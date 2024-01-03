@@ -10,6 +10,7 @@
 `汉化作者为官方zabbix docker镜像添加了如下内容`
 
 ==1) mysql分区 + 全官方模板汉化 + Web UI文本汉化 + grafana zabbix插件 + grafana loki插件 + https访问方式==
+
 ==2) PostgreSQL+ TimescaleDB分区 + 全官方模板汉化 + Web UI文本汉化 + grafana zabbix插件 + grafana loki插件 + https访问方式==
 
 ```shell
