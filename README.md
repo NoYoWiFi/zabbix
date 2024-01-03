@@ -2,7 +2,9 @@
 
 # 编译构建方法
 1. 下载zabbix dockerfile项目文件
-[一键安装脚本](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_dockerfile/zabbix_dockerfile.tar.gz)
+
+[一键安装脚本](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_dockerfile/zabbix-zabbix_dockerfile.tar.gz)
+
 2. 执行命令全自动本地化部署
 
 ```shell
