@@ -43,7 +43,7 @@ case ${option} in
             lvm2 --allowerasing
         yum-config-manager \
             --add-repo \
-            https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
+            https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
         yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
         yum -y install git --allowerasing
     fi
