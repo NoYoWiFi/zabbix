@@ -1,0 +1,17 @@
+zabbix-agent2
+zabbix-agent2-plugin-mongodb
+zabbix-agent2-plugin-postgresql
+zabbix-get
+zabbix-java-gateway
+zabbix-js
+zabbix-nginx-conf
+zabbix-proxy-pgsql
+zabbix-selinux-policy
+zabbix-sender
+zabbix-server-pgsql
+zabbix-sql-scripts
+zabbix-web
+zabbix-web-deps
+zabbix-web-pgsql
+zabbix-web-service
+
