@@ -58,11 +58,11 @@ case ${option} in
     echo "Centos 7 catch!"
         yum install -y yum-utils \
             device-mapper-persistent-data \
-            lvm2 --allowerasing
+            lvm2
         yum-config-manager \
             --add-repo \
-            https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
-        yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
+            https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        yum -y install docker-ce docker-ce-cli containerd.io
         if [ $? -ne '0' ]; then
          rpm -qa | grep docker | xargs rpm -e --nodeps
          echo "YUM配置异常请重新执行，如继续报错请联系作者QQ1284524409"

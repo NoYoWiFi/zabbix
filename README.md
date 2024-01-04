@@ -41,9 +41,9 @@ yum -y install git
 **执行如下命令克隆docker安装中文版zabbix项目**
 
 ```
-ZBX_SOURCES=https://NoYoWiFi:agp_66c5fe553765c414b8de0886f668b5f7@codeup.aliyun.com/636defa3f003e3b7bb5cae22/zabbix_docker/zabbix_chinese.git
-ZBX_VERSION=6.0-latest
-ZBX_NAME=zabbix_docker-${ZBX_VERSION}
+ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_VERSION=zabbix_docker
+ZBX_NAME=zabbix_docker-6.0-latest
 ZBX_DIR=/opt
 cd ${ZBX_DIR}
 git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch ${ZBX_DIR}/${ZBX_NAME}
@@ -61,22 +61,22 @@ sh update_config-entrypoint_pgsql.sh init
 **执行如下命令下载docker镜像**
 
 ```
-# sh update_config-entrypoint_mysql.sh down
-sh update_config-entrypoint_pgsql.sh down
+sh update_config-entrypoint_mysql.sh down
+# sh update_config-entrypoint_pgsql.sh down
 ```
 
 **执行如下命令初始化配置文件**
 
 ```
-# sh update_config-entrypoint_mysql.sh cp
-sh update_config-entrypoint_pgsql.sh cp
+sh update_config-entrypoint_mysql.sh cp
+# sh update_config-entrypoint_pgsql.sh cp
 ```
 
 **执行如下命令启动docker容器**
 
 ```
-# sh update_config-entrypoint_mysql.sh start
-sh update_config-entrypoint_pgsql.sh start
+sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_pgsql.sh start
 ```
 
 **打开网页输入服务器IP地址访问zabbix**
@@ -130,10 +130,10 @@ URL为http://IP:3100
 # sh update_config-entrypoint_mysql.sh stop
 sh update_config-entrypoint_pgsql.sh stop
 
-ZBX_VERSION=6.0-latest
-ZBX_NAME=zabbix_docker-${ZBX_VERSION}
+ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_VERSION=zabbix_docker
+ZBX_NAME=zabbix_docker-6.0-latest
 ZBX_DIR=/opt
-ZBX_SOURCES=https://NoYoWiFi:agp_66c5fe553765c414b8de0886f668b5f7@codeup.aliyun.com/636defa3f003e3b7bb5cae22/zabbix_docker/zabbix_chinese.git
 git init
 git remote add origin ${ZBX_SOURCES}
 cd ${ZBX_DIR}/${ZBX_NAME}
