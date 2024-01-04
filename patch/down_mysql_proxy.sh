@@ -1,5 +1,5 @@
 GV_VERSION=$(cat ./patch/.version_docker)
-VERSION=centos-${GV_VERSION}
+VERSION=rocky-${GV_VERSION}
 ADDRESS=registry.cn-shanghai.aliyuncs.com/zabbix_docker/zabbix_chinese
 for IM in `cat ./patch/.images_mysql_proxy`
 do
