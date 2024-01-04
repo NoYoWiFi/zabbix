@@ -7,9 +7,9 @@ docker pull ${ADDRESS}:${IM}_${VERSION}
 docker tag ${ADDRESS}:${IM}_${VERSION} ${IM}:${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
-docker pull ${ADDRESS}:rocky8
-docker tag ${ADDRESS}:rocky8 rocky:8
-docker rmi ${ADDRESS}:rocky8
+docker pull ${ADDRESS}:rockylinux8
+docker tag ${ADDRESS}:rockylinux8 rockylinux8:8
+docker rmi ${ADDRESS}:rockylinux8
 docker pull ${ADDRESS}:mariadb
 docker tag ${ADDRESS}:mariadb mariadb:11.1.2
 docker rmi ${ADDRESS}:mariadb

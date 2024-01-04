@@ -61,22 +61,22 @@ sh update_config-entrypoint_pgsql.sh init
 **执行如下命令下载docker镜像**
 
 ```
-# sh update_config-entrypoint_mysql.sh down
-sh update_config-entrypoint_pgsql.sh down
+sh update_config-entrypoint_mysql.sh down
+# sh update_config-entrypoint_pgsql.sh down
 ```
 
 **执行如下命令初始化配置文件**
 
 ```
-# sh update_config-entrypoint_mysql.sh cp
-sh update_config-entrypoint_pgsql.sh cp
+sh update_config-entrypoint_mysql.sh cp
+# sh update_config-entrypoint_pgsql.sh cp
 ```
 
 **执行如下命令启动docker容器**
 
 ```
-# sh update_config-entrypoint_mysql.sh start
-sh update_config-entrypoint_pgsql.sh start
+sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_pgsql.sh start
 ```
 
 **打开网页输入服务器IP地址访问zabbix**
