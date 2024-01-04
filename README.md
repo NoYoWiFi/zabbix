@@ -130,10 +130,10 @@ URL为http://IP:3100
 # sh update_config-entrypoint_mysql.sh stop
 sh update_config-entrypoint_pgsql.sh stop
 
-ZBX_VERSION=6.0-latest
-ZBX_NAME=zabbix_docker-${ZBX_VERSION}
+ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_VERSION=zabbix_docker
+ZBX_NAME=zabbix_docker-6.0-latest
 ZBX_DIR=/opt
-ZBX_SOURCES=https://NoYoWiFi:agp_66c5fe553765c414b8de0886f668b5f7@codeup.aliyun.com/636defa3f003e3b7bb5cae22/zabbix_docker/zabbix_chinese.git
 git init
 git remote add origin ${ZBX_SOURCES}
 cd ${ZBX_DIR}/${ZBX_NAME}
