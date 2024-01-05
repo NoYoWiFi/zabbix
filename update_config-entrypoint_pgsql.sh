@@ -52,11 +52,11 @@ case ${option} in
     echo "Centos 7 catch!"
         yum install -y yum-utils \
             device-mapper-persistent-data \
-            lvm2 --allowerasing
+            lvm2
         yum-config-manager \
             --add-repo \
             https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
-        yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
+        yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git --allowerasing
     ;;
     *)
