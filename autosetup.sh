@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # 设置了这个选项以后，包含管道命令的语句的返回值，会变成最后一个返回非零的管道命令的返回值。
 set -o pipefail
 
@@ -29,7 +29,7 @@ function check_ip_status()
     if [ $? -eq 0 ];then
         return 0
     else
-        return -1
+        return 1
     fi
 }
 if [ -d "/etc/yum.repos.d/bak/" ];then
@@ -53,7 +53,9 @@ else
     curl -s https://packagecloud.io/install/repositories/timescale/timescaledb/script.rpm.sh | sudo bash
 	\cp Rocky-AppStream.repo /etc/yum.repos.d/
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
-    rpm -ivhU ./packages/pgdg-redhat-repo-latest.noarch.rpm
+    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-38PGDG.noarch.rpm
+#    https://mirrors.aliyun.com/postgresql/repos/yum/common/redhat/rhel-8-x86_64/pgdg-redhat-repo-42.0-38PGDG.noarch.rpm
+#    sed -i -e "/rhel-\$releasever-\$basearch/s/rhel-\$releasever-\$basearch/rhel-8-x86_64/" /etc/yum.repos.d/pgdg-redhat-all.repo
     escape_spec_char() {
     local var_value=$1
 
