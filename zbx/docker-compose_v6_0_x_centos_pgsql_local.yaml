@@ -4,8 +4,8 @@ services:
   build:
    context: ./Dockerfiles/build-base/centos
    cache_from:
-    - centos:centos8
-  image: zabbix-build-base:centos-6.0-latest
+    - rockylinux:8
+  image: zabbix-build-base:rocky-6.0-latest
   profiles:
    - build1
 
@@ -13,10 +13,10 @@ services:
   build:
    context: ./Dockerfiles/build-pgsql/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-base:centos-6.0-latest
-  image: zabbix-build-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-base:rocky-6.0-latest
+  image: zabbix-build-pgsql:rocky-6.0-latest
   profiles:
    - build2
   depends_on:
@@ -26,10 +26,10 @@ services:
   build:
    context: ./Dockerfiles/server-pgsql/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-server-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-server-pgsql:rocky-6.0-latest
   container_name: zbx-server-pgsql
   restart: always
   profiles:
@@ -82,8 +82,8 @@ services:
      aliases:
       - zabbix-server
       - zabbix-server-pgsql
-      - zabbix-server-centos-pgsql
-      - zabbix-server-pgsql-centos
+      - zabbix-server-rocky-pgsql
+      - zabbix-server-pgsql-rocky
    zbx_net_frontend:
 #  devices:
 #   - "/dev/ttyUSB0:/dev/ttyUSB0"
@@ -98,16 +98,16 @@ services:
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "zabbix-server"
    com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-web-nginx-pgsql:
   build:
    context: ./Dockerfiles/web-nginx-pgsql/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-web-nginx-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-web-nginx-pgsql:rocky-6.0-latest
   container_name: zbx-web-nginx-pgsql
   restart: always
   profiles:
@@ -161,8 +161,8 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-web-nginx-pgsql
-     - zabbix-web-nginx-centos-pgsql
-     - zabbix-web-nginx-pgsql-centos
+     - zabbix-web-nginx-rocky-pgsql
+     - zabbix-web-nginx-pgsql-rocky
    zbx_net_frontend:
   stop_grace_period: 10s
   sysctls:
@@ -173,16 +173,16 @@ services:
    com.zabbix.component: "zabbix-frontend"
    com.zabbix.webserver: "nginx"
    com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-agent2:
   build:
    context: ./Dockerfiles/agent2/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-agent2:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-agent2:rocky-6.0-latest
   container_name: zbx-agent2
   restart: always
   profiles:
@@ -218,23 +218,23 @@ services:
     aliases:
      - zabbix-agent2
      - zabbix-agent2-passive
-     - zabbix-agent2-centos
+     - zabbix-agent2-rocky
    zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix agent"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "zabbix-agentd2"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-java-gateway:
   build:
    context: ./Dockerfiles/java-gateway/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-java-gateway:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-java-gateway:rocky-6.0-latest
   container_name: zbx-java-gateway
   restart: always
   profiles:
@@ -265,21 +265,21 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-java-gateway
-     - zabbix-java-gateway-centos
+     - zabbix-java-gateway-rocky
    zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix Java Gateway"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "java-gateway"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-snmptraps:
   build:
    context: ./Dockerfiles/snmptraps/centos
    cache_from:
-    - centos:centos8
-  image: zabbix-snmptraps:centos-6.0-latest
+    - rockylinux:8
+  image: zabbix-snmptraps:rocky-6.0-latest
   container_name: zbx-snmptraps
   restart: always
   profiles:
@@ -311,16 +311,16 @@ services:
    com.zabbix.description: "Zabbix snmptraps"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "snmptraps"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-web-service:
   build:
    context: ./Dockerfiles/web-service/centos
    cache_from:
-    - centos:centos8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-web-service:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-web-service:rocky-6.0-latest
   container_name: zbx-web-service
   restart: always
   profiles:
@@ -350,14 +350,14 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-web-service
-     - zabbix-web-service-centos
+     - zabbix-web-service-rocky
    zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix web service"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "web-service"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  postgres-server:
 #  image: postgres:15-alpine

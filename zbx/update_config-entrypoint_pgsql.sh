@@ -57,16 +57,15 @@ case ${option} in
         mkdir /etc/yum.repos.d/bak/
         mv /etc/yum.repos.d/* /etc/yum.repos.d/bak/
         tar -zxvf ./patch/repos.tar.gz -C /etc/yum.repos.d/
-        yum install -y yum-utils \
-            device-mapper-persistent-data \
-            lvm2
-        yum-config-manager \
-            --add-repo \
-            https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
-        yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
-        yum -y install git
-#        \cp ./trans/create_server_${GV_VERSION_DOCKER}_pgsql.sql.gz ./patch/create_server.sql.gz
     fi
+    yum install -y yum-utils \
+        device-mapper-persistent-data \
+        lvm2
+    yum-config-manager \
+        --add-repo \
+        https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+    yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
+    yum -y install git
     \cp ./trans/create_server_${GV_VERSION_DOCKER}_pgsql.sql.gz ./patch/create_server.sql.gz
     ;;
     7)
@@ -76,7 +75,7 @@ case ${option} in
             lvm2
         yum-config-manager \
             --add-repo \
-            https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
+            https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
         yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git
         \cp ./trans/create_server_${GV_VERSION_DOCKER}_pgsql.sql.gz ./patch/create_server.sql.gz
@@ -104,6 +103,7 @@ fi
 }
 
 zabbix_build_base() {
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_BUILD_BASE
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 if [ ! -f "./Dockerfiles/build-base/centos/go1.19.13.linux-amd64.tar.gz" ]; then
     \cp ./patch/go1.19.13.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
@@ -117,6 +117,7 @@ sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
 zabbix_build_pgsql() {
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_BUILD_PGSQL
 update_config_var $ZABBIX_BUILD_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
 \cp ./patch/zabbix-${GV_VERSION}.tar.gz ./Dockerfiles/build-pgsql/centos/
@@ -153,6 +154,7 @@ if [ ! -f "./Dockerfiles/server-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; 
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/server-pgsql/centos/
 fi
 \cp ./patch/timescaledb.sql ./Dockerfiles/server-pgsql/centos/
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_SERVER_PGSQL
 update_config_var $ZABBIX_SERVER_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 update_config_var $ZABBIX_SERVER_PGSQL "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki" "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_SERVER_PGSQL"
@@ -172,6 +174,7 @@ fi
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-pgsql/centos/
 fi
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $WEB_NGINX_PGSQL
 update_config_var $WEB_NGINX_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+2d" "$WEB_NGINX_PGSQL"
 sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_PGSQL
@@ -209,6 +212,7 @@ update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docke
 sed -i -e "/^ADD/,+1d" "$ZABBIX_AGENT2"
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
 sed -i '/best/a\        --allowerasing \\' $ZABBIX_AGENT2
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_AGENT2
 sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\""
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\""
@@ -218,6 +222,7 @@ zabbix_snmptraps() {
 if [ ! -f "./Dockerfiles/snmptraps/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/snmptraps/centos/
 fi
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_SNMPTRAPS"
 sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_SNMPTRAPS
@@ -227,6 +232,7 @@ zabbix_java_gateway() {
 if [ ! -f "./Dockerfiles/java-gateway/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/java-gateway/centos/
 fi
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_JAVA_GATEWAY"
 sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_JAVA_GATEWAY
@@ -236,6 +242,7 @@ zabbix_web_service() {
 if [ ! -f "./Dockerfiles/web-service/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/web-service/centos/
 fi
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_WEB_SERVICE"
 sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_WEB_SERVICE
@@ -450,11 +457,11 @@ elif [ $# -ge 1 ]; then
     fi
 	
     if [[ "$1" == "base" ]]; then
-        docker build -t quay.io/centos/centos:stream8 ./patch
-        docker save -o centos8.tar.gz quay.io/centos/centos:stream8
-        docker rmi $(docker images |grep quay.io/centos/centos | awk -F ' ' '{print $3}')
-        docker load < centos8.tar.gz
-        rm -f centos8.tar.gz
+        docker build -t rockylinux:8 ./patch/Dockerfile_rockylinux
+        docker save -o rockylinux8.tar.gz rockylinux:8
+        docker rmi $(docker images |grep rockylinux | awk -F ' ' '{print $3}')
+        docker load < rockylinux8.tar.gz
+        rm -f rockylinux8.tar.gz
         exit 1
     fi
     

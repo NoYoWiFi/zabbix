@@ -87,6 +87,7 @@ case ${option} in
     ;;
 esac
 service docker start
+mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
 {
