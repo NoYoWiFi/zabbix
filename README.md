@@ -127,8 +127,8 @@ URL为http://IP:3100
 **后期如果有新版本发布可以通过如下命令更新zabbix版本**
 
 ```
-# sh update_config-entrypoint_mysql.sh stop
-sh update_config-entrypoint_pgsql.sh stop
+sh update_config-entrypoint_mysql.sh stop
+# sh update_config-entrypoint_pgsql.sh stop
 
 ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
 ZBX_VERSION=zabbix_docker
@@ -144,11 +144,11 @@ git pull  ${ZBX_SOURCES} ${ZBX_VERSION}
 chmod 755 -R ${ZBX_DIR}/${ZBX_NAME}
 cd ${ZBX_DIR}/${ZBX_NAME}
 
-# sh update_config-entrypoint_mysql.sh down
-sh update_config-entrypoint_pgsql.sh down
+sh update_config-entrypoint_mysql.sh down
+# sh update_config-entrypoint_pgsql.sh down
 
-# sh update_config-entrypoint_mysql.sh start
-sh update_config-entrypoint_pgsql.sh start
+sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_pgsql.sh start
 ```
 
 `感谢打赏`    
