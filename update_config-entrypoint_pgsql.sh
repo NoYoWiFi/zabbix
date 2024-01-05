@@ -57,7 +57,7 @@ case ${option} in
             --add-repo \
             https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
         yum -y install docker-ce docker-ce-cli containerd.io
-        yum -y install git --allowerasing
+        yum -y install git
     ;;
     *)
     echo "Nothing to do"
