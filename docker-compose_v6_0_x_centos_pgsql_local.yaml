@@ -4,8 +4,8 @@ services:
   build:
    context: ./Dockerfiles/build-base/centos
    cache_from:
-    - quay.io/centos/centos:stream8
-  image: zabbix-build-base:centos-6.0-latest
+    - rockylinux:8
+  image: zabbix-build-base:rocky-6.0-latest
   profiles:
    - build1
 
@@ -13,10 +13,10 @@ services:
   build:
    context: ./Dockerfiles/build-pgsql/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-base:centos-6.0-latest
-  image: zabbix-build-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-base:rocky-6.0-latest
+  image: zabbix-build-pgsql:rocky-6.0-latest
   profiles:
    - build2
   depends_on:
@@ -26,10 +26,11 @@ services:
   build:
    context: ./Dockerfiles/server-pgsql/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-server-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-server-pgsql:rocky-6.0-latest
+  container_name: zbx-server-pgsql
   restart: always
   profiles:
    - make5
@@ -50,22 +51,23 @@ services:
    - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
    - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
    - snmptraps:/var/lib/zabbix/snmptraps:rw
+   - /var/log/loki:/var/log/loki:rw
 #   - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
 #   - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:rw
 #   - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:rw
   ulimits:
-   nproc: 65535
+   nproc: 655350
    nofile:
-    soft: 20000
-    hard: 40000
+    soft: 655350
+    hard: 655350
   deploy:
    resources:
     limits:
-      cpus: '0.70'
-      memory: 1G
+      cpus: '0.80'
+      memory: 4G
     reservations:
-      cpus: '0.5'
-      memory: 512M
+      cpus: '0.8'
+      memory: 4G
   env_file:
    - ./env_vars/.env_db_pgsql
    - ./env_vars/.env_srv
@@ -80,8 +82,8 @@ services:
      aliases:
       - zabbix-server
       - zabbix-server-pgsql
-      - zabbix-server-centos-pgsql
-      - zabbix-server-pgsql-centos
+      - zabbix-server-rocky-pgsql
+      - zabbix-server-pgsql-rocky
    zbx_net_frontend:
 #  devices:
 #   - "/dev/ttyUSB0:/dev/ttyUSB0"
@@ -96,17 +98,17 @@ services:
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "zabbix-server"
    com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "centos"
-
+   com.zabbix.os: "rocky"
 
  zabbix-web-nginx-pgsql:
   build:
    context: ./Dockerfiles/web-nginx-pgsql/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-web-nginx-pgsql:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-web-nginx-pgsql:rocky-6.0-latest
+  container_name: zbx-web-nginx-pgsql
   restart: always
   profiles:
    - zabbix-web-nginx-mysql
@@ -114,25 +116,31 @@ services:
    - make6
    - start5
    - start6
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
   ports:
-   - "80:8080"
-   - "443:8443"
+   - "8080:8080"
+   - "8443:8443"
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
    - ./zbx_env/etc/ssl/nginx:/etc/ssl/nginx:rw
    - ./zbx_env/usr/share/zabbix/modules/:/usr/share/zabbix/modules/:rw
+   - ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:rw
 #   - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
 #   - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:rw
 #   - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:rw
   deploy:
    resources:
     limits:
-      cpus: '0.70'
-      memory: 512M
+      cpus: '0.80'
+      memory: 4G
     reservations:
-      cpus: '0.5'
-      memory: 256M
+      cpus: '0.8'
+      memory: 4G
   env_file:
    - ./env_vars/.env_db_pgsql
    - ./env_vars/.env_web
@@ -153,8 +161,8 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-web-nginx-pgsql
-     - zabbix-web-nginx-centos-pgsql
-     - zabbix-web-nginx-pgsql-centos
+     - zabbix-web-nginx-rocky-pgsql
+     - zabbix-web-nginx-pgsql-rocky
    zbx_net_frontend:
   stop_grace_period: 10s
   sysctls:
@@ -165,16 +173,17 @@ services:
    com.zabbix.component: "zabbix-frontend"
    com.zabbix.webserver: "nginx"
    com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-agent2:
   build:
    context: ./Dockerfiles/agent2/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-agent2:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-agent2:rocky-6.0-latest
+  container_name: zbx-agent2
   restart: always
   profiles:
    - make5
@@ -193,11 +202,11 @@ services:
   deploy:
    resources:
     limits:
-      cpus: '0.2'
-      memory: 128M
+      cpus: '0.8'
+      memory: 4G
     reservations:
-      cpus: '0.1'
-      memory: 64M
+      cpus: '0.8'
+      memory: 4G
    mode: global
   env_file:
    - ./env_vars/.env_agent2
@@ -209,29 +218,32 @@ services:
     aliases:
      - zabbix-agent2
      - zabbix-agent2-passive
-     - zabbix-agent2-centos
+     - zabbix-agent2-rocky
    zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix agent"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "zabbix-agentd2"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-java-gateway:
   build:
    context: ./Dockerfiles/java-gateway/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-java-gateway:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-java-gateway:rocky-6.0-latest
+  container_name: zbx-java-gateway
   restart: always
   profiles:
    - make5
    - make6
    - start5
    - start6
+   - prxstart5
+   - prxstart6
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
@@ -240,11 +252,11 @@ services:
   deploy:
    resources:
     limits:
-      cpus: '0.5'
-      memory: 512M
+      cpus: '0.8'
+      memory: 4G
     reservations:
-      cpus: '0.25'
-      memory: 256M
+      cpus: '0.8'
+      memory: 4G
   env_file:
    - ./env_vars/.env_java
   depends_on:
@@ -253,20 +265,22 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-java-gateway
-     - zabbix-java-gateway-centos
+     - zabbix-java-gateway-rocky
+   zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix Java Gateway"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "java-gateway"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-snmptraps:
   build:
    context: ./Dockerfiles/snmptraps/centos
    cache_from:
-    - quay.io/centos/centos:stream8
-  image: zabbix-snmptraps:centos-6.0-latest
+    - rockylinux:8
+  image: zabbix-snmptraps:rocky-6.0-latest
+  container_name: zbx-snmptraps
   restart: always
   profiles:
    - make5
@@ -282,11 +296,11 @@ services:
   deploy:
    resources:
     limits:
-      cpus: '0.5'
-      memory: 256M
+      cpus: '0.8'
+      memory: 4G
     reservations:
-      cpus: '0.25'
-      memory: 128M
+      cpus: '0.8'
+      memory: 4G
   networks:
    zbx_net_frontend:
     aliases:
@@ -297,16 +311,17 @@ services:
    com.zabbix.description: "Zabbix snmptraps"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "snmptraps"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  zabbix-web-service:
   build:
    context: ./Dockerfiles/web-service/centos
    cache_from:
-    - quay.io/centos/centos:stream8
+    - rockylinux:8
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:centos-6.0-latest
-  image: zabbix-web-service:centos-6.0-latest
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-web-service:rocky-6.0-latest
+  container_name: zbx-web-service
   restart: always
   profiles:
    - make6
@@ -322,11 +337,11 @@ services:
   deploy:
    resources:
     limits:
-      cpus: '0.5'
-      memory: 512M
+      cpus: '0.8'
+      memory: 4G
     reservations:
-      cpus: '0.25'
-      memory: 256M
+      cpus: '0.8'
+      memory: 4G
   env_file:
    - ./env_vars/.env_web_service
   depends_on:
@@ -335,31 +350,41 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-web-service
-     - zabbix-web-service-centos
+     - zabbix-web-service-rocky
+   zbx_net_frontend:
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix web service"
    com.zabbix.company: "Zabbix LLC"
    com.zabbix.component: "web-service"
-   com.zabbix.os: "centos"
+   com.zabbix.os: "rocky"
 
  postgres-server:
 #  image: postgres:15-alpine
-  image: timescale/timescaledb-ha:pg15-latest
+  image: timescale/timescaledb:2.13.0-pg15
+  container_name: zbx-timescaledb
   restart: always
   profiles:
    - make5
    - make6
    - start5
    - start6
+   - prxstart5
+   - prxstart6
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
   ports:
    - "5432:5432"
 #  command: -c ssl=on -c ssl_cert_file=/run/secrets/server-cert.pem -c ssl_key_file=/run/secrets/server-key.pem -c ssl_ca_file=/run/secrets/root-ca.pem
   volumes:
-   - ./zbx_env/var/lib/postgresql/data:/home/postgres/pgdata/data:rw
+   - ./zbx_env/var/lib/postgresql/data:/var/lib/postgresql/data:rw
    - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
    - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/server-cert.pem:rw
    - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/server-key.pem:rw
+   - /etc/localtime:/etc/localtime:rw
   env_file:
    - ./env_vars/.env_db_pgsql
   secrets:
@@ -374,7 +399,81 @@ services:
      - pgsql-database
    zbx_net_frontend:
 
+ grafana:
+  image: grafana/grafana-enterprise:10.1.0
+  container_name: zbx-grafana
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  ports:
+   - '3000:3000'
+  environment:
+   GF_SERVER_PROTOCOL: "https"
+   GF_SERVER_CERT_FILE: "/etc/grafana/ssl/server.pem"
+   GF_SERVER_CERT_KEY: "/etc/grafana/ssl/server.pem"
+  volumes:
+   - ./zbx_env/data/ssl:/etc/grafana/ssl:rw
+   - ./zbx_env/data:/var/lib/grafana:rw
+   - ./zbx_env/data/plugins:/var/lib/grafana/plugins:rw
+  networks:
+   zbx_net_backend:
+    aliases:
+     - grafana-server
+     - grafana
+   zbx_net_frontend:
 
+ loki:
+  image: grafana/loki:2.8.4
+  container_name: zbx-loki
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  ports:
+   - '3100:3100'
+  command: -config.file=/mnt/config/loki-config.yaml
+  # environment:
+   # GF_SERVER_PROTOCOL: "https"
+   # GF_SERVER_CERT_FILE: "/etc/grafana/ssl/server.pem"
+   # GF_SERVER_CERT_KEY: "/etc/grafana/ssl/server.pem"
+  volumes:
+   - ./zbx_env/loki/config:/mnt/config:rw
+  networks:
+   zbx_net_backend:
+    aliases:
+     - loki-server
+     - loki
+   zbx_net_frontend:
+   
+ promtail:
+  image: grafana/promtail:2.8.4
+  container_name: zbx-promtail
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  volumes:
+    # chmod a+rw /var/run/docker.sock
+   - /var/run/docker.sock:/var/run/docker.sock:rw
+   - ./zbx_env/promtail/config:/mnt/config:rw
+   - /var/log/loki:/var/log/loki:rw
+  command: -config.file=/mnt/config/promtail-config.yaml
+  networks:
+   zbx_net_backend:
+    aliases:
+     - promtail-server
+     - promtail
+   zbx_net_frontend:
 # elasticsearch:
 #  image: elasticsearch
 #  profiles:
