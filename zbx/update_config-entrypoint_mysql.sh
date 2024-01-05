@@ -225,7 +225,6 @@ sed -i "${NUMINDEX}i\\$var_value_01" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 }
 
 zabbix_web_nginx_mysql() {
-
 if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/simkai.ttf" ]; then
     \cp ./patch/simkai.ttf ./Dockerfiles/web-nginx-mysql/centos/
 fi
@@ -262,7 +261,7 @@ case ${option} in
     sed -i "/ZBX_FONT_NAME/d" $WEB_NGINX_MYSQL
     sed -i '/.pki/a \    sed -i \"/ZBX_FONT_NAME/s/DejaVuSans/simkai/\" /usr/share/zabbix/include/defines.inc.php' $WEB_NGINX_MYSQL
     sed -i "/ZBX_GRAPH_FONT_NAME/d" Dockerfiles/web-nginx-mysql/centos/Dockerfile
-    sed -i '/.pki/a \    sed -i \"/ZBX_GRAPH_FONT_NAME/s/DejaVuSans/simkai/\" /usr/share/zabbix/include/defines.inc.php  && \\' $WEB_NGINX_MYSQL
+    sed -i '/.pki/a \    sed -i \"/ZBX_GRAPH_FONT_NAME/s/DejaVuSans/simkai/\" /usr/share/zabbix/include/defines.inc.php && \\' $WEB_NGINX_MYSQL
     ;;
     *)
     echo "Nothing to do"

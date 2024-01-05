@@ -29,6 +29,7 @@ ZABBIX_BUILD_PGSQL="./Dockerfiles/build-pgsql/centos/Dockerfile"
 ZABBIX_SERVER_PGSQL="./Dockerfiles/server-pgsql/centos/Dockerfile"
 ZABBIX_SERVER_PGSQL_ENTRYPOINT="./Dockerfiles/server-pgsql/centos/docker-entrypoint.sh"
 WEB_NGINX_PGSQL="./Dockerfiles/web-nginx-pgsql/centos/Dockerfile"
+WEB_NGINX_ENTRYPOINT="./Dockerfiles/web-nginx-pgsql/centos/docker-entrypoint.sh"
 ZABBIX_AGENT2="./Dockerfiles/agent2/centos/Dockerfile"
 ZABBIX_AGENT2_ENTRYPOINT="./Dockerfiles/agent2/centos/docker-entrypoint.sh"
 ZABBIX_SNMPTRAPS="./Dockerfiles/snmptraps/centos/Dockerfile"
@@ -171,13 +172,21 @@ zabbix_web_nginx_pgsql() {
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/simkai.ttf" ]; then
     \cp ./patch/simkai.ttf ./Dockerfiles/web-nginx-pgsql/centos/
 fi
+if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/frontend_6.0.mo" ]; then
+    \cp ./patch/frontend_6.0.mo ./Dockerfiles/web-nginx-pgsql/centos/
+fi
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-pgsql/centos/
 fi
+if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/nginx.sh" ]; then
+    \cp ./patch/nginx.sh ./Dockerfiles/web-nginx-pgsql/centos/
+fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $WEB_NGINX_PGSQL
 update_config_var $WEB_NGINX_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+2d" "$WEB_NGINX_PGSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_PGSQL
+sed -i -e "/^ADD/,+3d" "$WEB_NGINX_PGSQL"
+sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_PGSQL
+sed -i -e "/sh \/tmp\/nginx.sh/d" "$WEB_NGINX_ENTRYPOINT"
+sed -i '/prepare_zbx_web_config$/a \sh /tmp/nginx.sh\' $WEB_NGINX_ENTRYPOINT
 option=$(echo ${GV_VERSION} | cut -c 1)
 case ${option} in
     5)
@@ -467,7 +476,7 @@ elif [ $# -ge 1 ]; then
     
     if [[ "$1" == "buildpgsql" ]]; then
         docker build -t timescale/timescaledb:2.13.0-pg15 ./patch/Dockerfile_timescale
-        docker save -o timescale.tar.gz timescale/timescaledb-ha:pg15-latest
+        docker save -o timescale.tar.gz timescale/timescaledb:2.13.0-pg15
         docker rmi $(docker images |grep timescale | awk -F ' ' '{print $3}')
         docker load < timescale.tar.gz
         rm -f timescale.tar.gz
