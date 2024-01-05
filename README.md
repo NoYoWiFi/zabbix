@@ -18,17 +18,20 @@ tar -zxvf zabbix_dockerfile.tar.gz
 cd zabbix_rebuild
 sh rebuild.sh
 cd ../zbx
-# update_config-entrypoint_pgsql.sh update
-update_config-entrypoint_mysql.sh update
+# sh update_config-entrypoint_pgsql.sh update
+sh update_config-entrypoint_mysql.sh update
 
-# update_config-entrypoint_pgsql.sh build1
-update_config-entrypoint_mysql.sh build1
+# sh down_pgsql.sh
+sh down_mysql.sh
 
-# update_config-entrypoint_pgsql.sh build2
-update_config-entrypoint_mysql.sh build2
+# sh update_config-entrypoint_pgsql.sh build1
+sh update_config-entrypoint_mysql.sh build1
 
-# update_config-entrypoint_pgsql.sh make
-update_config-entrypoint_mysql.sh make
+# sh update_config-entrypoint_pgsql.sh build2
+sh update_config-entrypoint_mysql.sh build2
+
+# sh update_config-entrypoint_pgsql.sh make
+sh update_config-entrypoint_mysql.sh make
 ```
 
 # 使用方法
@@ -36,11 +39,11 @@ update_config-entrypoint_mysql.sh make
 ```shell
 docker images|grep none|awk '{print $3 }'|xargs docker rmi
 
-# update_config-entrypoint_pgsql.sh cp
-update_config-entrypoint_mysql.sh cp
+# sh update_config-entrypoint_pgsql.sh cp
+sh update_config-entrypoint_mysql.sh cp
 
-# update_config-entrypoint_pgsql.sh start
-update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_pgsql.sh start
+sh update_config-entrypoint_mysql.sh start
 ```
 
 **项目地址**  

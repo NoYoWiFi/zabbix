@@ -1,5 +1,5 @@
 GV_VERSION=$(cat ./patch/.version_docker)
-VERSION=centos-${GV_VERSION}
+VERSION=rocky-${GV_VERSION}
 ADDRESS=registry.cn-shanghai.aliyuncs.com/zabbix_docker/zabbix_chinese
 for IM in `cat ./patch/.images_mysql`
 do
@@ -7,9 +7,9 @@ docker tag ${IM}:${VERSION} ${ADDRESS}:${IM}_${VERSION}
 docker push ${ADDRESS}:${IM}_${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
-docker tag quay.io/centos/centos:stream8 ${ADDRESS}:centos_stream8
-docker push ${ADDRESS}:centos_stream8
-docker rmi ${ADDRESS}:centos_stream8
+docker tag rockylinux:8 ${ADDRESS}:rockylinux8
+docker push ${ADDRESS}:rockylinux8
+docker rmi ${ADDRESS}:rockylinux8
 docker tag mariadb:11.1.2 ${ADDRESS}:mariadb
 docker push ${ADDRESS}:mariadb
 docker rmi ${ADDRESS}:mariadb
