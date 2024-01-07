@@ -3,27 +3,27 @@
 
 **效果图**
 ```  
-[root@localhost zabbix_docker]# docker images  
-REPOSITORY               TAG                 IMAGE ID       CREATED        SIZE  
-zabbix-server-mysql      centos-6.0-latest   5bbe1784ca86   4 days ago     889MB  
-zabbix-web-service       centos-6.0-latest   302c32090933   4 days ago     732MB  
-zabbix-proxy-mysql       centos-6.0-latest   2af003bb178b   4 days ago     673MB  
-zabbix-java-gateway      centos-6.0-latest   6825b642100d   4 days ago     720MB  
-zabbix-snmptraps         centos-6.0-latest   d444eab79de1   4 days ago     601MB  
-zabbix-agent2            centos-6.0-latest   ddb84f925c55   4 days ago     615MB  
-mariadb                  10.5.19-focal       cfe0a83e48d5   8 days ago     392MB  
-zabbix-web-nginx-mysql   centos-6.0-latest   64081ecac82f   6 weeks ago    774MB  
-quay.io/centos/centos    stream8             6a97c47aacfc   3 months ago   513MB  
-[root@localhost zabbix_docker]# [root@localhost zabbix_docker]# docker ps -a  
-CONTAINER ID   IMAGE                                      COMMAND                  CREATED          STATUS                    PORTS                                                                            NAMES  
-977e75774418   zabbix-web-nginx-mysql:centos-6.0-latest   "docker-entrypoint.sh"   15 minutes ago   Up 15 minutes (healthy)   0.0.0.0:80->8080/tcp, :::80->8080/tcp, 0.0.0.0:443->8443/tcp, :::443->8443/tcp   zabbix_docker-zabbix-web-nginx-mysql-1  
-0770a23343e9   zabbix-server-mysql:centos-6.0-latest      "/usr/bin/tini -- /u…"   15 minutes ago   Up 15 minutes             0.0.0.0:10051->10051/tcp, :::10051->10051/tcp                                    zabbix_docker-zabbix-server-1  
-98aecf59d879   zabbix-agent2:centos-6.0-latest            "/usr/bin/tini -- /u…"   15 minutes ago   Up 15 minutes             0.0.0.0:10050->10050/tcp, :::10050->10050/tcp, 31999/tcp                         zabbix_docker-zabbix-agent2-1  
-ec9e9cd0ed74   zabbix-java-gateway:centos-6.0-latest      "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes                                                                                              zabbix_docker-zabbix-java-gateway-1  
-d0d7d7977b99   zabbix-snmptraps:centos-6.0-latest         "/usr/sbin/snmptrapd…"   15 minutes ago   Up 15 minutes             0.0.0.0:162->1162/udp, :::162->1162/udp                                          zabbix_docker-zabbix-snmptraps-1  
-b72cdae7ba93   zabbix-web-service:centos-6.0-latest       "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes                                                                                              zabbix_docker-zabbix-web-service-1  
-0b8819153360   mariadb:10.5.19-focal                      "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes             0.0.0.0:3306->3306/tcp, :::3306->3306/tcp                                        zabbix_docker-mysql-server-1  
-[root@localhost zabbix_docker]#   
+[root@localhost zbx]# docker images;
+REPOSITORY                   TAG                IMAGE ID       CREATED          SIZE
+zabbix-web-nginx-pgsql       rocky-6.0-latest   0688e2f40486   30 minutes ago   426MB
+zabbix-server-pgsql          rocky-6.0-latest   c365b40da452   31 minutes ago   422MB
+zabbix-web-service           rocky-6.0-latest   5c61366f8532   31 minutes ago   476MB
+zabbix-agent2                rocky-6.0-latest   52a32c972da0   32 minutes ago   303MB
+zabbix-java-gateway          rocky-6.0-latest   fa58ea3b847a   32 minutes ago   401MB
+zabbix-snmptraps             rocky-6.0-latest   10e2d6557ade   32 minutes ago   286MB
+zabbix-build-pgsql           rocky-6.0-latest   af6702d2d217   34 minutes ago   2.26GB
+zabbix-build-base            rocky-6.0-latest   a4eb17480afa   41 minutes ago   1.37GB
+zabbix-server-mysql          rocky-6.0-latest   59958d8badc5   2 hours ago      504MB
+zabbix-proxy-mysql           rocky-6.0-latest   2c94a35bf645   2 hours ago      499MB
+zabbix-build-mysql           rocky-6.0-latest   ab8c72632ad7   2 hours ago      2.26GB
+zabbix-web-nginx-mysql       rocky-6.0-latest   0e9fdedabe4f   14 hours ago     501MB
+rockylinux                   8                  c24baca6f6df   15 hours ago     228MB
+timescale/timescaledb        2.13.0-pg15        35167cd9604d   5 weeks ago      550MB
+mariadb                      11.1.2             86a799de5c86   2 months ago     404MB
+grafana/grafana-enterprise   10.1.0             22a97caed634   4 months ago     409MB
+grafana/promtail             2.8.4              260f742f3fe9   4 months ago     195MB
+grafana/loki                 2.8.4              64ae1e0ed80b   4 months ago     67.4MB
+[root@localhost zbx]# 
 ```  
   
 **集成全中文模板**  
