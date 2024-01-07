@@ -64,43 +64,51 @@ export https_proxy="https://127.0.0.1:38457"
 git config --global http.proxy "http://127.0.0.1:38457"
 git config --global https.proxy "https://127.0.0.1:38457"
 
-cd /tmp
 # ZBX_SOURCES=https://gitcode.net/mirrors/zabbix/zabbix.git
 ZBX_SOURCES=https://github.com/zabbix/zabbix.git
-git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION}
-if [ $? -ne '0' ]; then
- exit 1
+if [ ! -d "/tmp/zabbix-${ZBX_VERSION}" ]; then
+    cd /tmp
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION}
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf zabbix-${ZBX_VERSION}.tar.gz zabbix-${ZBX_VERSION}/
+    cd /tmp
+    \cp zabbix-${ZBX_VERSION}.tar.gz ${shellFolder}/
 fi
-tar -zcf zabbix-${ZBX_VERSION}.tar.gz zabbix-${ZBX_VERSION}/
-cd /tmp
-\cp zabbix-${ZBX_VERSION}.tar.gz ${shellFolder}/
-# ZBX_SOURCES=https://gitcode.net/mirrors/zabbix/zabbix-docker.git
-ZBX_SOURCES=https://github.com/zabbix/zabbix-docker.git
-git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION:0:3} --depth 1 --single-branch /tmp/zabbix-docker-${ZBX_VERSION}
-if [ $? -ne '0' ]; then
- exit 1
+if [ ! -d "/tmp/zabbix-docker-${ZBX_VERSION}" ]; then
+    # ZBX_SOURCES=https://gitcode.net/mirrors/zabbix/zabbix-docker.git
+    ZBX_SOURCES=https://github.com/zabbix/zabbix-docker.git
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION:0:3} --depth 1 --single-branch /tmp/zabbix-docker-${ZBX_VERSION}
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf zabbix-docker-${ZBX_VERSION}.tar.gz zabbix-docker-${ZBX_VERSION}/
+    cd /tmp
+    \cp zabbix-docker-${ZBX_VERSION}.tar.gz ${shellFolder}/
 fi
-tar -zcf zabbix-docker-${ZBX_VERSION}.tar.gz zabbix-docker-${ZBX_VERSION}/
-cd /tmp
-\cp zabbix-docker-${ZBX_VERSION}.tar.gz ${shellFolder}/
-cd /tmp
-ZBX_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git
-git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/mongodb_plugin
-if [ $? -ne '0' ]; then
- exit 1
+if [ ! -d "/tmp/mongodb_plugin" ]; then
+    cd /tmp
+    ZBX_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/mongodb_plugin
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf mongodb_plugin.tar.gz mongodb_plugin/
+    cd /tmp
+    \cp mongodb_plugin.tar.gz ${shellFolder}/
 fi
-tar -zcf mongodb_plugin.tar.gz mongodb_plugin/
-cd /tmp
-\cp mongodb_plugin.tar.gz ${shellFolder}/
-cd /tmp
-ZBX_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git
-git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/postgresql_plugin
-if [ $? -ne '0' ]; then
- exit 1
+if [ ! -d "/tmp/postgresql_plugin" ]; then
+    cd /tmp
+    ZBX_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/postgresql_plugin
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf postgresql_plugin.tar.gz postgresql_plugin/
+    cd /tmp
+    \cp postgresql_plugin.tar.gz ${shellFolder}/
 fi
-tar -zcf postgresql_plugin.tar.gz postgresql_plugin/
-cd /tmp
-\cp postgresql_plugin.tar.gz ${shellFolder}/
 cd ${shellFolder}/
 ZBX_VERSION=$(cat .version)
 mkdir -p /opt/zbx/

@@ -77,14 +77,14 @@ SELECT add_retention_policy('history_str',
 
 SELECT remove_retention_policy('trends', true);
 SELECT add_retention_policy('trends', 
-                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'89 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
+                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'364 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
                            'Asia/Shanghai');
 SELECT remove_retention_policy('trends_uint', true);
 SELECT add_retention_policy('trends_uint', 
-                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'89 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
+                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'364 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
