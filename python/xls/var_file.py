@@ -1,0 +1,9 @@
+xls_01 = './python/xls/cfg_net.xls'
+xls_02 = './python/xls/cfg_hostName.xls'
+xls_03 = './python/xls/restart_network.xls'
+xls_04 = './python/xls/export_firewall.xls'
+# xls_cfg_net_path = './cfg_net.xls'
+db_01 = "autosetup"
+form_01 = "switchVlan_cfg"
+form_02 = "switch_cfg"
+form_03 = "upload_server_IP"
