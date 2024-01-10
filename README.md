@@ -2,15 +2,21 @@
 # 全自动安装方法
 1. 下载一键安装脚本
 [一键安装脚本](https://gitcode.net/1284524409/zabbix/-/archive/rocky_8_zabbix_6.0.x_pgsql/zabbix-rocky_8_zabbix_6.0.x_pgsql.tar.gz)
-2. 执行命令全自动安装
+2. 执行命令全自动安装zabbix-server
 ```
 tar -zxvf zabbix-rocky_8_zabbix_6.0.x_pgsql.tar.gz
 cd zabbix-rocky_8_zabbix_6.0.x_pgsql
 sh autosetup.sh install
 ```
-3. [postgresql连接工具](https://www.pgadmin.org/download/pgadmin-4-rpm/)
-4. [Rocky8.9系统下载](https://mirrors.aliyun.com/rockylinux/8/isos/x86_64/)
-5. [Rocky系统bug报告](https://bugs.rockylinux.org/my_view_page.php?refresh=true)
+3. 执行命令全自动安装zabbix-proxy
+```
+tar -zxvf zabbix-rocky_8_zabbix_6.0.x_pgsql.tar.gz
+cd zabbix-rocky_8_zabbix_6.0.x_pgsql
+sh autosetup.sh proxy
+```
+4. [postgresql连接工具](https://www.pgadmin.org/download/pgadmin-4-rpm/)
+5. [Rocky8.9系统下载](https://mirrors.aliyun.com/rockylinux/8/isos/x86_64/)
+6. [Rocky系统bug报告](https://bugs.rockylinux.org/my_view_page.php?refresh=true)
 # 手动安装方法
 1. 操作系统：Rocky8
 2. 数据库版本
