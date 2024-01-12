@@ -28,6 +28,7 @@ ZABBIX_BUILD_BASE="./Dockerfiles/build-base/centos/Dockerfile"
 ZABBIX_BUILD_PGSQL="./Dockerfiles/build-pgsql/centos/Dockerfile"
 ZABBIX_SERVER_PGSQL="./Dockerfiles/server-pgsql/centos/Dockerfile"
 ZABBIX_PROXY_PGSQL="./Dockerfiles/proxy-pgsql/centos/Dockerfile"
+ZABBIX_PROXY_PGSQL_ENTRYPOINT="./Dockerfiles/proxy-pgsql/centos/docker-entrypoint.sh"
 ZABBIX_SERVER_PGSQL_ENTRYPOINT="./Dockerfiles/server-pgsql/centos/docker-entrypoint.sh"
 WEB_NGINX_PGSQL="./Dockerfiles/web-nginx-pgsql/centos/Dockerfile"
 WEB_NGINX_ENTRYPOINT="./Dockerfiles/web-nginx-pgsql/centos/docker-entrypoint.sh"
@@ -170,6 +171,7 @@ sed -i '/EXPOSE 10051/i\    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki 
 }
 
 zabbix_proxy_pgsql() {
+\cp -vrf ./Dockerfiles/server-pgsql ./Dockerfiles/proxy-pgsql
 if [ ! -f "./Dockerfiles/proxy-pgsql/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/proxy-pgsql/centos/
 fi
@@ -180,7 +182,37 @@ if [ ! -f "./Dockerfiles/proxy-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; t
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/proxy-pgsql/centos/
 fi
 \cp ./patch/timescaledb.sql ./Dockerfiles/proxy-pgsql/centos/
+sed -i -e 's|Zabbix server|Zabbix proxy|g' $ZABBIX_PROXY_PGSQL
+sed -i -e 's|zabbix_server|zabbix_proxy|g' $ZABBIX_PROXY_PGSQL
+sed -i -e 's|create_server.sql.gz|create_proxy.sql.gz|g' $ZABBIX_PROXY_PGSQL
+sed -i -e 's|zabbix-server-postgresql|zabbix-proxy-postgresql|g' $ZABBIX_PROXY_PGSQL
+sed -i -e 's|, "/var/lib/zabbix/export"||g' $ZABBIX_PROXY_PGSQL
 sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_PROXY_PGSQL
+
+sed -i -e 's|zabbix-server-postgresql|zabbix-proxy-postgresql|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i -e 's|Zabbix server|Zabbix proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i -e 's|zabbix_server|zabbix_proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+
+sed -i '368i\ ' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\    fi' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\        update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\        update_config_var $ZBX_CONFIG "Hostname" "${ZBX_HOSTNAME:-"zabbix-proxy-pgsql"}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\    else' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\        update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\        update_config_var $ZBX_CONFIG "Hostname" ""' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\    if [ -z "${ZBX_HOSTNAME}" ] && [ -n "${ZBX_HOSTNAMEITEM}" ]; then' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\    update_config_var $ZBX_CONFIG "Server" "${ZBX_SERVER_HOST}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '368i\    update_config_var $ZBX_CONFIG "ProxyMode" "${ZBX_PROXYMODE}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+
+sed -i '418i\ ' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '418i\    update_config_var $ZBX_CONFIG "DataSenderFrequency" "${ZBX_DATASENDERFREQUENCY}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '418i\    update_config_var $ZBX_CONFIG "ProxyConfigFrequency" "${ZBX_PROXYCONFIGFREQUENCY}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '418i\    update_config_var $ZBX_CONFIG "ProxyOfflineBuffer" "${ZBX_PROXYOFFLINEBUFFER}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+sed -i '418i\    update_config_var $ZBX_CONFIG "ProxyLocalBuffer" "${ZBX_PROXYLOCALBUFFER}"' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+
+sed -i -e 's|prepare_server|prepare_proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
+
+
 update_config_var $ZABBIX_PROXY_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 update_config_var $ZABBIX_PROXY_PGSQL "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki" "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_PROXY_PGSQL"

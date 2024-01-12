@@ -1,4 +1,5 @@
 zabbix-server-pgsql
+zabbix-proxy-pgsql
 zabbix-web-service
 zabbix-agent2
 zabbix-java-gateway

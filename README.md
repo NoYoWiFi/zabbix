@@ -43,7 +43,9 @@ docker images|grep none|awk '{print $3 }'|xargs docker rmi
 sh update_config-entrypoint_mysql.sh cp
 
 # sh update_config-entrypoint_pgsql.sh start
+# sh update_config-entrypoint_pgsql.sh prxstart
 sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_mysql.sh prxstart
 ```
 
 **项目地址**  
