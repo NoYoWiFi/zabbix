@@ -64,6 +64,7 @@ sh update_config-entrypoint_pgsql.sh init
 
 ```
 sh update_config-entrypoint_mysql.sh down
+# sh update_config-entrypoint_mysql.sh prxdown
 # sh update_config-entrypoint_pgsql.sh down
 ```
 
@@ -78,6 +79,7 @@ sh update_config-entrypoint_mysql.sh cp
 
 ```
 sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_mysql.sh prxstart
 # sh update_config-entrypoint_pgsql.sh start
 ```
 
