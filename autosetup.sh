@@ -32,7 +32,7 @@ function check_ip_status()
     if [ $? -eq 0 ];then
         return 0
     else
-        return -1
+        return 1
     fi
 }
 if [ -d "/etc/yum.repos.d/bak/" ];then
@@ -252,7 +252,7 @@ sed -i -e "/^\# StartPollersUnreachable/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartTrappers/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartVMwareCollectors/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartPingers/s/=.*/=100/" ${ZABBIX_CONFIG}
-sed -i -e "/^\# StartDiscoverers/s/=.*/=3/" ${ZABBIX_CONFIG}
+sed -i -e "/^\# StartDiscoverers/s/=.*/=50/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartHTTPPollers/s/=.*/=3/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartTimers/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartEscalators/s/=.*/=2/" ${ZABBIX_CONFIG}
@@ -283,7 +283,7 @@ sed -i -e "/^StartPollersUnreachable/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartTrappers/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartVMwareCollectors/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartPingers/s/=.*/=100/" ${ZABBIX_CONFIG}
-sed -i -e "/^StartDiscoverers/s/=.*/=3/" ${ZABBIX_CONFIG}
+sed -i -e "/^StartDiscoverers/s/=.*/=50/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartHTTPPollers/s/=.*/=3/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartTimers/s/=.*/=100/" ${ZABBIX_CONFIG}
 sed -i -e "/^StartEscalators/s/=.*/=2/" ${ZABBIX_CONFIG}
