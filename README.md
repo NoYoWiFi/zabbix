@@ -184,18 +184,6 @@ root@ubuntu:/home/ubuntu# cd ${ZBX_DIR}
 root@ubuntu:/opt# git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch ${ZBX_DIR}/${ZBX_NAME}
 root@ubuntu:/opt# chmod 755 -R ${ZBX_DIR}/${ZBX_NAME}
 root@ubuntu:/opt# cd ${ZBX_DIR}/${ZBX_NAME}
-root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh init
-update_config-entrypoint_mysql.sh: 15: set: Illegal option -o pipefail
-root@ubuntu:/opt/zabbix_docker-6.0-latest# vi update_config-entrypoint_mysql.sh ^C
-root@ubuntu:/opt/zabbix_docker-6.0-latest# 
-root@ubuntu:/opt/zabbix_docker-6.0-latest# 
-root@ubuntu:/opt/zabbix_docker-6.0-latest#  dpkg-reconfigure dash
-root@ubuntu:/opt/zabbix_docker-6.0-latest# 原文链接：https://blog.csdn.net/fantasywith/article/details/123668156
-root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh init
-update_config-entrypoint_mysql.sh: 15: set: Illegal option -o pipefail
-root@ubuntu:/opt/zabbix_docker-6.0-latest# 原文链接：https://blog.csdn.net/fantasywith/article/details/123668156
-root@ubuntu:/opt/zabbix_docker-6.0-latest#  dpkg-reconfigure bash
-update-alternatives: using /usr/share/man/man7/bash-builtins.7.gz to provide /usr/share/man/man7/builtins.7.gz (builtins.7.gz) in auto mode
 root@ubuntu:/opt/zabbix_docker-6.0-latest# ls -al /bin/sh
 lrwxrwxrwx 1 root root 4 Jul 11  2023 /bin/sh -> dash
 root@ubuntu:/opt/zabbix_docker-6.0-latest# sudo ln -fs /bin/bash /bin/sh
