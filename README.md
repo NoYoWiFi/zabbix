@@ -32,6 +32,8 @@ grafana/loki                 2.8.4              64ae1e0ed80b   4 months ago     
   
 ![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/ce76ece189844eaa94629d9c59beb845.png)
 
+`[Rocky8|centos7|centos8]`
+
 **执行如下命令进行git安装**
 
 ```
@@ -149,6 +151,60 @@ sh update_config-entrypoint_mysql.sh down
 
 sh update_config-entrypoint_mysql.sh start
 # sh update_config-entrypoint_pgsql.sh start
+```
+
+`[Ubuntu]`
+
+`ubunt系统请参考如下命令手动执行`
+
+```
+root@ubuntu:/opt/zabbix_docker-6.0-latest# cat /etc/os-release | grep "Ubuntu "
+PRETTY_NAME="Ubuntu 23.10"
+ubuntu@ubuntu:~$ sudo sed -i 's/https:\/\/mirrors.aliyun.com/http:\/\/mirrors.cloud.aliyuncs.com/g' /etc/apt/sources.list
+ubuntu@ubuntu:~$ sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common
+ubuntu@ubuntu:~$ curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
+ubuntu@ubuntu:~$ sudo passwd root
+New password: 
+Retype new password: 
+passwd: password updated successfully
+ubuntu@ubuntu:~$ su
+Password: 
+root@ubuntu:/home/ubuntu# curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add -
+Warning: apt-key is deprecated. Manage keyring files in trusted.gpg.d instead (see apt-key(8)).
+OK
+root@ubuntu:/home/ubuntu# add-apt-repository "deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+root@ubuntu:/home/ubuntu# apt-get -y install docker-ce
+root@ubuntu:/home/ubuntu# service docker start
+root@ubuntu:/home/ubuntu# apt install git
+root@ubuntu:/home/ubuntu# ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+root@ubuntu:/home/ubuntu# ZBX_VERSION=zabbix_docker
+root@ubuntu:/home/ubuntu# ZBX_NAME=zabbix_docker-6.0-latest
+root@ubuntu:/home/ubuntu# ZBX_DIR=/opt
+root@ubuntu:/home/ubuntu# cd ${ZBX_DIR}
+root@ubuntu:/opt# git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch ${ZBX_DIR}/${ZBX_NAME}
+root@ubuntu:/opt# chmod 755 -R ${ZBX_DIR}/${ZBX_NAME}
+root@ubuntu:/opt# cd ${ZBX_DIR}/${ZBX_NAME}
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh init
+update_config-entrypoint_mysql.sh: 15: set: Illegal option -o pipefail
+root@ubuntu:/opt/zabbix_docker-6.0-latest# vi update_config-entrypoint_mysql.sh ^C
+root@ubuntu:/opt/zabbix_docker-6.0-latest# 
+root@ubuntu:/opt/zabbix_docker-6.0-latest# 
+root@ubuntu:/opt/zabbix_docker-6.0-latest#  dpkg-reconfigure dash
+root@ubuntu:/opt/zabbix_docker-6.0-latest# 原文链接：https://blog.csdn.net/fantasywith/article/details/123668156
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh init
+update_config-entrypoint_mysql.sh: 15: set: Illegal option -o pipefail
+root@ubuntu:/opt/zabbix_docker-6.0-latest# 原文链接：https://blog.csdn.net/fantasywith/article/details/123668156
+root@ubuntu:/opt/zabbix_docker-6.0-latest#  dpkg-reconfigure bash
+update-alternatives: using /usr/share/man/man7/bash-builtins.7.gz to provide /usr/share/man/man7/builtins.7.gz (builtins.7.gz) in auto mode
+root@ubuntu:/opt/zabbix_docker-6.0-latest# ls -al /bin/sh
+lrwxrwxrwx 1 root root 4 Jul 11  2023 /bin/sh -> dash
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sudo ln -fs /bin/bash /bin/sh
+root@ubuntu:/opt/zabbix_docker-6.0-latest# ls -al /bin/sh
+lrwxrwxrwx 1 root root 9 Jan 12 05:42 /bin/sh -> /bin/bash
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh init
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh down
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh cp
+root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh start
 ```
 
 `感谢打赏`    
