@@ -27,6 +27,7 @@ BUILD_CONFIG="./build.sh"
 ZABBIX_BUILD_BASE="./Dockerfiles/build-base/centos/Dockerfile"
 ZABBIX_BUILD_PGSQL="./Dockerfiles/build-pgsql/centos/Dockerfile"
 ZABBIX_SERVER_PGSQL="./Dockerfiles/server-pgsql/centos/Dockerfile"
+ZABBIX_PROXY_PGSQL="./Dockerfiles/proxy-pgsql/centos/Dockerfile"
 ZABBIX_SERVER_PGSQL_ENTRYPOINT="./Dockerfiles/server-pgsql/centos/docker-entrypoint.sh"
 WEB_NGINX_PGSQL="./Dockerfiles/web-nginx-pgsql/centos/Dockerfile"
 WEB_NGINX_ENTRYPOINT="./Dockerfiles/web-nginx-pgsql/centos/docker-entrypoint.sh"
@@ -166,6 +167,30 @@ sed -i '/RUN set -eux /i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19
 sed -i -e "/    rm -rf \/var\/cache\/dnf/d" "$ZABBIX_SERVER_PGSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_PGSQL"
 sed -i '/EXPOSE 10051/i\    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
+}
+
+zabbix_proxy_pgsql() {
+if [ ! -f "./Dockerfiles/proxy-pgsql/centos/repos.tar.gz" ]; then
+    \cp ./patch/repos.tar.gz ./Dockerfiles/proxy-pgsql/centos/
+fi
+if [ ! -f "./Dockerfiles/proxy-pgsql/centos/pip.sh" ]; then
+    \cp ./patch/pip.sh ./Dockerfiles/proxy-pgsql/centos/
+fi
+if [ ! -f "./Dockerfiles/proxy-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; then
+    \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/proxy-pgsql/centos/
+fi
+\cp ./patch/timescaledb.sql ./Dockerfiles/proxy-pgsql/centos/
+sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_PROXY_PGSQL
+update_config_var $ZABBIX_PROXY_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
+update_config_var $ZABBIX_PROXY_PGSQL "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki" "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\"
+sed -i -e "/^ADD/,+4d" "$ZABBIX_PROXY_PGSQL"
+#3ADD
+sed -i '/RUN set -eux /i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD timescaledb.sql /usr/share/doc/zabbix-proxy-postgresql/timescaledb.sql\n' $ZABBIX_PROXY_PGSQL
+#4ADD
+#sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_PGSQL
+sed -i -e "/    rm -rf \/var\/cache\/dnf/d" "$ZABBIX_PROXY_PGSQL"
+sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_PGSQL"
+sed -i '/EXPOSE 10051/i\    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_PGSQL
 }
 
 zabbix_web_nginx_pgsql() {
@@ -331,6 +356,7 @@ elif [ $# -ge 1 ]; then
         zabbix_build_base
         zabbix_build_pgsql
         zabbix_server_pgsql
+        zabbix_proxy_pgsql
         zabbix_web_nginx_pgsql
         zabbix_agent2
         zabbix_snmptraps
@@ -449,7 +475,25 @@ elif [ $# -ge 1 ]; then
         esac
         exit 1
     fi
-    
+
+    if [[ "$1" == "prxstart" ]]; then
+        option=$(echo ${GV_VERSION} | cut -c 1)
+        case ${option} in
+            5)
+            echo "zabbix 5 LTSC!"
+            docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart5 up -d
+            ;;
+            6)
+            echo "zabbix 6 LTSC!"
+            docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart6 up -d
+            ;;
+            *)
+            echo "Nothing to do"
+            ;;
+        esac
+        exit 1
+    fi
+
     if [[ "$1" == "stop" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
         exit 1

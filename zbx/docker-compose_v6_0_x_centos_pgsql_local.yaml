@@ -100,6 +100,79 @@ services:
    com.zabbix.dbtype: "pgsql"
    com.zabbix.os: "rocky"
 
+ zabbix-proxy-pgsql:
+  build:
+   context: ./Dockerfiles/proxy-pgsql/centos
+   cache_from:
+    - rockylinux:8
+   args:
+    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
+  image: zabbix-proxy-pgsql:rocky-6.0-latest
+  container_name: zbx-proxy-pgsql
+  profiles:
+   - make5
+   - make6
+   - prxstart5
+   - prxstart6
+  ports:
+   - "10071:10051"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw 
+   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:rw
+   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
+   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
+   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
+   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
+   - snmptraps:/var/lib/zabbix/snmptraps:rw
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  deploy:
+   resources:
+    limits:
+      cpus: '0.80'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ./env_vars/.env_db_pgsql_proxy
+   - ./env_vars/.env_prx
+   - ./env_vars/.env_prx_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  depends_on:
+   - postgres-server
+   - zabbix-build-pgsql
+   - zabbix-java-gateway
+   - zabbix-snmptraps
+  networks:
+   zbx_net_backend:
+     aliases:
+      - zabbix-proxy
+      - zabbix-proxy-pgsql
+      - zabbix-proxy-rocky-pgsql
+      - zabbix-proxy-pgsql-rocky
+   zbx_net_frontend:
+#  devices:
+#   - "/dev/ttyUSB0:/dev/ttyUSB0"
+  stop_grace_period: 30s
+  sysctls:
+   - net.ipv4.ip_local_port_range=1024 65000
+   - net.ipv4.conf.all.accept_redirects=0
+   - net.ipv4.conf.all.secure_redirects=0
+   - net.ipv4.conf.all.send_redirects=0
+  labels:
+   com.zabbix.description: "Zabbix proxy with PostgreSQL database support"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-proxy"
+   com.zabbix.dbtype: "pgsql"
+   com.zabbix.os: "rocky"
+
  zabbix-web-nginx-pgsql:
   build:
    context: ./Dockerfiles/web-nginx-pgsql/centos
@@ -111,7 +184,7 @@ services:
   container_name: zbx-web-nginx-pgsql
   restart: always
   profiles:
-   - zabbix-web-nginx-mysql
+   - zabbix-web-nginx-pgsql
    - make5
    - make6
    - start5
@@ -190,6 +263,8 @@ services:
    - make6
    - start5
    - start6
+   - prxstart5
+   - prxstart6
   ports:
    - "10050:10050"
   volumes:
