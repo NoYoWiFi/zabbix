@@ -499,9 +499,9 @@ URL为http://IP:3100
 
 `感谢打赏`  
   
-| 微信                        |支付宝|  
-|---------------------------|---|  
-|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/thanks_wx.jpg) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/thanks_zfb.jpg)|  
+| zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
+|-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|  
+| ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/vx_images/zabbix-dayi.png) | ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/vx_images/zabbix-hanhua.png) |  
   
   
 **全文完结**
