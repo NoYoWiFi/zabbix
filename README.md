@@ -51,11 +51,11 @@ sh update_config-entrypoint_mysql.sh start
 **项目地址**  
 [GitCode项目地址](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_docker)
 
-`感谢打赏`  
+`交流群`  
   
-| 微信                        |支付宝|  
+| zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
 |---------------------------|---|  
-|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/thanks_wx.jpg) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/thanks_zfb.jpg)|  
+|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/vx_images/zabbix-dayi.png) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/vx_images/zabbix-hanhua.png)|  
   
   
 **全文完结**
