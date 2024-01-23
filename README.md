@@ -199,10 +199,10 @@ root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh 
 root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh start
 ```
 
-`感谢打赏`    
-
-| **微信** | **支付宝** |
-| :--: | :--: |
-| ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/thanks_wx.jpg) | ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/thanks_zfb.jpg) |
+`交流群`  
+  
+| zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
+|:------------------------------------------------------------------------------------------:| :--: |
+| ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/zabbix-dayi.png) | ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/zabbix-hanhua.png) |
 
 **全文完结**
