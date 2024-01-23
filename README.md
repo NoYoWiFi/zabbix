@@ -529,11 +529,11 @@ URL为http://IP:3100
 ![在这里插入图片描述](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/c469826e35f6d0735418cbb9ca008b22.png)
 
 
-`感谢打赏`  
+`交流群`  
   
-| 微信                        |支付宝|  
+| zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
 |---------------------------|---|  
-|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/thanks_wx.jpg) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/thanks_zfb.jpg)|  
+|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/zabbix-dayi.png) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/zabbix-hanhua.png)|  
   
   
 **全文完结**
