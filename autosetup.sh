@@ -163,6 +163,7 @@ case ${1} in
         " /etc/opt/rh/rh-nginx116/nginx/conf.d/zabbix.conf
         #![配置php-fpm]
         \cp ./php-fpm.d/zabbix.conf /etc/opt/rh/rh-php73/php-fpm.d/
+        sed -i -e "/^\listen =/s/= .*/= \/var\/opt\/rh\/rh-php73\/run\/php-fpm\/zabbix\.sock/" /etc/opt/rh/rh-php73/php-fpm.d/zabbix.conf
         sed -i "/date\.timezon/s/\; php_value\[date\.timezone\] = Europe\/Riga/php_value[date.timezone] = Asia\/Shanghai/" /etc/opt/rh/rh-php73/php-fpm.d/zabbix.conf
         #cp /usr/share/doc/zabbix-agent-*/userparameter_mysql.conf /etc/zabbix/zabbix_agentd.d/
         sed -i -e "/^\post_max_size/s/=.*/=32M/" /etc/opt/rh/rh-php73/php.ini
@@ -397,6 +398,7 @@ systemctl enable snmpd
 cd ${shellFolder}/mysql
 case ${1} in
     "install")
+        chmod a+rw -R /var/log/loki/
         mkdir -p /run/php-fpm
         systemctl start rh-php73-php-fpm
         systemctl enable rh-php73-php-fpm
