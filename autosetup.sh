@@ -70,6 +70,10 @@ gpgcheck = 1
 EOF
     yum module disable mysql mariadb -y
     sudo dnf -y install MariaDB-server MariaDB-client
+    if [ $? -ne '0' ]; then
+     echo "ERROR!"
+     exit 1
+    fi
 fi
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog
@@ -139,6 +143,7 @@ esac
 setenforce 0
 service firewalld stop
 chkconfig firewalld off
+sed -i "/SELINUX=enforcing/s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
 case ${1} in
     "proxy")
         echo "proxy"
@@ -208,6 +213,7 @@ sed -i -e "/^#DefaultLimitNPROC=/s/=.*/=100000/" /etc/systemd/user.conf
 sed -i -e "/^\#DefaultLimitCORE=/s/^#//" /etc/systemd/user.conf
 sed -i -e "/^\#DefaultLimitNOFILE=/s/^#//" /etc/systemd/user.conf
 sed -i -e "/^\#DefaultLimitNPROC=/s/^#//" /etc/systemd/user.conf
+
 case ${1} in
     "proxy")
         echo "proxy"
@@ -413,5 +419,5 @@ case ${1} in
         echo "Nothing to do"
         ;;
 esac
-netstat -nltp | grep '10050\|10051\|10052\|3306\|80\|3000'
+netstat -nltp | grep '10050\|10051\|10052\|3306\|8443\|3000'
 # rm -rf ${shellFolder}*
