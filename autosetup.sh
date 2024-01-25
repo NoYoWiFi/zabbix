@@ -62,7 +62,7 @@ gpgkey=https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 EOF
     yum module disable mysql mariadb -y
-    sudo dnf -y install MariaDB-server MariaDB-client
+    sudo yum -y install MariaDB-server MariaDB-client
 fi
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip sysstat iotop rsyslog
