@@ -399,6 +399,7 @@ systemctl enable snmpd
 cd ${shellFolder}/mysql
 case ${1} in
     "install")
+        chmod a+rw -R /var/log/loki/
         systemctl start php-fpm
         systemctl enable php-fpm
         systemctl start nginx
