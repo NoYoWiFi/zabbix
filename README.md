@@ -11,7 +11,7 @@ sh autosetup.sh install
 3. 执行命令全自动安装zabbix-proxy
 ```
 tar -zxvf zabbix-centos_7_zabbix_5.0.x_mysql.tar.gz
-cd zabbix-rocky_8_zabbix_6.0.x_mysql
+cd zabbix-centos_7_zabbix_5.0.x_mysql
 sh autosetup.sh proxy
 ```
 
