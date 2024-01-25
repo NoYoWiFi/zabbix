@@ -417,6 +417,7 @@ systemctl start snmpd
 systemctl enable snmpd
 case ${1} in
     "install")
+        chmod a+rw -R /var/log/loki/
         systemctl start php-fpm
         systemctl enable php-fpm
         systemctl start nginx
