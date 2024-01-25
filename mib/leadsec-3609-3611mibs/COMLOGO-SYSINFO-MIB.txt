@@ -1,0 +1,80 @@
+COMLOGO-SYSINFO-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE           FROM SNMPv2-SMI
+    Common								   FROM COMLOGO-SMI;
+
+SystemInfo MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for security system information."
+    ::= { Common 1 }
+
+--
+-- System information MIB tree structure
+--
+
+siType OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The type of the system."
+    ::= { SystemInfo 1 }
+
+siName OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The name of the system."
+    ::= { SystemInfo 2 }
+
+siSerial OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The serial number of the system."
+    ::= { SystemInfo 3 }
+
+siHWVersion OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The hardware version of the system."
+    ::= { SystemInfo 4 }
+
+siSWInfo OBJECT IDENTIFIER ::= { SystemInfo 5 }
+	
+siSWVersion OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The software version of the system."
+    ::= { siSWInfo 1 }
+	
+siUPVersion OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The software upgrade of the system."
+    ::= { siSWInfo 2 }
+
+siSNMPVersion OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The SNMP agent version of the system."
+    ::= { SystemInfo 6 }
+
+END
+
+
