@@ -63,6 +63,10 @@ gpgcheck=1
 EOF
     yum module disable mysql mariadb -y
     sudo yum -y install MariaDB-server MariaDB-client
+    if [ $? -ne '0' ]; then
+     echo "ERROR!"
+     exit 1
+    fi
 fi
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip sysstat iotop rsyslog
