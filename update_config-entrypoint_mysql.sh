@@ -51,7 +51,7 @@ case ${option} in
          echo "YUM配置异常请联系作者QQ1284524409"
          exit 1
         fi
-        yum -y install git
+        yum -y install git rsyslog --allowerasing
     fi
     ;;
     7)
@@ -68,7 +68,7 @@ case ${option} in
          echo "YUM配置异常请重新执行，如继续报错请联系作者QQ1284524409"
          exit 1
         fi
-        yum -y install git
+        yum -y install git rsyslog
     ;;
     *)
     echo "Nothing to do"
