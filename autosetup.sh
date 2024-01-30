@@ -75,6 +75,9 @@ EOF
      exit 1
     fi
 fi
+#![安装php8.x]
+dnf module reset php -y
+dnf module enable php:8.0 -y
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog
 #![安装grafana zabbix图形界面]
@@ -414,6 +417,10 @@ case ${1} in
         sh mysql.sh
         ;;
     "trans")
+        systemctl start php-fpm
+        systemctl enable php-fpm
+        systemctl start nginx
+        systemctl enable nginx
         systemctl disable zabbix-server
         ;;
     *)
