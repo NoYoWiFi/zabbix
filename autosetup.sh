@@ -88,7 +88,7 @@ fi
 dnf module reset php -y
 dnf module enable php:8.0 -y
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog
+yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3
 #![安装grafana zabbix图形界面]
 cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
 yum -y install grafana/*.rpm
@@ -167,6 +167,8 @@ setenforce 0
 service firewalld stop
 chkconfig firewalld off
 sed -i "/SELINUX=enforcing/s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+sed -i -e "/zbx-agent2/d" /etc/hosts
+echo "127.0.0.1 zbx-agent2" >> /etc/hosts
 case ${1} in
     "proxy")
         echo "proxy"
