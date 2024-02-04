@@ -68,7 +68,7 @@ case ${option} in
         --add-repo \
         https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
     yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
-    yum -y install git
+    yum -y install git rsyslog
     \cp ./trans/create_server_${GV_VERSION_DOCKER}_pgsql.sql.gz ./patch/create_server.sql.gz
     ;;
     7)
@@ -80,7 +80,7 @@ case ${option} in
             --add-repo \
             https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
         yum -y install docker-ce docker-ce-cli containerd.io
-        yum -y install git
+        yum -y install git rsyslog
         \cp ./trans/create_server_${GV_VERSION_DOCKER}_pgsql.sql.gz ./patch/create_server.sql.gz
     ;;
     *)
