@@ -69,7 +69,7 @@ EOF
     fi
 fi
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip sysstat iotop rsyslog
+yum -y install nano net-snmp* net-tools unzip sysstat iotop rsyslog iperf3
 #![安装grafana zabbix图形界面]
 cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
 yum -y install grafana/*.rpm
@@ -395,15 +395,17 @@ systemctl start snmptrapd
 systemctl enable snmptrapd
 systemctl start snmpd
 systemctl enable snmpd
+mv /usr/lib/systemd/system/rh-php73-php-fpm.service /usr/lib/systemd/system/php-fpm.service
+mv /usr/lib/systemd/system/rh-nginx116-nginx.service /usr/lib/systemd/system/nginx.service
+systemctl daemon-reload
 cd ${shellFolder}/mysql
 case ${1} in
     "install")
         chmod a+rw -R /var/log/loki/
-        mkdir -p /run/php-fpm
-        systemctl start rh-php73-php-fpm
-        systemctl enable rh-php73-php-fpm
-        systemctl start rh-nginx116-nginx
-        systemctl enable rh-nginx116-nginx
+        systemctl start php-fpm
+        systemctl enable php-fpm
+        systemctl start nginx
+        systemctl enable nginx
         systemctl start zabbix-server
         systemctl enable zabbix-server
         sh mysql.sh
@@ -414,6 +416,10 @@ case ${1} in
         sh mysql.sh
         ;;
     "trans")
+        systemctl start php-fpm
+        systemctl enable php-fpm
+        systemctl start nginx
+        systemctl enable nginx
         systemctl disable zabbix-server
         ;;
     *)
