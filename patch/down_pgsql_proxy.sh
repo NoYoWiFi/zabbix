@@ -7,6 +7,6 @@ docker pull ${ADDRESS}:${IM}_${VERSION}
 docker tag ${ADDRESS}:${IM}_${VERSION} ${IM}:${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
-docker pull ${ADDRESS}:2.13.0-pg15
-docker tag ${ADDRESS}:2.13.0-pg15 timescale/timescaledb:2.13.0-pg15
-docker rmi ${ADDRESS}:2.13.0-pg15
+docker pull ${ADDRESS}:2.13.0-pg16
+docker tag ${ADDRESS}:2.13.0-pg16 timescale/timescaledb:2.13.0-pg16
+docker rmi ${ADDRESS}:2.13.0-pg16
