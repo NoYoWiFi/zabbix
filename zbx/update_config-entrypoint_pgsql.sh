@@ -551,8 +551,8 @@ elif [ $# -ge 1 ]; then
     fi
     
     if [[ "$1" == "buildpgsql" ]]; then
-        docker build -t timescale/timescaledb:2.13.0-pg15 ./patch/Dockerfile_timescale
-        docker save -o timescale.tar.gz timescale/timescaledb:2.13.0-pg15
+        docker build -t timescale/timescaledb:2.13.0-pg16 ./patch/Dockerfile_timescale
+        docker save -o timescale.tar.gz timescale/timescaledb:2.13.0-pg16
         docker rmi $(docker images |grep timescale | awk -F ' ' '{print $3}')
         docker load < timescale.tar.gz
         rm -f timescale.tar.gz

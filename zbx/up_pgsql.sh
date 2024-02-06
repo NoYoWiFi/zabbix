@@ -10,9 +10,9 @@ done
 docker tag rockylinux:8 ${ADDRESS}:rockylinux8
 docker push ${ADDRESS}:rockylinux8
 docker rmi ${ADDRESS}:rockylinux8
-docker tag timescale/timescaledb:2.13.0-pg15 ${ADDRESS}:2.13.0-pg15
-docker push ${ADDRESS}:2.13.0-pg15
-docker rmi ${ADDRESS}:2.13.0-pg15
+docker tag timescale/timescaledb:2.13.0-pg16 ${ADDRESS}:2.13.0-pg16
+docker push ${ADDRESS}:2.13.0-pg16
+docker rmi ${ADDRESS}:2.13.0-pg16
 docker tag grafana/grafana-enterprise:10.1.0 ${ADDRESS}:grafana_grafana-enterprise
 docker push ${ADDRESS}:grafana_grafana-enterprise
 docker rmi ${ADDRESS}:grafana_grafana-enterprise
