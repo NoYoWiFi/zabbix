@@ -82,8 +82,11 @@ else
     var_1=$(escape_spec_char "$var_1")
     var_2=$(escape_spec_char "$var_2")
     sed -i -e "/$var_1/s/$var_1/$var_2/" "$config_path"
-    cat ./patch/pgsql | xargs yum -y install --enablerepo='pgdg15' --disablerepo='appstream'
+    cat ./patch/pgsql | xargs yum -y install --enablerepo='pgdg16' --disablerepo='appstream'
 fi
+#![配置时区]
+timedatectl set-timezone Asia/Shanghai
+chronyc -a makestep
 #![安装php8.x]
 dnf module reset php -y
 dnf module enable php:8.0 -y
@@ -115,19 +118,19 @@ case ${1} in
         fi
         ;;
 esac
-#![安装postgresql-15]
-/usr/pgsql-15/bin/postgresql-15-setup initdb
+#![安装postgresql-16]
+/usr/pgsql-16/bin/postgresql-16-setup initdb
 if [ $? -ne '0' ]; then
  echo "rpm install failed"
  exit 1
 fi
 echo "rpm install success"
-timescaledb-tune --pg-config=/usr/pgsql-15/bin/pg_config -yes
-sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/pgsql/15/data/postgresql.conf
-sed -i 's/#port = 5432/port = 5432/g' /var/lib/pgsql/15/data/postgresql.conf
-sed -i -e "/^max_connections/s/=.*/= 2000/" /var/lib/pgsql/15/data/postgresql.conf
-\cp ./pgsql/pg_hba.conf /var/lib/pgsql/15/data/
-systemctl start postgresql-15
+timescaledb-tune --pg-config=/usr/pgsql-16/bin/pg_config -yes
+sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/pgsql/16/data/postgresql.conf
+sed -i 's/#port = 5432/port = 5432/g' /var/lib/pgsql/16/data/postgresql.conf
+sed -i -e "/^max_connections/s/=.*/= 2000/" /var/lib/pgsql/16/data/postgresql.conf
+\cp ./pgsql/pg_hba.conf /var/lib/pgsql/16/data/
+systemctl start postgresql-16
 #![创建zabbix数据库导入create_server_6.0-latest汉化模板]
 echo "create user zabbix with password '${DPassword}';" | sudo -u postgres psql
 echo "alter user postgres with password '${DPassword}';" | sudo -u postgres psql
@@ -142,7 +145,7 @@ case ${1} in
     "trans")
         echo "trans"
         gunzip < /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql -q zabbix
-        systemctl restart postgresql-15
+        systemctl restart postgresql-16
         ;;
     "install")
         echo "install"
@@ -161,7 +164,7 @@ case ${1} in
         echo "Nothing to do"
         ;;
 esac
-systemctl restart postgresql-15
+systemctl restart postgresql-16
 #![关闭防火墙与selinux]
 setenforce 0
 service firewalld stop
@@ -407,8 +410,8 @@ systemctl start zabbix-agent2
 systemctl enable zabbix-agent2
 systemctl start zabbix-java-gateway
 systemctl enable zabbix-java-gateway
-systemctl enable --now postgresql-15
-systemctl restart postgresql-15
+systemctl enable --now postgresql-16
+systemctl restart postgresql-16
 systemctl daemon-reload
 systemctl restart grafana-server
 systemctl enable grafana-server.service
