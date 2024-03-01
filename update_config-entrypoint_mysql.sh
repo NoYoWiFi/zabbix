@@ -135,7 +135,6 @@ elif [ $# -ge 1 ]; then
             touch /var/log/loki/alert.log
             echo "test" > /var/log/loki/alert.log
             chmod -R 777 /var/log/loki
-            sed -i -e "/^\      __path__:/s/:.*/: \/var\/log\/loki\/\*log/" /etc/promtail/config.yml
             \cp ./patch/loki.conf /etc/rsyslog.d/
             mkdir -p ./zbx_env/usr/lib/zabbix/alertscripts
             \cp ./patch/echo.sh ./zbx_env/usr/lib/zabbix/alertscripts/

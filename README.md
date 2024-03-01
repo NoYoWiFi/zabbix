@@ -1,29 +1,34 @@
+**zabbix 版本**
+
+`6.0.27`
+
 **项目地址**  
 [GitCode项目地址](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_docker)
 
 **效果图**
 ```  
 [root@localhost zbx]# docker images;
-REPOSITORY                   TAG                IMAGE ID       CREATED          SIZE
-zabbix-web-nginx-pgsql       rocky-6.0-latest   0688e2f40486   30 minutes ago   426MB
-zabbix-server-pgsql          rocky-6.0-latest   c365b40da452   31 minutes ago   422MB
-zabbix-web-service           rocky-6.0-latest   5c61366f8532   31 minutes ago   476MB
-zabbix-agent2                rocky-6.0-latest   52a32c972da0   32 minutes ago   303MB
-zabbix-java-gateway          rocky-6.0-latest   fa58ea3b847a   32 minutes ago   401MB
-zabbix-snmptraps             rocky-6.0-latest   10e2d6557ade   32 minutes ago   286MB
-zabbix-build-pgsql           rocky-6.0-latest   af6702d2d217   34 minutes ago   2.26GB
-zabbix-build-base            rocky-6.0-latest   a4eb17480afa   41 minutes ago   1.37GB
-zabbix-server-mysql          rocky-6.0-latest   59958d8badc5   2 hours ago      504MB
-zabbix-proxy-mysql           rocky-6.0-latest   2c94a35bf645   2 hours ago      499MB
-zabbix-build-mysql           rocky-6.0-latest   ab8c72632ad7   2 hours ago      2.26GB
-zabbix-web-nginx-mysql       rocky-6.0-latest   0e9fdedabe4f   14 hours ago     501MB
-rockylinux                   8                  c24baca6f6df   15 hours ago     228MB
-timescale/timescaledb        2.13.0-pg15        35167cd9604d   5 weeks ago      550MB
-mariadb                      11.1.2             86a799de5c86   2 months ago     404MB
-grafana/grafana-enterprise   10.1.0             22a97caed634   4 months ago     409MB
-grafana/promtail             2.8.4              260f742f3fe9   4 months ago     195MB
-grafana/loki                 2.8.4              64ae1e0ed80b   4 months ago     67.4MB
-[root@localhost zbx]# 
+REPOSITORY                                                     TAG                                   IMAGE ID       CREATED          SIZE
+zabbix-web-nginx-pgsql                                         rocky-6.0-latest                      b67b259b0a8b   7 minutes ago    441MB
+zabbix-server-pgsql                                            rocky-6.0-latest                      d89d656e4dd2   7 minutes ago    431MB
+zabbix-proxy-pgsql                                             rocky-6.0-latest                      1eabdf15a0a0   7 minutes ago    425MB
+zabbix-web-service                                             rocky-6.0-latest                      0b5517385135   8 minutes ago    473MB
+zabbix-java-gateway                                            rocky-6.0-latest                      787d686971f9   26 minutes ago   460MB
+zabbix-agent2                                                  rocky-6.0-latest                      27d8d0a3e994   26 minutes ago   307MB
+zabbix-build-pgsql                                             rocky-6.0-latest                      dc70e7fdf506   2 hours ago      2.07GB
+zabbix-server-mysql                                            rocky-6.0-latest                      0ecb5beeb87f   3 hours ago      512MB
+zabbix-proxy-mysql                                             rocky-6.0-latest                      90d6b14d4fe1   3 hours ago      496MB
+zabbix-web-nginx-mysql                                         rocky-6.0-latest                      f76d91be3616   8 hours ago      515MB
+zabbix-snmptraps                                               rocky-6.0-latest                      7123f3cc0a20   24 hours ago     286MB
+zabbix-build-mysql                                             rocky-6.0-latest                      a070dc2c9bc1   31 hours ago     2.07GB
+zabbix-build-base                                              rocky-6.0-latest                      9c35feed350f   32 hours ago     1.39GB
+mariadb                                                        11.2.3                                7d65ebbd4dce   47 hours ago     405MB
+timescale/timescaledb                                          2.13.0-pg16                           37796458a471   3 weeks ago      284MB
+grafana/grafana-enterprise                                     10.0.11                               55a918349323   4 weeks ago      351MB
+grafana/loki                                                   2.9.4                                 652b79950756   5 weeks ago      74.6MB
+grafana/promtail                                               2.9.4                                 1c7475004f2f   5 weeks ago      198MB
+rockylinux                                                     8                                     c24baca6f6df   8 weeks ago      228MB
+
 ```  
   
 **集成全中文模板**  
