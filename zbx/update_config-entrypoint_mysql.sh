@@ -28,6 +28,7 @@ ZABBIX_BUILD_MYSQL="./Dockerfiles/build-mysql/centos/Dockerfile"
 ZABBIX_SERVER_MYSQL="./Dockerfiles/server-mysql/centos/Dockerfile"
 ZABBIX_SERVER_MYSQL_ENTRYPOINT="./Dockerfiles/server-mysql/centos/docker-entrypoint.sh"
 WEB_NGINX_MYSQL="./Dockerfiles/web-nginx-mysql/centos/Dockerfile"
+WEB_NGINX_MYSQL_NGINX_CONF="./Dockerfiles/web-nginx-mysql/centos/conf/etc/zabbix/nginx.conf"
 WEB_NGINX_ENTRYPOINT="./Dockerfiles/web-nginx-mysql/centos/docker-entrypoint.sh"
 ZABBIX_AGENT2="./Dockerfiles/agent2/centos/Dockerfile"
 ZABBIX_AGENT2_ENTRYPOINT="./Dockerfiles/agent2/centos/docker-entrypoint.sh"
@@ -142,7 +143,7 @@ sed -i '/RUN/i ADD NotoSansCJKjp-hinted.zip /tmp/fonts/\n' $ZABBIX_BUILD_MYSQL
 sed -i '/    cp \/tmp\/create_server.sql.gz/d' $ZABBIX_BUILD_MYSQL
 sed -i '/    strip \/tmp\/zabbix-\${ZBX_VERSION}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create_server.sql.gz database/mysql/create_server.sql.gz && \\' $ZABBIX_BUILD_MYSQL
 sed -i '/.\/configure \\/i\    go env -w GOPROXY=https://goproxy.cn && \\' $ZABBIX_BUILD_MYSQL
-sed -i -e "/curl --silent/d" $ZABBIX_BUILD_MYSQL
+sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_MYSQL
 }
 
 zabbix_server_mysql() {
@@ -160,19 +161,18 @@ if [ ! -f "./Dockerfiles/server-mysql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; 
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_SERVER_MYSQL
 update_config_var $ZABBIX_SERVER_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-update_config_var $ZABBIX_SERVER_MYSQL "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki" "    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_SERVER_MYSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_SERVER_MYSQL
-sed -i -e "/    rm -rf \/var\/cache\/dnf/d" "$ZABBIX_SERVER_MYSQL"
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_SERVER_MYSQL
+sed -i -e "/    dnf -y clean all/d" "$ZABBIX_SERVER_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_MYSQL"
-sed -i '/EXPOSE 10051/i\    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_MYSQL
+sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_MYSQL
 # exec_sql_file
 sed -i -e "275,301{/^    mysql --silent/,+16d}" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 var_value_01="    mysql --silent --skip-column-names \\"
 var_value_02="                --default-character-set=utf8mb4 \\"
 var_value_03="                -h \${DB_SERVER_HOST} -P \${DB_SERVER_PORT} \\"
 var_value_04="                -u \${DB_SERVER_ROOT_USER} \$ssl_opts \\"
-var_value_05="                \${DB_SERVER_DBNAME} < /tmp/zbx_db_partitiong.sql"
+var_value_05="                \${DB_SERVER_DBNAME} < /opt/zbx_db_partitiong.sql"
 var_value_06="    mysql_query \"use zabbix;ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
 var_value_06_1="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
 var_value_06_2="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
@@ -239,10 +239,27 @@ if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/nginx.sh" ]; then
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $WEB_NGINX_MYSQL
 update_config_var $WEB_NGINX_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+3d" "$WEB_NGINX_MYSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
-sed -i -e "/sh \/tmp\/nginx.sh/d" "$WEB_NGINX_ENTRYPOINT"
-sed -i '/prepare_zbx_web_config$/a \sh /tmp/nginx.sh\' $WEB_NGINX_ENTRYPOINT
+sed -i -e "/^ADD/,+2d" $WEB_NGINX_MYSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_MYSQL
+#sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
+# sed -i -e "/    sh \/tmp\/nginx.sh/d" $WEB_NGINX_MYSQL
+# sed -i -e "/    dnf -y clean all/d" $WEB_NGINX_MYSQL
+# sed -i '/EXPOSE 8080/i\    dnf -y clean all && \\\n    sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
+sed -i -e "/listen/d" ${WEB_NGINX_MYSQL_NGINX_CONF}
+sed -i -e "/server {/a\ \tlisten 8080;\n\tlisten [::]:8080;\n\tlisten 8443 ssl;" ${WEB_NGINX_MYSQL_NGINX_CONF}
+sed -i -e "/ssl_/d" ${WEB_NGINX_MYSQL_NGINX_CONF}
+sed -i -e "/if /,+2d" ${WEB_NGINX_MYSQL_NGINX_CONF}
+sed -i -e "/8443 ssl/a\ \tssl_certificate \"/etc/ssl/nginx/server.pem\";\n\
+\tssl_certificate_key \"/etc/ssl/nginx/server.pem\";\n\
+\tssl_session_cache shared:SSL:1m;\n\
+\tssl_session_timeout  10m;\n\
+\tssl_ciphers PROFILE=SYSTEM;\n\
+\tssl_prefer_server_ciphers on;\n\
+\tif (\$server_port = 8080) {\n\
+\t\trewrite ^(\.\*)\$ https://\$host:8443\$1 permanent;\n\
+\t}\
+" ${WEB_NGINX_MYSQL_NGINX_CONF}
+
 option=$(echo ${GV_VERSION} | cut -c 1)
 case ${option} in
     5)
@@ -322,17 +339,17 @@ fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM rockylinux:8/" $ZABBIX_PROXY_MYSQL
 update_config_var $ZABBIX_PROXY_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_PROXY_MYSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_MYSQL
-sed -i -e "/    rm -rf \/var\/cache\/dnf/d" "$ZABBIX_PROXY_MYSQL"
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_PROXY_MYSQL
+sed -i -e "/    dnf -y clean all/d" "$ZABBIX_PROXY_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_MYSQL"
-sed -i '/EXPOSE 10051/i\    rm -rf /var/cache/dnf /etc/udev/hwdb.bin /root/.pki && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
+sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
 # exec_sql_file
 sed -i -e "275,301{/^    mysql --silent/,+16d}" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 var_value_01="    mysql --silent --skip-column-names \\"
 var_value_02="                --default-character-set=utf8mb4 \\"
 var_value_03="                -h \${DB_SERVER_HOST} -P \${DB_SERVER_PORT} \\"
 var_value_04="                -u \${DB_SERVER_ROOT_USER} \$ssl_opts \\"
-var_value_05="                \${DB_SERVER_DBNAME} < /tmp/zbx_db_partitiong.sql"
+var_value_05="                \${DB_SERVER_DBNAME} < /opt/zbx_db_partitiong.sql"
 var_value_06="    mysql_query \"use zabbix;ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
 var_value_06_1="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
 var_value_06_2="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
@@ -551,8 +568,6 @@ elif [ $# -ge 1 ]; then
             touch /var/log/loki/alert.log
             echo "test" > /var/log/loki/alert.log
             chmod 777 -R /var/log/loki
-            
-            sed -i -e "/^\      __path__:/s/:.*/: \/var\/log\/loki\/\*log/" /etc/promtail/config.yml
             \cp ./patch/loki.conf /etc/rsyslog.d/
             mkdir -p ./zbx_env/usr/lib/zabbix/alertscripts
             \cp ./patch/echo.sh ./zbx_env/usr/lib/zabbix/alertscripts/
@@ -632,8 +647,8 @@ elif [ $# -ge 1 ]; then
     fi
     
     if [[ "$1" == "buildmariadb" ]]; then
-        docker build -t mariadb:11.1.2 ./patch/Dockerfile_mariadb
-        docker save -o mariadb.tar.gz mariadb:11.1.2
+        docker build -t mariadb:11.2.3 ./patch/Dockerfile_mariadb
+        docker save -o mariadb.tar.gz mariadb:11.2.3
         docker rmi $(docker images |grep mariadb | awk -F ' ' '{print $3}')
         docker load < mariadb.tar.gz
         rm -f mariadb.tar.gz

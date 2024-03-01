@@ -2,262 +2,111 @@ version: '3.8'
 services:
  zabbix-build-base:
   build:
-   context: ./Dockerfiles/build-base/centos
+   context: ./Dockerfiles/build-base/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
-  image: zabbix-build-base:rocky-6.0-latest
+    - "${CENTOS_CACHE_FROM}"
+  image: ${BUILD_BASE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   profiles:
    - build1
 
  zabbix-build-pgsql:
   build:
-   context: ./Dockerfiles/build-pgsql/centos
+   context: ./Dockerfiles/build-pgsql/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-base:rocky-6.0-latest
-  image: zabbix-build-pgsql:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   profiles:
    - build2
   depends_on:
    - zabbix-build-base
 
  zabbix-server:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: server-pgsql
   build:
-   context: ./Dockerfiles/server-pgsql/centos
+   context: ./Dockerfiles/server-pgsql/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-server-pgsql:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_SERVER_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-server-pgsql
-  restart: always
   profiles:
    - make5
    - make6
    - start5
    - start6
-  ports:
-   - "10051:10051"
-  volumes:
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw 
-   - ./zbx_env/usr/lib/zabbix/alertscripts:/usr/lib/zabbix/alertscripts:rw
-   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:rw
-   - ./zbx_env/var/lib/zabbix/dbscripts:/var/lib/zabbix/dbscripts:rw
-   - ./zbx_env/var/lib/zabbix/export:/var/lib/zabbix/export:rw
-   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
-   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
-   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
-   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
-   - snmptraps:/var/lib/zabbix/snmptraps:rw
-   - /var/log/loki:/var/log/loki:rw
-#   - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
-#   - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:rw
-#   - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:rw
-  ulimits:
-   nproc: 655350
-   nofile:
-    soft: 655350
-    hard: 655350
-  deploy:
-   resources:
-    limits:
-      cpus: '0.80'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  env_file:
-   - ./env_vars/.env_db_pgsql
-   - ./env_vars/.env_srv
-  secrets:
-   - POSTGRES_USER
-   - POSTGRES_PASSWORD
   depends_on:
    - postgres-server
    - zabbix-build-pgsql
-  networks:
-   zbx_net_backend:
-     aliases:
-      - zabbix-server
-      - zabbix-server-pgsql
-      - zabbix-server-rocky-pgsql
-      - zabbix-server-pgsql-rocky
-   zbx_net_frontend:
-#  devices:
-#   - "/dev/ttyUSB0:/dev/ttyUSB0"
-  stop_grace_period: 30s
-  sysctls:
-   - net.ipv4.ip_local_port_range=1024 65000
-   - net.ipv4.conf.all.accept_redirects=0
-   - net.ipv4.conf.all.secure_redirects=0
-   - net.ipv4.conf.all.send_redirects=0
   labels:
-   com.zabbix.description: "Zabbix server with PostgreSQL database support"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "zabbix-server"
-   com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-proxy-pgsql:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: proxy-pgsql
   build:
-   context: ./Dockerfiles/proxy-pgsql/centos
+   context: ./Dockerfiles/proxy-pgsql/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-proxy-pgsql:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_PROXY_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-proxy-pgsql
   profiles:
    - make5
    - make6
    - prxstart5
    - prxstart6
-  ports:
-   - "10071:10051"
-  volumes:
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw 
-   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:rw
-   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
-   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
-   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
-   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
-   - snmptraps:/var/lib/zabbix/snmptraps:rw
-  ulimits:
-   nproc: 655350
-   nofile:
-    soft: 655350
-    hard: 655350
-  deploy:
-   resources:
-    limits:
-      cpus: '0.80'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  env_file:
-   - ./env_vars/.env_db_pgsql_proxy
-   - ./env_vars/.env_prx
-   - ./env_vars/.env_prx_pgsql
-  secrets:
-   - POSTGRES_USER
-   - POSTGRES_PASSWORD
   depends_on:
    - postgres-server
    - zabbix-build-pgsql
    - zabbix-java-gateway
    - zabbix-snmptraps
-  networks:
-   zbx_net_backend:
-     aliases:
-      - zabbix-proxy
-      - zabbix-proxy-pgsql
-      - zabbix-proxy-rocky-pgsql
-      - zabbix-proxy-pgsql-rocky
-   zbx_net_frontend:
-#  devices:
-#   - "/dev/ttyUSB0:/dev/ttyUSB0"
-  stop_grace_period: 30s
-  sysctls:
-   - net.ipv4.ip_local_port_range=1024 65000
-   - net.ipv4.conf.all.accept_redirects=0
-   - net.ipv4.conf.all.secure_redirects=0
-   - net.ipv4.conf.all.send_redirects=0
   labels:
-   com.zabbix.description: "Zabbix proxy with PostgreSQL database support"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "zabbix-proxy"
-   com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-web-nginx-pgsql:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: web-nginx-pgsql
   build:
-   context: ./Dockerfiles/web-nginx-pgsql/centos
+   context: ./Dockerfiles/web-nginx-pgsql/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-web-nginx-pgsql:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_WEB_NGINX_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-web-nginx-pgsql
-  restart: always
   profiles:
    - zabbix-web-nginx-pgsql
    - make5
    - make6
    - start5
    - start6
-  ulimits:
-   nproc: 655350
-   nofile:
-    soft: 655350
-    hard: 655350
-  ports:
-   - "8080:8080"
-   - "8443:8443"
-  volumes:
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw
-   - ./zbx_env/etc/ssl/nginx:/etc/ssl/nginx:rw
-   - ./zbx_env/usr/share/zabbix/modules/:/usr/share/zabbix/modules/:rw
-   - ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:rw
-#   - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
-#   - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:rw
-#   - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:rw
-  deploy:
-   resources:
-    limits:
-      cpus: '0.80'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  env_file:
-   - ./env_vars/.env_db_pgsql
-   - ./env_vars/.env_web
-  secrets:
-   - POSTGRES_USER
-   - POSTGRES_PASSWORD
   depends_on:
    - postgres-server
    - zabbix-server
    - zabbix-build-pgsql
-  healthcheck:
-   test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
-   interval: 10s
-   timeout: 5s
-   retries: 3
-   start_period: 30s
-  networks:
-   zbx_net_backend:
-    aliases:
-     - zabbix-web-nginx-pgsql
-     - zabbix-web-nginx-rocky-pgsql
-     - zabbix-web-nginx-pgsql-rocky
-   zbx_net_frontend:
-  stop_grace_period: 10s
-  sysctls:
-   - net.core.somaxconn=65535
   labels:
-   com.zabbix.description: "Zabbix frontend on Nginx web-server with PostgreSQL database support"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "zabbix-frontend"
-   com.zabbix.webserver: "nginx"
-   com.zabbix.dbtype: "pgsql"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-agent2:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: agent2
   build:
-   context: ./Dockerfiles/agent2/centos
+   context: ./Dockerfiles/agent2/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-agent2:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_AGENT2_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-agent2
-  restart: always
   profiles:
    - make5
    - make6
@@ -265,51 +114,22 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  ports:
-   - "10050:10050"
-  volumes:
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw
-   - /var/run/docker.sock:/var/run/docker.sock:rw
-   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
-   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
-   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
-  deploy:
-   resources:
-    limits:
-      cpus: '0.8'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-   mode: global
-  env_file:
-   - ./env_vars/.env_agent2
-  pid: "host"
   depends_on:
     - zabbix-build-pgsql
-  networks:
-   zbx_net_backend:
-    aliases:
-     - zabbix-agent2
-     - zabbix-agent2-passive
-     - zabbix-agent2-rocky
-   zbx_net_frontend:
-  stop_grace_period: 5s
   labels:
-   com.zabbix.description: "Zabbix agent"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "zabbix-agentd2"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-java-gateway:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: java-gateway
   build:
-   context: ./Dockerfiles/java-gateway/centos
+   context: ./Dockerfiles/java-gateway/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-java-gateway:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_JAVA_GATEWAY_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-java-gateway
   restart: always
   profiles:
@@ -319,126 +139,55 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  volumes:
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw
-  ports:
-   - "10052:10052"
-  deploy:
-   resources:
-    limits:
-      cpus: '0.8'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  env_file:
-   - ./env_vars/.env_java
   depends_on:
    - zabbix-build-pgsql
-  networks:
-   zbx_net_backend:
-    aliases:
-     - zabbix-java-gateway
-     - zabbix-java-gateway-rocky
-   zbx_net_frontend:
-  stop_grace_period: 5s
   labels:
-   com.zabbix.description: "Zabbix Java Gateway"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "java-gateway"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-snmptraps:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: snmptraps
   build:
-   context: ./Dockerfiles/snmptraps/centos
+   context: ./Dockerfiles/snmptraps/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
-  image: zabbix-snmptraps:rocky-6.0-latest
+    - "${CENTOS_CACHE_FROM}"
+  image: ${ZABBIX_SNMPTRAPS_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-snmptraps
-  restart: always
   profiles:
    - make5
    - make6
    - start5
    - start6
-  ports:
-   - "162:1162/udp"
-  volumes:
-   - snmptraps:/var/lib/zabbix/snmptraps:rw
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw
-  deploy:
-   resources:
-    limits:
-      cpus: '0.8'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  networks:
-   zbx_net_frontend:
-    aliases:
-     - zabbix-snmptraps
-   zbx_net_backend:
-  stop_grace_period: 5s
   labels:
-   com.zabbix.description: "Zabbix snmptraps"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "snmptraps"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-web-service:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: web-service
   build:
-   context: ./Dockerfiles/web-service/centos
+   context: ./Dockerfiles/web-service/${CENTOS_OS_TAG_SHORT}
    cache_from:
-    - rockylinux:8
+    - "${CENTOS_CACHE_FROM}"
    args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:rocky-6.0-latest
-  image: zabbix-web-service:rocky-6.0-latest
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_WEB_SERVICE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-web-service
-  restart: always
   profiles:
    - make6
    - start6
-  ports:
-   - "10053:10053"
-  volumes:
-   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
-   - /etc/localtime:/etc/localtime:rw
-   - /etc/timezone:/etc/timezone:rw
-  cap_add:
-   - SYS_ADMIN
-  deploy:
-   resources:
-    limits:
-      cpus: '0.8'
-      memory: 4G
-    reservations:
-      cpus: '0.8'
-      memory: 4G
-  env_file:
-   - ./env_vars/.env_web_service
   depends_on:
    - zabbix-build-pgsql
-  networks:
-   zbx_net_backend:
-    aliases:
-     - zabbix-web-service
-     - zabbix-web-service-rocky
-   zbx_net_frontend:
-  stop_grace_period: 5s
   labels:
-   com.zabbix.description: "Zabbix web service"
-   com.zabbix.company: "Zabbix LLC"
-   com.zabbix.component: "web-service"
-   com.zabbix.os: "rocky"
+   com.zabbix.os: "${CENTOS_OS_TAG}"
 
  postgres-server:
+  extends:
+   file: compose_databases.yaml
+   service: postgres-server
 #  image: postgres:15-alpine
-  image: timescale/timescaledb:2.13.0-pg16
   container_name: zbx-timescaledb
-  restart: always
   profiles:
    - make5
    - make6
@@ -446,36 +195,9 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  ulimits:
-   nproc: 655350
-   nofile:
-    soft: 655350
-    hard: 655350
-  ports:
-   - "5432:5432"
-#  command: -c ssl=on -c ssl_cert_file=/run/secrets/server-cert.pem -c ssl_key_file=/run/secrets/server-key.pem -c ssl_ca_file=/run/secrets/root-ca.pem
-  volumes:
-   - ./zbx_env/var/lib/postgresql/data:/var/lib/postgresql/data:rw
-   - ./env_vars/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:rw
-   - ./env_vars/.ZBX_DB_CERT_FILE:/run/secrets/server-cert.pem:rw
-   - ./env_vars/.ZBX_DB_KEY_FILE:/run/secrets/server-key.pem:rw
-   - /etc/localtime:/etc/localtime:rw
-  env_file:
-   - ./env_vars/.env_db_pgsql
-  secrets:
-   - POSTGRES_USER
-   - POSTGRES_PASSWORD
-  stop_grace_period: 1m
-  networks:
-   zbx_net_backend:
-    aliases:
-     - postgres-server
-     - pgsql-server
-     - pgsql-database
-   zbx_net_frontend:
 
  grafana:
-  image: grafana/grafana-enterprise:10.1.0
+  image: grafana/grafana-enterprise:10.0.11
   container_name: zbx-grafana
   restart: unless-stopped
   user: '0'
@@ -502,7 +224,7 @@ services:
    zbx_net_frontend:
 
  loki:
-  image: grafana/loki:2.8.4
+  image: grafana/loki:2.9.4
   container_name: zbx-loki
   restart: unless-stopped
   user: '0'
@@ -528,7 +250,7 @@ services:
    zbx_net_frontend:
    
  promtail:
-  image: grafana/promtail:2.8.4
+  image: grafana/promtail:2.9.4
   container_name: zbx-promtail
   restart: unless-stopped
   user: '0'
@@ -566,27 +288,34 @@ networks:
   zbx_net_frontend:
     driver: bridge
     driver_opts:
-      com.docker.network.enable_ipv6: "false"
+      com.docker.network.enable_ipv6: "${FRONTEND_ENABLE_IPV6}"
     ipam:
-      driver: default
+      driver: "${FRONTEND_NETWORK_DRIVER}"
       config:
-      - subnet: 172.16.238.0/24
+      - subnet: "${FRONTEND_SUBNET}"
   zbx_net_backend:
     driver: bridge
     driver_opts:
-      com.docker.network.enable_ipv6: "false"
+      com.docker.network.enable_ipv6: "${BACKEND_ENABLE_IPV6}"
     internal: true
     ipam:
-      driver: default
+      driver: ${FRONTEND_NETWORK_DRIVER}
       config:
-      - subnet: 172.16.239.0/24
+      - subnet: "${BACKEND_SUBNET}"
+  zbx_net_database:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "${DATABASE_NETWORK_ENABLE_IPV6}"
+    internal: true
+    ipam:
+      driver: "${DATABASE_NETWORK_DRIVER}"
 
 volumes:
   snmptraps:
 
 secrets:
   POSTGRES_USER:
-    file: ./env_vars/.POSTGRES_USER
+    file: ${ENV_VARS_DIRECTORY}/.POSTGRES_USER
   POSTGRES_PASSWORD:
-    file: ./env_vars/.POSTGRES_PASSWORD
+    file: ${ENV_VARS_DIRECTORY}/.POSTGRES_PASSWORD
     

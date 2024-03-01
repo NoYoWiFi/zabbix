@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+ mysql-server:
+  image: "${MYSQL_IMAGE}:${MYSQL_IMAGE_TAG}"
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  command:
+   - mysqld
+   - --character-set-server=utf8mb4
+   - --collation-server=utf8mb4_bin
+   - --default-authentication-plugin=mysql_native_password
+# Only during upgrade from versions prior 6.4 and new installations (schema deployment)
+   - --log_bin_trust_function_creators=1
+# Use TLS encryption for connections to database
+#   - --require-secure-transport
+#   - --ssl-ca=/run/secrets/root-ca.pem
+#   - --ssl-cert=/run/secrets/server-cert.pem
+#   - --ssl-key=/run/secrets/server-key.pem
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
+   - ${ENV_VARS_DIRECTORY}/mysql_init/init_proxy_db.sql:/docker-entrypoint-initdb.d/mysql_init_proxy.sql:ro
+   - ${DATA_DIRECTORY}/etc/mysql:/etc/mysql:rw
+   - /etc/localtime:/etc/localtime:rw
+#   - dbsocket:/var/run/mysqld/
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_mysql
+  environment:
+   - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/MYSQL_ROOT_PASSWORD
+  secrets:
+   - MYSQL_USER
+   - MYSQL_PASSWORD
+   - MYSQL_ROOT_PASSWORD
+#   - server-key.pem
+#   - server-cert.pem
+#   - root-ca.pem
+  stop_grace_period: 1m
+  ports:
+   - "${ZABBIX_MARIADB_PORT}:3306"
+  networks:
+   zbx_net_database:
+    aliases:
+     - mysql-server
+   zbx_net_frontend:
+
+ postgres-server:
+  image: "${POSTGRESQL_IMAGE}:${POSTGRESQL_IMAGE_TAG}"
+#  command: -c ssl=on -c ssl_cert_file=/run/secrets/server-cert.pem -c ssl_key_file=/run/secrets/server-key.pem -c ssl_ca_file=/run/secrets/root-ca.pem
+  restart: "${RESTART_POLICY}"
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - ${DATA_DIRECTORY}/var/lib/postgresql/data:/var/lib/postgresql/data:rw
+   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:ro
+   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CERT_FILE:/run/secrets/server-cert.pem:ro
+   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_KEY_FILE:/run/secrets/server-key.pem:ro
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  ports:
+   - "${ZABBIX_TIMESQL_PORT}:5432"
+  stop_grace_period: 1m
+  networks:
+   zbx_net_backend:
+    aliases:
+     - postgres-server
+   zbx_net_frontend:
+

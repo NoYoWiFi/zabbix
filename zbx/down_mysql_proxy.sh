@@ -8,5 +8,5 @@ docker tag ${ADDRESS}:${IM}_${VERSION} ${IM}:${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
 docker pull ${ADDRESS}:mariadb
-docker tag ${ADDRESS}:mariadb mariadb:10.11.2
+docker tag ${ADDRESS}:mariadb mariadb:11.2.3
 docker rmi ${ADDRESS}:mariadb

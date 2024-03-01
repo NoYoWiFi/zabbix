@@ -1,0 +1,401 @@
+version: '3.8'
+services:
+ server:
+  ports:
+   - "${ZABBIX_SERVER_PORT}:10051"
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw 
+   - ${DATA_DIRECTORY}/var/lib/zabbix/dbscripts:/var/lib/zabbix/dbscripts:ro
+   - ./zbx_env/usr/lib/zabbix/alertscripts:/usr/lib/zabbix/alertscripts:rw
+   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:rw
+   - ./zbx_env/var/lib/zabbix/export:/var/lib/zabbix/export:rw
+   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
+   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
+   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
+   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
+   - snmptraps:/var/lib/zabbix/snmptraps:rw
+   - /var/log/loki:/var/log/loki:rw
+  tmpfs: /tmp
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  deploy:
+   resources:
+    limits:
+      cpus: '0.80'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_srv
+#  devices:
+#   - "/dev/ttyUSB0:/dev/ttyUSB0"
+  stop_grace_period: 30s
+#  cap_add:
+#    - "NET_RAW"
+  sysctls:
+   - net.ipv4.ip_local_port_range=1024 65000
+   - net.ipv4.conf.all.accept_redirects=0
+   - net.ipv4.conf.all.secure_redirects=0
+   - net.ipv4.conf.all.send_redirects=0
+#   - net.ipv4.ping_group_range=0 1995
+  labels:
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-server"
+
+ server-mysql:
+  extends:
+   service: server
+  secrets:
+   - MYSQL_USER
+   - MYSQL_PASSWORD
+   - MYSQL_ROOT_USER
+   - MYSQL_ROOT_PASSWORD
+#   - client-key.pem
+#   - client-cert.pem
+#   - root-ca.pem
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_mysql
+  networks:
+   zbx_net_backend:
+     aliases:
+      - zabbix-server-mysql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix server with MySQL database support"
+   com.zabbix.dbtype: "mysql"
+
+ server-pgsql:
+  extends:
+   service: server
+#  volumes:
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:ro
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  networks:
+   zbx_net_backend:
+     aliases:
+      - zabbix-server-pgsql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix server with PostgreSQL database support"
+   com.zabbix.dbtype: "pgsql"
+
+ proxy:
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:rw
+   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
+   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
+   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
+   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:rw
+   - snmptraps:/var/lib/zabbix/snmptraps:rw
+  tmpfs: /tmp
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  deploy:
+   resources:
+    limits:
+      cpus: '0.80'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_prx
+  stop_grace_period: 30s
+#  cap_add:
+#    - "NET_RAW"
+  sysctls:
+   - net.ipv4.ip_local_port_range=1024 64999
+   - net.ipv4.conf.all.accept_redirects=0
+   - net.ipv4.conf.all.secure_redirects=0
+   - net.ipv4.conf.all.send_redirects=0
+#   - net.ipv4.ping_group_range=0 1995
+  labels:
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-proxy"
+
+ proxy-mysql:
+  extends:
+   service: proxy
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_mysql_proxy
+   - ${ENV_VARS_DIRECTORY}/.env_prx_mysql
+  secrets:
+   - MYSQL_USER
+   - MYSQL_PASSWORD
+   - MYSQL_ROOT_USER
+   - MYSQL_ROOT_PASSWORD
+#   - client-key.pem
+#   - client-cert.pem
+#   - root-ca.pem
+  ports:
+   - "${ZABBIX_PROXY_MYSQL_PORT}:10051"
+  networks:
+   zbx_net_database:
+     aliases:
+      - zabbix-proxy-mysql
+   zbx_net_backend:
+     aliases:
+      - zabbix-proxy-mysql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix proxy with MySQL database support"
+   com.zabbix.dbtype: "mysql"
+   
+
+ proxy-pgsql:
+  extends:
+   service: proxy
+#  volumes:
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:ro
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_pgsql_proxy
+   - ${ENV_VARS_DIRECTORY}/.env_prx_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  ports:
+   - "${ZABBIX_PROXY_PGSQL_PORT}:10051"
+  networks:
+   zbx_net_backend:
+     aliases:
+      - zabbix-proxy-pgsql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix server with PostgreSQL database support"
+   com.zabbix.dbtype: "pgsql"
+ web-nginx:
+  ports:
+   - "${ZABBIX_WEB_NGINX_HTTP_PORT}:8080"
+   - "${ZABBIX_WEB_NGINX_HTTPS_PORT}:8443"
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+   - ${DATA_DIRECTORY}/etc/ssl/nginx:/etc/ssl/nginx:rw
+   - ${DATA_DIRECTORY}/usr/share/zabbix/modules/:/usr/share/zabbix/modules/:rw
+   - ${DATA_DIRECTORY}/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/:rw
+  tmpfs: /tmp
+  ulimits:
+   nproc: 655350
+   nofile:
+    soft: 655350
+    hard: 655350
+  deploy:
+   resources:
+    limits:
+      cpus: '0.80'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_web
+  healthcheck:
+   test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+   interval: 10s
+   timeout: 5s
+   retries: 3
+   start_period: 30s
+  stop_grace_period: 10s
+  sysctls:
+   - net.core.somaxconn=65535
+  labels:
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-frontend"
+   com.zabbix.webserver: "nginx"
+
+ web-nginx-mysql:
+  extends:
+   service: web-nginx
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_mysql
+  secrets:
+   - MYSQL_USER
+   - MYSQL_PASSWORD
+#   - client-key.pem
+#   - client-cert.pem
+#   - root-ca.pem
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-web-nginx-mysql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix frontend on Nginx web-server with MySQL database support"
+   com.zabbix.dbtype: "mysql"
+
+ web-nginx-pgsql:
+  extends:
+   service: web-nginx
+#  volumes:
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:ro
+#   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:ro
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_db_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-web-nginx-pgsql
+   zbx_net_frontend:
+  labels:
+   com.zabbix.description: "Zabbix frontend on Nginx web-server with PostgreSQL database support"
+   com.zabbix.dbtype: "pgsql"
+
+ agent2:
+  ports:
+   - "${ZABBIX_AGENT2_PORT}:10050"
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+   - /var/run/docker.sock:/var/run/docker.sock:rw
+   - ${DATA_DIRECTORY}/etc/zabbix/zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d:ro
+   - ${DATA_DIRECTORY}/var/lib/zabbix/modules:/var/lib/zabbix/modules:rw
+   - ${DATA_DIRECTORY}/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
+   - ${DATA_DIRECTORY}/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:rw
+  tmpfs: /tmp
+  deploy:
+   resources:
+    limits:
+      cpus: '0.8'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+   mode: global
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_agent2
+  privileged: true
+  pid: "host"
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-agent2
+     - zabbix-agent2-passive
+   zbx_net_frontend:
+  stop_grace_period: 5s
+  labels:
+   com.zabbix.description: "Zabbix agent 2"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-agent2"
+
+ java-gateway:
+  ports:
+   - "${ZABBIX_JAVA_GATEWAY_PORT}:10052"
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+  deploy:
+   resources:
+    limits:
+      cpus: '0.8'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_java
+  restart: "${RESTART_POLICY}"
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-java-gateway
+   zbx_net_frontend:
+  stop_grace_period: 5s
+  labels:
+   com.zabbix.description: "Zabbix Java Gateway"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "java-gateway"
+
+ snmptraps:
+# Override snmptrapd command arguments to receive SNMP traps by DNS
+# It must be done with ZBX_SNMP_TRAP_USE_DNS=true environment variable
+#  command: /usr/sbin/snmptrapd -C -c /etc/snmp/snmptrapd.conf -Lo -A
+  ports:
+   - "${ZABBIX_SNMPTRAPS_PORT}:1162/udp"
+  restart: "${RESTART_POLICY}"
+  volumes:
+   - snmptraps:/var/lib/zabbix/snmptraps:rw
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+  tmpfs: /tmp
+  deploy:
+   resources:
+    limits:
+      cpus: '0.8'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_snmptraps
+  restart: "${RESTART_POLICY}"
+  networks:
+   zbx_net_frontend:
+    aliases:
+     - zabbix-snmptraps
+   zbx_net_backend:
+  stop_grace_period: 5s
+  labels:
+   com.zabbix.description: "Zabbix snmptraps"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "snmptraps"
+
+ web-service:
+  ports:
+   - "${ZABBIX_WEB_SERVICE_PORT}:10053"
+  volumes:
+   - ${DATA_DIRECTORY}/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
+   - /etc/localtime:/etc/localtime:rw
+   - /etc/timezone:/etc/timezone:rw
+  tmpfs: /tmp
+  security_opt:
+   - seccomp:${ENV_VARS_DIRECTORY}/chrome_dp.json
+  deploy:
+   resources:
+    limits:
+      cpus: '0.8'
+      memory: 4G
+    reservations:
+      cpus: '0.8'
+      memory: 4G
+  env_file:
+   - ${ENV_VARS_DIRECTORY}/.env_web_service
+  cap_add:
+   - SYS_ADMIN
+  restart: "${RESTART_POLICY}"
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-web-service
+   zbx_net_frontend:
+  stop_grace_period: 5s
+  labels:
+   com.zabbix.description: "Zabbix web service"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "web-service"

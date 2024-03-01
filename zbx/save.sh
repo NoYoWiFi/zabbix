@@ -5,4 +5,4 @@ do
 docker save -o ${IM}.tar.gz  ${IM}:${VERSION}
 done
 docker save -o centos.tar.gz quay.io/centos/centos:stream8
-docker save -o mariadb.tar.gz mariadb:10.11.2
+docker save -o mariadb.tar.gz mariadb:11.2.3
