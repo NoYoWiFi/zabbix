@@ -93,7 +93,7 @@ dnf module enable php:8.0 -y
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3
 #![安装grafana zabbix图形界面]
-cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
+cat ./grafana/grafana-enterprise-* > ./grafana/grafana-enterprise.x86_64.rpm
 yum -y install grafana/*.rpm
 #![安装grafana zabbix插件]
 unzip -qo ./grafana/alexanderzobnin-zabbix-app-*.zip -d /var/lib/grafana/plugins
@@ -139,8 +139,8 @@ echo "alter database \"zabbix\" owner to zabbix;" | sudo -u postgres psql
 echo "grant all on database \"zabbix\" to zabbix;" | sudo -u postgres psql
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/timescaledb.sql
-\cp pgsql/create_server_6.0-latest.gz /usr/share/zabbix-sql-scripts/postgresql/
-chmod 766 /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest.gz
+\cp pgsql/create_server_6.0-latest_pgsql.sql.gz /usr/share/zabbix-sql-scripts/postgresql/
+chmod 766 /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest_pgsql.sql.gz
 case ${1} in
     "trans")
         echo "trans"
@@ -149,7 +149,7 @@ case ${1} in
         ;;
     "install")
         echo "install"
-        zcat /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest.gz | sudo -u zabbix psql -q zabbix
+        zcat /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest_pgsql.sql.gz | sudo -u zabbix psql -q zabbix
         #![开启postgresql timescaleDB插件]
         echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | sudo -u postgres psql zabbix
         #![为timescaleDB分区]
