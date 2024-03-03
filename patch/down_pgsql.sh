@@ -14,11 +14,11 @@ docker pull ${ADDRESS}:2.13.0-pg16
 docker tag ${ADDRESS}:2.13.0-pg16 timescale/timescaledb:2.13.0-pg16
 docker rmi ${ADDRESS}:2.13.0-pg16
 docker pull ${ADDRESS}:grafana_grafana-enterprise
-docker tag ${ADDRESS}:grafana_grafana-enterprise grafana/grafana-enterprise:10.1.0
+docker tag ${ADDRESS}:grafana_grafana-enterprise grafana/grafana-enterprise:10.0.11
 docker rmi ${ADDRESS}:grafana_grafana-enterprise
 docker pull ${ADDRESS}:grafana_loki
-docker tag ${ADDRESS}:grafana_loki grafana/loki:2.8.4
+docker tag ${ADDRESS}:grafana_loki grafana/loki:2.9.4
 docker rmi ${ADDRESS}:grafana_loki
 docker pull ${ADDRESS}:grafana_promtail
-docker tag ${ADDRESS}:grafana_promtail grafana/promtail:2.8.4
+docker tag ${ADDRESS}:grafana_promtail grafana/promtail:2.9.4
 docker rmi ${ADDRESS}:grafana_promtail
