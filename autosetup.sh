@@ -57,13 +57,11 @@ else
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
     touch /etc/yum.repos.d/MariaDB.repo
     cat > /etc/yum.repos.d/MariaDB.repo << EOF
-# MariaDB 10.11.2 CentOS repository list - created 2023-03-24 01:38 UTC
 # https://mariadb.org/download/
 [mariadb]
 name = MariaDB
 # rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
-# baseurl = https://rpm.mariadb.org/10.11.3/centos/\$releasever/\$basearch
-baseurl = https://mirrors.aliyun.com/mariadb/yum/11.1/rhel/\$releasever/\$basearch
+baseurl = https://mirrors.aliyun.com/mariadb/yum/11.2/rhel/\$releasever/\$basearch
 # gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
 gpgcheck = 1
@@ -75,13 +73,16 @@ EOF
      exit 1
     fi
 fi
+#![配置时区]
+timedatectl set-timezone Asia/Shanghai
+chronyc -a makestep
 #![安装php8.x]
 dnf module reset php -y
 dnf module enable php:8.0 -y
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3
 #![安装grafana zabbix图形界面]
-cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
+cat ./grafana/grafana-enterprise-* > ./grafana/grafana-enterprise.x86_64.rpm
 yum -y install grafana/*.rpm
 #![安装grafana zabbix插件]
 unzip -qo ./grafana/alexanderzobnin-zabbix-app-*.zip -d /var/lib/grafana/plugins
@@ -129,9 +130,9 @@ case ${1} in
         ;;
     "install")
         echo "install"
-        \cp mysql/create_server_6.0-latest.sql.gz /usr/share/zabbix-sql-scripts/mysql/
-        chmod 766 /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest.sql.gz
-        zcat /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest.sql.gz | mariadb -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
+        \cp mysql/create_server_6.0-latest_mysql.sql.gz /usr/share/zabbix-sql-scripts/mysql/
+        chmod 766 /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest_mysql.sql.gz
+        zcat /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest_mysql.sql.gz | mariadb -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
         ;;
     "proxy")
         echo "proxy"
