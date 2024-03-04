@@ -157,6 +157,24 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
+    if [[ "$1" == "prxstart" ]]; then
+        option=$(echo ${GV_VERSION} | cut -c 1)
+        case ${option} in
+            5)
+            echo "zabbix 5 LTSC!"
+            docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart5 up -d
+            ;;
+            6)
+            echo "zabbix 6 LTSC!"
+            docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart6 up -d
+            ;;
+            *)
+            echo "Nothing to do"
+            ;;
+        esac
+        exit 1
+    fi
+
     if [[ "$1" == "stop" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
         exit 1
