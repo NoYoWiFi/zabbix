@@ -195,6 +195,11 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
+    if [[ "$1" == "prxdown" ]]; then
+        sh ./patch/down_pgsql_proxy.sh
+        exit 1
+    fi
+
     if [[ "$1" == "init" ]]; then
         init
         exit 1
