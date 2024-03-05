@@ -19,9 +19,10 @@ set +e
 
 # Script trace mode
 set -o xtrace
-
-GV_VERSION=$(cat ./patch/.version)
-GV_VERSION_DOCKER=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
+GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 BUILD_CONFIG="./build.sh"
 ZABBIX_BUILD_BASE="./Dockerfiles/build-base/centos/Dockerfile"
 ZABBIX_BUILD_MYSQL="./Dockerfiles/build-mysql/centos/Dockerfile"
@@ -651,8 +652,8 @@ elif [ $# -ge 1 ]; then
     fi
     
     if [[ "$1" == "buildmariadb" ]]; then
-        docker build -t mariadb:11.2.3 ./patch/Dockerfile_mariadb
-        docker save -o mariadb.tar.gz mariadb:11.2.3
+        docker build -t mariadb:${GV_ARR_ENV[GV_MARIADB_VERSION]} ./patch/Dockerfile_mariadb
+        docker save -o mariadb.tar.gz mariadb:${GV_ARR_ENV[GV_MARIADB_VERSION]}
         docker rmi $(docker images |grep mariadb | awk -F ' ' '{print $3}')
         docker load < mariadb.tar.gz
         rm -f mariadb.tar.gz

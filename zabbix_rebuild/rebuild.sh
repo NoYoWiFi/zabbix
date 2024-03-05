@@ -8,7 +8,9 @@ set +e
 # Script trace mode
 set -o xtrace
 shellFolder=$(dirname $(readlink -f "$0"))
-ZBX_VERSION=$(cat .version)
+GV_ENV_SHELL="./.env_shell"
+source ./getEnv.sh
+ZBX_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
 function check_ip_status()
 {
     ping -c 3 -i 0.2 -W 3 $1 &> /dev/null
@@ -110,13 +112,12 @@ if [ ! -d "/tmp/postgresql_plugin" ]; then
     \cp postgresql_plugin.tar.gz ${shellFolder}/
 fi
 cd ${shellFolder}/
-ZBX_VERSION=$(cat .version)
 mkdir -p /opt/zbx/
 tar -zxf ./zabbix-docker-${ZBX_VERSION}.tar.gz -C /opt/zbx/ --strip-components 1
 \cp -vrf ../zbx/ /opt/
 cat /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz
 cat /opt/zbx/patch/NotoSansCJKjp-hinted.zip_* > /opt/zbx/patch/NotoSansCJKjp-hinted.zip
-\cp .version /opt/zbx/patch/
+\cp ./.env_shell /opt/zbx/patch/
 \cp zabbix-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
 \cp postgresql_plugin.tar.gz /opt/zbx/patch/
 \cp mongodb_plugin.tar.gz /opt/zbx/patch/

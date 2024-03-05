@@ -21,8 +21,10 @@ set +e
 # Script trace mode
 set -o xtrace
 
-GV_VERSION=$(cat ./patch/.version)
-GV_VERSION_DOCKER=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
+GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 BUILD_CONFIG="./build.sh"
 ZABBIX_BUILD_BASE="./Dockerfiles/build-base/centos/Dockerfile"
 ZABBIX_BUILD_PGSQL="./Dockerfiles/build-pgsql/centos/Dockerfile"
@@ -569,8 +571,8 @@ elif [ $# -ge 1 ]; then
     fi
     
     if [[ "$1" == "buildpgsql" ]]; then
-        docker build -t timescale/timescaledb:2.13.0-pg16 ./patch/Dockerfile_timescale
-        docker save -o timescale.tar.gz timescale/timescaledb:2.13.0-pg16
+        docker build -t timescale/timescaledb:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]} ./patch/Dockerfile_timescale
+        docker save -o timescale.tar.gz timescale/timescaledb:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
         docker rmi $(docker images |grep timescale | awk -F ' ' '{print $3}')
         docker load < timescale.tar.gz
         rm -f timescale.tar.gz
