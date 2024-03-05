@@ -372,10 +372,10 @@ sed -i -e "/^\# UnavailableDelay/s/^# //" ${ZABBIX_CONFIG}
 systemctl start rsyslog
 \cp ./patch/loki.conf /etc/rsyslog.d/
 \cp ./patch/loki /etc/logrotate.d/loki
-sed -i -e "/^\# module(load=\"imudp\")/s/^# //" /etc/rsyslog.conf
-sed -i -e "/^\# input(type=\"imudp\"/s/^# //" /etc/rsyslog.conf
-sed -i -e "/^\# module(load=\"imtcp\")/s/^# //" /etc/rsyslog.conf
-sed -i -e "/^\# input(type=\"imtcp\"/s/^# //" /etc/rsyslog.conf
+sed -i -e "/^\#module(load=\"imudp\")/s/^#//" /etc/rsyslog.conf
+sed -i -e "/^\#input(type=\"imudp\"/s/^#//" /etc/rsyslog.conf
+sed -i -e "/^\#module(load=\"imtcp\")/s/^#//" /etc/rsyslog.conf
+sed -i -e "/^\#input(type=\"imtcp\"/s/^#//" /etc/rsyslog.conf
 sed -i -e "/^\module(load=\"builtin:omfile\"/s/^\(.*\)$/# \1/" /etc/rsyslog.conf
 systemctl restart rsyslog
 case ${1} in
