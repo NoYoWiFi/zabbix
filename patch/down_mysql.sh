@@ -1,4 +1,6 @@
-GV_VERSION=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./.env_shell"
+source ./getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 VERSION=rocky-${GV_VERSION}
 ADDRESS=registry.cn-shanghai.aliyuncs.com/zabbix_docker/zabbix_chinese
 for IM in `cat ./patch/.images_mysql`
@@ -11,14 +13,14 @@ docker pull ${ADDRESS}:rockylinux8
 docker tag ${ADDRESS}:rockylinux8 rockylinux8:8
 docker rmi ${ADDRESS}:rockylinux8
 docker pull ${ADDRESS}:mariadb
-docker tag ${ADDRESS}:mariadb mariadb:11.2.3
+docker tag ${ADDRESS}:mariadb mariadb:${GV_ARR_ENV[GV_MARIADB_VERSION]}
 docker rmi ${ADDRESS}:mariadb
 docker pull ${ADDRESS}:grafana_grafana-enterprise
-docker tag ${ADDRESS}:grafana_grafana-enterprise grafana/grafana-enterprise:10.0.11
+docker tag ${ADDRESS}:grafana_grafana-enterprise grafana/grafana-enterprise:${GV_ARR_ENV[GV_GRAFANA_VERSION]}
 docker rmi ${ADDRESS}:grafana_grafana-enterprise
 docker pull ${ADDRESS}:grafana_loki
-docker tag ${ADDRESS}:grafana_loki grafana/loki:2.9.4
+docker tag ${ADDRESS}:grafana_loki grafana/loki:${GV_ARR_ENV[GV_LOKI_VERSION]}
 docker rmi ${ADDRESS}:grafana_loki
 docker pull ${ADDRESS}:grafana_promtail
-docker tag ${ADDRESS}:grafana_promtail grafana/promtail:2.9.4
+docker tag ${ADDRESS}:grafana_promtail grafana/promtail:${GV_ARR_ENV[GV_PROMTAIL_VERSION]}
 docker rmi ${ADDRESS}:grafana_promtail

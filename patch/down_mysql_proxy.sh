@@ -1,4 +1,6 @@
-GV_VERSION=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./.env_shell"
+source ./getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 VERSION=rocky-${GV_VERSION}
 ADDRESS=registry.cn-shanghai.aliyuncs.com/zabbix_docker/zabbix_chinese
 for IM in `cat ./patch/.images_mysql_proxy`
@@ -8,5 +10,5 @@ docker tag ${ADDRESS}:${IM}_${VERSION} ${IM}:${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
 docker pull ${ADDRESS}:mariadb
-docker tag ${ADDRESS}:mariadb mariadb:11.2.3
+docker tag ${ADDRESS}:mariadb mariadb:${GV_ARR_ENV[GV_MARIADB_VERSION]}
 docker rmi ${ADDRESS}:mariadb
