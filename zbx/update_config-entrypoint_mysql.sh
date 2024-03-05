@@ -576,6 +576,10 @@ elif [ $# -ge 1 ]; then
             sed -i -e "/^\#input(type=\"imudp\"/s/^#//" /etc/rsyslog.conf
             sed -i -e "/^\#module(load=\"imtcp\")/s/^#//" /etc/rsyslog.conf
             sed -i -e "/^\#input(type=\"imtcp\"/s/^#//" /etc/rsyslog.conf
+            sed -i -e "/^\#\$ModLoad imudp/s/^#//" /etc/rsyslog.conf
+            sed -i -e "/^\#\$UDPServerRun 514/s/^#//" /etc/rsyslog.conf
+            sed -i -e "/^\#\$ModLoad imtcp/s/^#//" /etc/rsyslog.conf
+            sed -i -e "/^\#\$InputTCPServerRun 514/s/^#//" /etc/rsyslog.conf
             sed -i -e "/^\module(load=\"builtin:omfile\"/s/^\(.*\)$/# \1/" /etc/rsyslog.conf
             systemctl restart rsyslog
             ;;

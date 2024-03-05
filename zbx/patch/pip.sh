@@ -15,6 +15,7 @@ timeout = 6000
 
 EOF
 python3 -m pip install --upgrade pip
-pip3 install  paramiko openpyxl
-pip3 install  cryptography==3.4.8
+pip3 install paramiko openpyxl
+pip3 install cryptography==3.4.8
+pip3 install alibabacloud_dysmsapi20170525
 rpm -ivh /tmp/tcping-1.3.5-19.el8.x86_64.rpm
