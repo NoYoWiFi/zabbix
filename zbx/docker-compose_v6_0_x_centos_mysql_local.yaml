@@ -198,7 +198,7 @@ services:
   # else find the right id with the id -u command
   # adding the mount volume point which we create earlier
  grafana:
-  image: grafana/grafana-enterprise:10.0.11
+  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG}
   container_name: zbx-grafana
   restart: unless-stopped
   user: '0'
@@ -225,7 +225,7 @@ services:
    zbx_net_frontend:
 
  loki:
-  image: grafana/loki:2.9.4
+  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG}
   container_name: zbx-loki
   restart: unless-stopped
   user: '0'
@@ -251,7 +251,7 @@ services:
    zbx_net_frontend:
    
  promtail:
-  image: grafana/promtail:2.9.4
+  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG}
   container_name: zbx-promtail
   restart: unless-stopped
   user: '0'
