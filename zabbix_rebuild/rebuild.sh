@@ -53,9 +53,6 @@ else
 fi
 chmod 755 -R ../fastgithub_linux-x64/
 yum -y install libicu
-ps -ef | grep fast | awk -F ' ' '{print $2}' | xargs kill -9
-/bin/bash -c "nohup ../fastgithub_linux-x64/fastgithub >/dev/null 2>&1 & " && echo 1
-sleep 10
 git config --global http.sslVerify false
 export http_proxy="http://127.0.0.1:38457"
 export https_proxy="https://127.0.0.1:38457"
@@ -69,6 +66,9 @@ git config --global https.proxy "https://127.0.0.1:38457"
 # ZBX_SOURCES=https://gitcode.net/mirrors/zabbix/zabbix.git
 ZBX_SOURCES=https://github.com/zabbix/zabbix.git
 if [ ! -d "/tmp/zabbix-${ZBX_VERSION}" ]; then
+    ps -ef | grep fast | awk -F ' ' '{print $2}' | xargs kill -9
+    /bin/bash -c "nohup ../fastgithub_linux-x64/fastgithub >/dev/null 2>&1 & " && echo 1
+    sleep 10
     cd /tmp
     git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION}
     if [ $? -ne '0' ]; then

@@ -229,8 +229,8 @@ zabbix_web_nginx_mysql() {
 if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/simkai.ttf" ]; then
     \cp ./patch/simkai.ttf ./Dockerfiles/web-nginx-mysql/centos/
 fi
-if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/frontend_6.0.mo" ]; then
-    \cp ./patch/frontend_6.0.mo ./Dockerfiles/web-nginx-mysql/centos/
+if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]}" ]; then
+    \cp ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./Dockerfiles/web-nginx-mysql/centos/
 fi
 if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-mysql/centos/
@@ -550,7 +550,7 @@ elif [ $# -ge 1 ]; then
             6)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
-            \cp -rf ./patch/frontend_6.0.mo ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+            \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
 #            mkdir -p ./zbx_env/etc/mysql/conf.d
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf

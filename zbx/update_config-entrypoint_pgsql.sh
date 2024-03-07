@@ -230,8 +230,8 @@ zabbix_web_nginx_pgsql() {
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/simkai.ttf" ]; then
     \cp ./patch/simkai.ttf ./Dockerfiles/web-nginx-pgsql/centos/
 fi
-if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/frontend_6.0.mo" ]; then
-    \cp ./patch/frontend_6.0.mo ./Dockerfiles/web-nginx-pgsql/centos/
+if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]}" ]; then
+    \cp ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./Dockerfiles/web-nginx-pgsql/centos/
 fi
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/repos.tar.gz" ]; then
     \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-pgsql/centos/
@@ -472,7 +472,7 @@ elif [ $# -ge 1 ]; then
             mkdir -p ./zbx_env/var/lib/postgresql/data
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
-            \cp -rf ./patch/frontend_6.0.mo ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+            \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
             mkdir -p ./zbx_env/etc/ssl/nginx
             \cp -rf ./patch/server.pem ./zbx_env/etc/ssl/nginx/
             \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
