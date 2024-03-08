@@ -8,7 +8,9 @@ set +e
 # Script trace mode
 set -o xtrace
 #zabbix数据库密码
-DPassword="123.com"
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+DPassword=${GV_ARR_ENV[GV_ZABBIX_DPASSWORD]}
 shellFolder=$(dirname $(readlink -f "$0"))
 case ${1} in
     "trans")
@@ -82,16 +84,17 @@ else
     var_1=$(escape_spec_char "$var_1")
     var_2=$(escape_spec_char "$var_2")
     sed -i -e "/$var_1/s/$var_1/$var_2/" "$config_path"
-    cat ./patch/pgsql | xargs yum -y install --enablerepo='pgdg16' --disablerepo='appstream'
+    cat ./patch/pgsql | xargs yum -y install --enablerepo="${GV_ARR_ENV[GV_PGSQL_REPO]}" --disablerepo='appstream'
 fi
-#![配置时区]
-timedatectl set-timezone Asia/Shanghai
-chronyc -a makestep
 #![安装php8.x]
 dnf module reset php -y
-dnf module enable php:8.0 -y
+dnf module enable php:${GV_ARR_ENV[GV_PHP_VERSION]} -y
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3
+yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
+#![配置时区]
+timedatectl set-timezone Asia/Shanghai
+systemctl start chronyd
+chronyc -a makestep
 #![安装grafana zabbix图形界面]
 cat ./grafana/grafana-enterprise-* > ./grafana/grafana-enterprise.x86_64.rpm
 yum -y install grafana/*.rpm
@@ -118,20 +121,20 @@ case ${1} in
         fi
         ;;
 esac
-#![安装postgresql-16]
-/usr/pgsql-16/bin/postgresql-16-setup initdb
+#![安装postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}]
+/usr/pgsql-${GV_ARR_ENV[GV_PGSQL_VERSION]}/bin/postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}-setup initdb
 if [ $? -ne '0' ]; then
  echo "rpm install failed"
  exit 1
 fi
 echo "rpm install success"
-timescaledb-tune --pg-config=/usr/pgsql-16/bin/pg_config -yes
-sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/pgsql/16/data/postgresql.conf
-sed -i 's/#port = 5432/port = 5432/g' /var/lib/pgsql/16/data/postgresql.conf
-sed -i -e "/^max_connections/s/=.*/= 2000/" /var/lib/pgsql/16/data/postgresql.conf
-\cp ./pgsql/pg_hba.conf /var/lib/pgsql/16/data/
-systemctl start postgresql-16
-#![创建zabbix数据库导入create_server_6.0-latest汉化模板]
+timescaledb-tune --pg-config=/usr/pgsql-${GV_ARR_ENV[GV_PGSQL_VERSION]}/bin/pg_config -yes
+sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /var/lib/pgsql/${GV_ARR_ENV[GV_PGSQL_VERSION]}/data/postgresql.conf
+sed -i 's/#port = 5432/port = 5432/g' /var/lib/pgsql/${GV_ARR_ENV[GV_PGSQL_VERSION]}/data/postgresql.conf
+sed -i -e "/^max_connections/s/=.*/= 2000/" /var/lib/pgsql/${GV_ARR_ENV[GV_PGSQL_VERSION]}/data/postgresql.conf
+\cp ./pgsql/pg_hba.conf /var/lib/pgsql/${GV_ARR_ENV[GV_PGSQL_VERSION]}/data/
+systemctl start postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}
+#![创建zabbix数据库导入create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}汉化模板]
 echo "create user zabbix with password '${DPassword}';" | sudo -u postgres psql
 echo "alter user postgres with password '${DPassword}';" | sudo -u postgres psql
 echo "create database zabbix;" | sudo -u postgres psql
@@ -139,17 +142,17 @@ echo "alter database \"zabbix\" owner to zabbix;" | sudo -u postgres psql
 echo "grant all on database \"zabbix\" to zabbix;" | sudo -u postgres psql
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/timescaledb.sql
-\cp pgsql/create_server_6.0-latest_pgsql.sql.gz /usr/share/zabbix-sql-scripts/postgresql/
-chmod 766 /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest_pgsql.sql.gz
+\cp pgsql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_pgsql.sql.gz /usr/share/zabbix-sql-scripts/postgresql/
+chmod 766 /usr/share/zabbix-sql-scripts/postgresql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_pgsql.sql.gz
 case ${1} in
     "trans")
         echo "trans"
         gunzip < /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql -q zabbix
-        systemctl restart postgresql-16
+        systemctl restart postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}
         ;;
     "install")
         echo "install"
-        zcat /usr/share/zabbix-sql-scripts/postgresql/create_server_6.0-latest_pgsql.sql.gz | sudo -u zabbix psql -q zabbix
+        zcat /usr/share/zabbix-sql-scripts/postgresql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_pgsql.sql.gz | sudo -u zabbix psql -q zabbix
         #![开启postgresql timescaleDB插件]
         echo "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" | sudo -u postgres psql zabbix
         #![为timescaleDB分区]
@@ -164,7 +167,7 @@ case ${1} in
         echo "Nothing to do"
         ;;
 esac
-systemctl restart postgresql-16
+systemctl restart postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}
 #![关闭防火墙与selinux]
 setenforce 0
 service firewalld stop
@@ -220,7 +223,7 @@ case ${1} in
         ;;
     *)
         #![汉化web ui图形界面并解决web乱码问题]
-        \cp patch/frontend_6.0.mo /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+        \cp patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
         \cp ./patch/simkai.ttf /usr/share/zabbix/assets/fonts
         sed -i "/ZBX_GRAPH_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
         sed -i "/ZBX_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
@@ -414,8 +417,8 @@ systemctl start zabbix-agent2
 systemctl enable zabbix-agent2
 systemctl start zabbix-java-gateway
 systemctl enable zabbix-java-gateway
-systemctl enable --now postgresql-16
-systemctl restart postgresql-16
+systemctl enable --now postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}
+systemctl restart postgresql-${GV_ARR_ENV[GV_PGSQL_VERSION]}
 systemctl daemon-reload
 systemctl restart grafana-server
 systemctl enable grafana-server.service
@@ -427,6 +430,7 @@ systemctl start snmptrapd
 systemctl enable snmptrapd
 systemctl start snmpd
 systemctl enable snmpd
+systemctl enable chronyd
 case ${1} in
     "install")
         chmod a+rw -R /var/log/loki/
