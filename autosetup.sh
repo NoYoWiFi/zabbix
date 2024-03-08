@@ -8,7 +8,9 @@ set +e
 # Script trace mode
 set -o xtrace
 #zabbix数据库密码
-DPassword="123.com"
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+DPassword=${GV_ARR_ENV[GV_ZABBIX_DPASSWORD]}
 shellFolder=$(dirname $(readlink -f "$0"))
 case ${1} in
     "trans")
@@ -61,7 +63,7 @@ else
 [mariadb]
 name = MariaDB
 # rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
-baseurl = https://mirrors.aliyun.com/mariadb/yum/11.2/rhel/\$releasever/\$basearch
+baseurl = https://mirrors.aliyun.com/mariadb/yum/${GV_ARR_ENV[GV_MARIADB_VERSION]}/rhel/\$releasever/\$basearch
 # gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgkey = https://mirrors.aliyun.com/mariadb/yum/RPM-GPG-KEY-MariaDB
 gpgcheck = 1
@@ -73,14 +75,15 @@ EOF
      exit 1
     fi
 fi
-#![配置时区]
-timedatectl set-timezone Asia/Shanghai
-chronyc -a makestep
 #![安装php8.x]
 dnf module reset php -y
-dnf module enable php:8.0 -y
+dnf module enable php:${GV_ARR_ENV[GV_PHP_VERSION]} -y
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3
+yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
+#![配置时区]
+timedatectl set-timezone Asia/Shanghai
+systemctl start chronyd
+chronyc -a makestep
 #![安装grafana zabbix图形界面]
 cat ./grafana/grafana-enterprise-* > ./grafana/grafana-enterprise.x86_64.rpm
 yum -y install grafana/*.rpm
@@ -112,7 +115,7 @@ if [ $? -ne '0' ]; then
  echo "ERROR!"
  exit 1
 fi
-#![创建zabbix数据库导入create_server_6.0-latest汉化模板]
+#![创建zabbix数据库导入create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}汉化模板]
 mariadb -e "create database zabbix character set utf8mb4 collate utf8mb4_bin;"
 mariadb -e "grant all privileges on zabbix.* to'zabbix'@'localhost' identified by '$DPassword';"
 mariadb -e "grant all privileges on zabbix.* to'zabbix'@'%' identified by '$DPassword';"
@@ -130,9 +133,9 @@ case ${1} in
         ;;
     "install")
         echo "install"
-        \cp mysql/create_server_6.0-latest_mysql.sql.gz /usr/share/zabbix-sql-scripts/mysql/
-        chmod 766 /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest_mysql.sql.gz
-        zcat /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest_mysql.sql.gz | mariadb -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
+        \cp mysql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_mysql.sql.gz /usr/share/zabbix-sql-scripts/mysql/
+        chmod 766 /usr/share/zabbix-sql-scripts/mysql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_mysql.sql.gz
+        zcat /usr/share/zabbix-sql-scripts/mysql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_mysql.sql.gz | mariadb -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
         ;;
     "proxy")
         echo "proxy"
@@ -198,7 +201,7 @@ case ${1} in
         ;;
     *)
         #![汉化web ui图形界面并解决web乱码问题]
-        \cp patch/frontend_6.0.mo /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+        \cp patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
         \cp ./patch/simkai.ttf /usr/share/zabbix/assets/fonts
         sed -i "/ZBX_GRAPH_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
         sed -i "/ZBX_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
@@ -406,6 +409,7 @@ systemctl start snmptrapd
 systemctl enable snmptrapd
 systemctl start snmpd
 systemctl enable snmpd
+systemctl enable chronyd
 cd ${shellFolder}/mysql
 case ${1} in
     "install")
