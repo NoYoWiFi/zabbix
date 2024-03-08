@@ -9,9 +9,9 @@ docker pull ${ADDRESS}:${IM}_${VERSION}
 docker tag ${ADDRESS}:${IM}_${VERSION} ${IM}:${VERSION}
 docker rmi ${ADDRESS}:${IM}_${VERSION}
 done
-docker pull ${ADDRESS}:rockylinux8
-docker tag ${ADDRESS}:rockylinux8 rockylinux8:8
-docker rmi ${ADDRESS}:rockylinux8
+docker pull ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]}
+docker tag ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]} ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}
+docker rmi ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]}
 docker pull ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
 docker tag ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]} timescale/timescaledb:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
 docker rmi ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
