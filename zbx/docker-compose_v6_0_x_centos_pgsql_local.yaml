@@ -1,0 +1,321 @@
+version: '3.8'
+services:
+ zabbix-build-base:
+  build:
+   context: ./Dockerfiles/build-base/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+  image: ${BUILD_BASE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  profiles:
+   - build1
+
+ zabbix-build-pgsql:
+  build:
+   context: ./Dockerfiles/build-pgsql/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  profiles:
+   - build2
+  depends_on:
+   - zabbix-build-base
+
+ zabbix-server:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: server-pgsql
+  build:
+   context: ./Dockerfiles/server-pgsql/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_SERVER_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-server-pgsql
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  depends_on:
+   - postgres-server
+   - zabbix-build-pgsql
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-proxy-pgsql:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: proxy-pgsql
+  build:
+   context: ./Dockerfiles/proxy-pgsql/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_PROXY_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-proxy-pgsql
+  profiles:
+   - make5
+   - make6
+   - prxstart5
+   - prxstart6
+  depends_on:
+   - postgres-server
+   - zabbix-build-pgsql
+   - zabbix-java-gateway
+   - zabbix-snmptraps
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-web-nginx-pgsql:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: web-nginx-pgsql
+  build:
+   context: ./Dockerfiles/web-nginx-pgsql/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_WEB_NGINX_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-web-nginx-pgsql
+  profiles:
+   - zabbix-web-nginx-pgsql
+   - make5
+   - make6
+   - start5
+   - start6
+  depends_on:
+   - postgres-server
+   - zabbix-server
+   - zabbix-build-pgsql
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-agent2:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: agent2
+  build:
+   context: ./Dockerfiles/agent2/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_AGENT2_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-agent2
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+   - prxstart5
+   - prxstart6
+  depends_on:
+    - zabbix-build-pgsql
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-java-gateway:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: java-gateway
+  build:
+   context: ./Dockerfiles/java-gateway/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_JAVA_GATEWAY_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-java-gateway
+  restart: always
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+   - prxstart5
+   - prxstart6
+  depends_on:
+   - zabbix-build-pgsql
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-snmptraps:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: snmptraps
+  build:
+   context: ./Dockerfiles/snmptraps/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+  image: ${ZABBIX_SNMPTRAPS_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-snmptraps
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ zabbix-web-service:
+  extends:
+   file: compose_zabbix_components.yaml
+   service: web-service
+  build:
+   context: ./Dockerfiles/web-service/${CENTOS_OS_TAG_SHORT}
+   cache_from:
+    - "${CENTOS_CACHE_FROM}"
+   args:
+    BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  image: ${ZABBIX_WEB_SERVICE_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
+  container_name: zbx-web-service
+  profiles:
+   - make6
+   - start6
+  depends_on:
+   - zabbix-build-pgsql
+  labels:
+   com.zabbix.os: "${CENTOS_OS_TAG}"
+
+ postgres-server:
+  extends:
+   file: compose_databases.yaml
+   service: postgres-server
+#  image: postgres:15-alpine
+  container_name: zbx-timescaledb
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+   - prxstart5
+   - prxstart6
+
+ grafana:
+  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG}
+  container_name: zbx-grafana
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  ports:
+   - '3000:3000'
+  environment:
+   GF_SERVER_PROTOCOL: "https"
+   GF_SERVER_CERT_FILE: "/etc/grafana/ssl/server.pem"
+   GF_SERVER_CERT_KEY: "/etc/grafana/ssl/server.pem"
+  volumes:
+   - ./zbx_env/data/ssl:/etc/grafana/ssl:rw
+   - ./zbx_env/data:/var/lib/grafana:rw
+   - ./zbx_env/data/plugins:/var/lib/grafana/plugins:rw
+  networks:
+   zbx_net_backend:
+    aliases:
+     - grafana-server
+     - grafana
+   zbx_net_frontend:
+
+ loki:
+  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG}
+  container_name: zbx-loki
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  ports:
+   - '3100:3100'
+  command: -config.file=/mnt/config/loki-config.yaml
+  # environment:
+   # GF_SERVER_PROTOCOL: "https"
+   # GF_SERVER_CERT_FILE: "/etc/grafana/ssl/server.pem"
+   # GF_SERVER_CERT_KEY: "/etc/grafana/ssl/server.pem"
+  volumes:
+   - ./zbx_env/loki/config:/mnt/config:rw
+  networks:
+   zbx_net_backend:
+    aliases:
+     - loki-server
+     - loki
+   zbx_net_frontend:
+   
+ promtail:
+  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG}
+  container_name: zbx-promtail
+  restart: unless-stopped
+  user: '0'
+  profiles:
+   - make5
+   - make6
+   - start5
+   - start6
+  volumes:
+    # chmod a+rw /var/run/docker.sock
+   - /var/run/docker.sock:/var/run/docker.sock:rw
+   - ./zbx_env/promtail/config:/mnt/config:rw
+   - /var/log/loki:/var/log/loki:rw
+  command: -config.file=/mnt/config/promtail-config.yaml
+  networks:
+   zbx_net_backend:
+    aliases:
+     - promtail-server
+     - promtail
+   zbx_net_frontend:
+# elasticsearch:
+#  image: elasticsearch
+#  profiles:
+#   - full
+#   - all
+#  environment:
+#   - transport.host=0.0.0.0
+#   - discovery.zen.minimum_master_nodes=1
+#  networks:
+#   zbx_net_backend:
+#    aliases:
+#     - elasticsearch
+
+networks:
+  zbx_net_frontend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "${FRONTEND_ENABLE_IPV6}"
+    ipam:
+      driver: "${FRONTEND_NETWORK_DRIVER}"
+      config:
+      - subnet: "${FRONTEND_SUBNET}"
+  zbx_net_backend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "${BACKEND_ENABLE_IPV6}"
+    internal: true
+    ipam:
+      driver: ${FRONTEND_NETWORK_DRIVER}
+      config:
+      - subnet: "${BACKEND_SUBNET}"
+  zbx_net_database:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "${DATABASE_NETWORK_ENABLE_IPV6}"
+    internal: true
+    ipam:
+      driver: "${DATABASE_NETWORK_DRIVER}"
+
+volumes:
+  snmptraps:
+
+secrets:
+  POSTGRES_USER:
+    file: ${ENV_VARS_DIRECTORY}/.POSTGRES_USER
+  POSTGRES_PASSWORD:
+    file: ${ENV_VARS_DIRECTORY}/.POSTGRES_PASSWORD
+    
