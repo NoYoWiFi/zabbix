@@ -1,0 +1,286 @@
+COMLOGO-FIREWALL-HA DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, 
+    OBJECT-IDENTITY, Integer32, IpAddress       FROM SNMPv2-SMI
+    DisplayString                               FROM SNMPv2-TC
+    lnvFirewall                                 FROM COMLOGO-FIREWALL-MIB;
+
+fwHA MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for firewall HA information."
+    ::= { lnvFirewall 102 }
+
+
+---
+--- The HA nodes state table
+---
+
+fwHANodeNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the total number of HA nodes."
+    ::= { fwHA 1 }
+
+fwHATable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwHAEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of HA nodes."
+    ::= { fwHA 2 }
+
+fwHAEntry OBJECT-TYPE
+    SYNTAX      FwHAEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing HA node information."
+    INDEX   { fwHANodeIndex }
+
+    ::= { fwHATable 1 }
+
+FwHAEntry ::=
+    SEQUENCE {
+        fwHANodeIndex      Integer32,
+        fwHANodeId         Integer32,
+        fwHANodePriority   Integer32,
+        fwHANodeIPAddr     IpAddress,
+        fwHANodeConfSyn    INTEGER
+    }
+
+fwHANodeIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Integer reference number (row number) for the HA node table."
+    ::= { fwHAEntry 1 }
+
+fwHANodeId OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, for each entry."
+    ::= { fwHAEntry 2 }
+
+fwHANodePriority OBJECT-TYPE
+    SYNTAX  Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Priority of the HA node."
+    ::= { fwHAEntry 3 }
+
+fwHANodeIPAddr OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The HA node IP address ."
+    ::= { fwHAEntry 4 }
+
+fwHANodeConfSyn OBJECT-TYPE
+    SYNTAX  INTEGER {
+                unsynchronized(0),
+                synchronized(1)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Synchronization state of the HA node config."
+    ::= { fwHAEntry 5 }
+
+
+---
+--- The HA detect information
+---
+fwHADetect OBJECT-IDENTITY
+    STATUS      current
+    DESCRIPTION
+            "The HA detect information."
+    ::= { fwHA 3 }
+
+fwHADetectIP OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "the Ip address to be detected by HA."
+    ::= { fwHADetect 1 }
+    
+
+fwHAIfNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the total number of interfaces detected by HA."
+    ::= { fwHADetect 11 }
+    
+fwHAIfTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwHAIfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of interfaces detected by HA."
+    ::= { fwHADetect 12 }
+
+fwHAIfEntry OBJECT-TYPE
+    SYNTAX      FwHAIfEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing HA detected interface information."
+    INDEX   { fwHAIfIndex }
+
+    ::= { fwHAIfTable 1 }
+
+FwHAIfEntry ::=
+    SEQUENCE {
+        fwHAIfIndex      Integer32,
+        fwHAIfName       DisplayString,
+        fwHAIfAlert   	 INTEGER,
+        fwHAIfStatus     INTEGER
+    }
+
+fwHAIfIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Integer reference number (row number) for the HA Interface table."
+    ::= { fwHAIfEntry 1 }
+
+fwHAIfName OBJECT-TYPE
+    SYNTAX  DisplayString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the interface name."
+    ::= { fwHAIfEntry 2 }
+
+fwHAIfAlert OBJECT-TYPE
+    SYNTAX  INTEGER {
+                no(0),
+                yes(1)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "alert."
+    ::= { fwHAIfEntry 3 }
+
+fwHAIfStatus OBJECT-TYPE
+    SYNTAX  INTEGER {
+                off(0),
+                on(1)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The HA node IP address ."
+    ::= { fwHAIfEntry 4 }
+
+
+fwHAThreshold OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the threshold for Ip detected failure times."
+    ::= { fwHADetect 21 }
+    
+fwHAFailedNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the times of Ip detected failure ."
+    ::= { fwHADetect 22 }
+
+fwHAIPNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the total number of IP detected by HA."
+    ::= { fwHADetect 31 }
+    
+fwHAIPTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwHAIPEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of  IP detected by HA."
+    ::= { fwHADetect 32 }
+
+fwHAIPEntry OBJECT-TYPE
+    SYNTAX      FwHAIPEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing IP information detected by HA."
+    INDEX   { fwHAIPIndex }
+
+    ::= { fwHAIPTable 1 }
+
+FwHAIPEntry ::=
+    SEQUENCE {
+        fwHAIPIndex      Integer32,
+        fwHAIPAddres     IpAddress,
+        fwHAIPWeight     Integer32,
+        fwHAIPInterface  DisplayString,
+        fwHAIPStatus     INTEGER
+    }
+
+fwHAIPIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Integer reference number (row number) for the HA detected IP table."
+    ::= { fwHAIPEntry 1 }
+
+fwHAIPAddres OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "a Ip address detected by HA."
+    ::= { fwHAIPEntry 2 }
+    
+fwHAIPWeight OBJECT-TYPE
+    SYNTAX  Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Weight for this IP."
+    ::= { fwHAIPEntry 3 }
+    
+fwHAIPInterface OBJECT-TYPE
+    SYNTAX  DisplayString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the interface from which HA detected the IP."
+    ::= { fwHAIPEntry 4 }
+    
+fwHAIPStatus OBJECT-TYPE
+    SYNTAX  INTEGER {
+                off(0),
+                on(1)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the status for the HA  IP detecting of this ip."
+    ::= { fwHAIPEntry 5 }
+END

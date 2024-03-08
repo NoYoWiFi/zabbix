@@ -1,0 +1,4246 @@
+INSPUR-MIB DEFINITIONS ::= BEGIN 
+	IMPORTS
+		enterprises 
+            FROM RFC1155-SMI			
+        Integer32  
+            FROM RFC1155-SMI            
+        DisplayString  
+            FROM RFC1213-MIB 
+    	IpAddress       
+    		FROM RFC1155-SMI  
+    	PhysAddress                        
+    		FROM RFC1213-MIB; 
+	
+	wiredformgmt 		OBJECT IDENTIFIER ::= {enterprises 37945}
+	server 				OBJECT IDENTIFIER ::= {wiredformgmt 2}   
+	
+	serverSysInfo 		OBJECT IDENTIFIER ::= {server 1} 
+	serverBMCSettings 	OBJECT IDENTIFIER ::= {server 2}
+	serverPowerAndFan 	OBJECT IDENTIFIER ::= {server 3}    
+	serverRemoteControl	OBJECT IDENTIFIER ::= {server 4}  
+	-- SysInfo start
+	serverAssetInfo 		 OBJECT IDENTIFIER ::= {serverSysInfo 1}   
+		serverCPUInfo   				OBJECT IDENTIFIER ::= {serverAssetInfo 1} 
+		serverMemoryInfo   				OBJECT IDENTIFIER ::= {serverAssetInfo 2}
+	    serverPCIEInfo   				OBJECT IDENTIFIER ::= {serverAssetInfo 3}
+	    serverFrontHardBackplaneInfo   	OBJECT IDENTIFIER ::= {serverAssetInfo 4}
+	    serverOnboardNICInfo   			OBJECT IDENTIFIER ::= {serverAssetInfo 5}
+	    serverPowerSupplyUnitInfo   	OBJECT IDENTIFIER ::= {serverAssetInfo 6}
+	serverHardwareMonitor 	 OBJECT IDENTIFIER ::= {serverSysInfo 2}  
+	    serverTemperatureMonitor   		OBJECT IDENTIFIER ::= {serverHardwareMonitor 1}
+	    serverVoltageMonitor        	OBJECT IDENTIFIER ::= {serverHardwareMonitor 2}
+	    serverFanMonitor        		OBJECT IDENTIFIER ::= {serverHardwareMonitor 3}  
+	    serverProcessorMonitor        	OBJECT IDENTIFIER ::= {serverHardwareMonitor 4}
+	    serverMemoryMonitor        		OBJECT IDENTIFIER ::= {serverHardwareMonitor 5} 
+	    serverDriveSlotMonitor        	OBJECT IDENTIFIER ::= {serverHardwareMonitor 6}
+		serverPowerSupply		 		OBJECT IDENTIFIER ::= {serverHardwareMonitor 7}
+		serverPowerUnit		   	 		OBJECT IDENTIFIER ::= {serverHardwareMonitor 8}
+		serverEventLoggingDisabled   	OBJECT IDENTIFIER ::= {serverHardwareMonitor 9}
+		serverManagementSubsystemHealth 	OBJECT IDENTIFIER ::= {serverHardwareMonitor 10}
+		serverMicrocontrollerAndCoprocessor OBJECT IDENTIFIER ::= {serverHardwareMonitor 11}
+		serverWatchdog2        	 OBJECT IDENTIFIER ::= {serverHardwareMonitor 12}
+	
+	serverSystemDeviceStatus OBJECT IDENTIFIER ::= {serverSysInfo 3} 
+	   serverFrontHDStatus 			OBJECT IDENTIFIER ::= {serverSystemDeviceStatus 1}
+	   serverNICStatus 				OBJECT IDENTIFIER ::= {serverSystemDeviceStatus 2}
+	serverBIOSSetupOptions 	 	OBJECT IDENTIFIER ::= {serverSysInfo 4}  
+	   --serverBIOSAdvancedOptions 	OBJECT IDENTIFIER ::= {serverBIOSSetupOptions 1}  
+	   --serverBIOSChipsetOptions 	OBJECT IDENTIFIER ::= {serverBIOSSetupOptions 2} 
+	   --serverBIOSABootOptions 	 	OBJECT IDENTIFIER ::= {serverBIOSSetupOptions 3}
+	serverFRUInfo 	 		 	OBJECT IDENTIFIER ::= {serverSysInfo 5}   
+	   --serverFRUInfo 	 		OBJECT IDENTIFIER ::= {serverFRUInfo 1}
+	   --serverFRUChassisInfo 	 	OBJECT IDENTIFIER ::= {serverFRUInfo 2}
+	   --serverFRUBoardInfo 	 		OBJECT IDENTIFIER ::= {serverFRUInfo 3}
+	   --serverFRUProductInfo 	 	OBJECT IDENTIFIER ::= {serverFRUInfo 4}
+	-- serverPowerAndFan start
+	serverPowerSupplyMonitor 	OBJECT IDENTIFIER ::= {serverPowerAndFan 1}
+	-- SysInfo start
+	serverBMCNetwork         OBJECT IDENTIFIER ::= {serverBMCSettings 1}
+		bmcNetworkInterface		 		OBJECT IDENTIFIER ::= {serverBMCNetwork 1} 
+			bmcNetworkSharedInterface		OBJECT IDENTIFIER ::= {bmcNetworkInterface 1}
+			bmcNetworkDedicatedInterface	OBJECT IDENTIFIER ::= {bmcNetworkInterface 2}  
+			bmcNetworkBondInterface         OBJECT IDENTIFIER ::= {bmcNetworkInterface 3}
+			bmcNetworkInterfaceDNSConf      OBJECT IDENTIFIER ::= {bmcNetworkInterface 4}
+			bmcNetworkInterfaceSNMPConf      OBJECT IDENTIFIER ::= {bmcNetworkInterface 5}
+	serverBMCNTPConf         OBJECT IDENTIFIER ::= {serverBMCSettings 3}
+	serverBMCUserConf        OBJECT IDENTIFIER ::= {serverBMCSettings 8}
+
+	--serverRemoteControl	start
+	serverPowerControl         OBJECT IDENTIFIER ::= {serverRemoteControl 1}
+	serverLocatedControl       OBJECT IDENTIFIER ::= {serverRemoteControl 2}
+
+	--serverRemoteControl	end
+
+	--serverCPUInfo start 
+	serverCPUInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverCPUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of CPU information relevant to this entity's CPU"
+	 	::= {serverCPUInfo 1}  
+	 
+	serverCPUInfoEntry OBJECT-TYPE
+	    SYNTAX     serverCPUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The CPU information for one of this entity's CPU."
+	    INDEX   { 
+				  serverCPUInfoIndex,
+	    		  serverCPUInfoName 
+	            }
+	    ::= { serverCPUInfoTable 1 }   
+	
+	serverCPUInfoEntry ::= SEQUENCE {
+	    serverCPUInfoIndex                Integer32,
+	    serverCPUInfoName				DisplayString,
+	 	serverCPUInfoPresent				Integer32,
+	    serverCPUInfoModel				DisplayString,
+	    serverCPUInfoUsedCore				DisplayString,
+	    serverCPUInfoThermalDesignPower	DisplayString,
+	    serverCPUInfoL1Cache				DisplayString,
+	    serverCPUInfoL2Cache				DisplayString,
+	    serverCPUInfoL3Cache				DisplayString
+	}
+	    	    
+	 	--serverCPUInfo start----
+	serverCPUInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies the interface to which this entry is applicable.
+		"
+		::= {serverCPUInfoEntry 1}
+	serverCPUInfoName  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The CPU name associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 2} 	
+	serverCPUInfoPresent  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						 Absent(0),
+						Present(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 3} 
+	serverCPUInfoModel  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The CPU model associated with the CPU of this entry.
+		"
+		::= {serverCPUInfoEntry 4}
+		
+	serverCPUInfoUsedCore  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The num of core CPU used associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 5}   
+					
+	serverCPUInfoThermalDesignPower  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The thermal design power(W) associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 6}
+		
+	serverCPUInfoL1Cache  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The L1 Cache(KB) associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 7}   
+					
+	serverCPUInfoL2Cache  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The L2 Cache(KB) associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 8}
+	      			
+	serverCPUInfoL3Cache  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The L3 Cache(KB) associated with the CPU of this entry .
+		"
+		::= {serverCPUInfoEntry 9} 
+	      --CPU info end 
+	      --memory start 
+	serverMemoryInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverMemoryInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of CPU information relevant to this entity's memory"
+			::= {serverMemoryInfo 1}
+			
+	serverMemoryInfoEntry OBJECT-TYPE
+	    SYNTAX     serverMemoryInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The memory information associated with the memory of this entry."
+	    INDEX   { 
+				  serverMemoryInfoIndex,
+	    		  serverMemoryInfoName 
+	            }
+	    ::= { serverMemoryInfoTable 1 }   
+	
+	serverMemoryInfoEntry ::= SEQUENCE {
+	  	serverMemoryInfoIndex  			Integer32,
+	    serverMemoryInfoName			DisplayString,
+	  	serverMemoryInfoPresent			Integer32,
+	    serverMemoryInfoAttachTo		DisplayString,
+	    serverMemoryInfoMFC				DisplayString,
+	    serverMemoryInfoSerialNO		DisplayString,
+	    serverMemoryInfoCapacity		DisplayString,
+	    serverMemoryInfoSpeed			DisplayString
+	   }
+	
+	serverMemoryInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies the interface to which this entry is applicable.
+		"
+		::= {serverMemoryInfoEntry 1}
+	     		  
+	serverMemoryInfoName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The memory name associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 2}
+		
+	serverMemoryInfoPresent  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						 Absent(0),
+						Present(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the memory of this entry .
+		"
+		::= {serverMemoryInfoEntry 3}
+		  
+	serverMemoryInfoAttachTo  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The CPU name attach to associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 4}
+	 
+	serverMemoryInfoMFC  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The Manufacturer associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 5}
+		
+	serverMemoryInfoSerialNO  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The Serial Number associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 6}			
+		
+	serverMemoryInfoCapacity  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The Capacity(MB) associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 7}
+		
+	serverMemoryInfoSpeed  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The Speed(MHZ) associated with the memory of this entry.
+		"
+		::= {serverMemoryInfoEntry 8}						 
+	--serverMemoryInfo end ---------------- 
+	--serverPCIEInfo start  
+	serverPCIEInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverPCIEInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of PCIE information relevant to this entity's PCIE"
+			::= {serverPCIEInfo 1}
+			
+	serverPCIEInfoEntry OBJECT-TYPE
+	    SYNTAX     serverPCIEInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The PCIE information associated with the PCIE of this entry."
+	    INDEX   { 
+	    		  serverPCIEInfoIndex,
+	    		  serverPCIEInfoSlotOnBoard  
+	            }
+	    ::= { serverPCIEInfoTable 1 }   
+	
+	serverPCIEInfoEntry ::= SEQUENCE {
+	    serverPCIEInfoIndex				Integer32,
+	    serverPCIEInfoSlotOnBoard		DisplayString,
+	    serverPCIEInfoPresent			Integer32,
+	    serverPCIEInfoConnectionType	DisplayString,
+	    serverPCIEInfoSlotOnRiser		DisplayString,
+	    serverPCIEInfoDeviceType		DisplayString,
+	    serverPCIEInfoVender			DisplayString,
+	    serverPCIEInfoDevice			DisplayString,
+	    serverPCIEInfoRatedWidth		DisplayString,
+	    serverPCIEInfoRatedSpeed		DisplayString
+	}  
+	serverPCIEInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverPCIEInfoEntry 1}   
+	serverPCIEInfoSlotOnBoard  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The slot on board associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 2} 
+	serverPCIEInfoPresent  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						 Absent(0),
+						Present(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the PCIE of this entry .
+		"
+		::= {serverPCIEInfoEntry 3}
+	serverPCIEInfoConnectionType  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The connect type associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 4}    
+	serverPCIEInfoSlotOnRiser  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The slot on riser associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 5}  
+	serverPCIEInfoDeviceType  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The device type associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 6}
+    serverPCIEInfoVender  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vender associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 7}
+	serverPCIEInfoDevice  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The device associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 8}  
+	serverPCIEInfoRatedWidth  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The rated width associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 9} 
+	serverPCIEInfoRatedSpeed  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The rated speed associated with the PCIE of this entry 
+		"
+		::= {serverPCIEInfoEntry 10}
+
+	--serverPCIEInfo end    				
+	--serverFrontHardBackplaneInfo start
+	serverFrontHardBackplaneInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverFrontHardBackplaneInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of front hard backplane information relevant to this entity's front hard backplane"
+			::= {serverFrontHardBackplaneInfo 1}
+			
+	serverFrontHardBackplaneInfoEntry OBJECT-TYPE
+	    SYNTAX     serverFrontHardBackplaneInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The front hard backplane information associated with the front hard backplane of this entry."
+	    INDEX   { 
+	    		  serverFrontHardBackplaneInfoIndex,
+	    		  serverFrontHardBackplaneInfoName  
+	            }
+	    ::= { serverFrontHardBackplaneInfoTable 1 }   
+	
+	serverFrontHardBackplaneInfoEntry ::= SEQUENCE {
+	    serverFrontHardBackplaneInfoIndex			Integer32,
+	    serverFrontHardBackplaneInfoName			DisplayString,
+	    serverFrontHardBackplaneInfoPresent			Integer32,
+	    serverFrontHardBackplaneInfoPortNumber		DisplayString,
+	    serverFrontHardBackplaneInfoHarddiskNumber	DisplayString
+	}
+	serverFrontHardBackplaneInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverFrontHardBackplaneInfoEntry 1}   
+	serverFrontHardBackplaneInfoName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The name associated with the front hard backplane of this entry 
+		"
+		::= {serverFrontHardBackplaneInfoEntry 2} 
+	serverFrontHardBackplaneInfoPresent  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						 Absent(0),
+						Present(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the front hard backplane of this entry .
+		"
+		::= {serverFrontHardBackplaneInfoEntry 3}
+	serverFrontHardBackplaneInfoPortNumber  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The port number associated with the front hard backplane of this entry 
+		"
+		::= {serverFrontHardBackplaneInfoEntry 4}    
+	serverFrontHardBackplaneInfoHarddiskNumber  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The harddisk number associated with the front hard backplane of this entry 
+		"
+		::= {serverFrontHardBackplaneInfoEntry 5}  	
+	--serverFrontHardBackplaneInfo end   	
+	--serverOnboardNICInfo  start  			
+	serverOnboardNICInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverOnboardNICInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of onboard NIC information relevant to this entity's onboard NIC"
+			::= {serverOnboardNICInfo 1}
+			
+	serverOnboardNICInfoEntry OBJECT-TYPE
+	    SYNTAX     serverOnboardNICInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The onboard NIC information associated with the onboard NIC of this entry."
+	    INDEX   { 
+	    		  serverOnboardNICInfoIndex,
+	    		  serverOnboardNICInfoName  
+	            }
+	    ::= { serverOnboardNICInfoTable 1 }   
+	
+	serverOnboardNICInfoEntry ::= SEQUENCE {
+	    serverOnboardNICInfoIndex			Integer32,
+	    serverOnboardNICInfoName			DisplayString,
+	    serverOnboardNICInfoPhysicalNICNo 	DisplayString,
+	    serverOnboardNICInfoVendorDevice	DisplayString,
+	    serverOnboardNICInfoBrandingString	DisplayString,
+	    serverOnboardNICInfoMACAddress		DisplayString,
+	    serverOnboardNICInfoIPAddress		DisplayString
+	} 
+	serverOnboardNICInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverOnboardNICInfoEntry 1}   
+	serverOnboardNICInfoName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The name associated with the onboard NIC of this entry 
+		"
+		::= {serverOnboardNICInfoEntry 2} 
+	serverOnboardNICInfoPhysicalNICNo  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the onboard NIC of this entry .
+		"
+		::= {serverOnboardNICInfoEntry 3}
+	serverOnboardNICInfoVendorDevice  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The connect type associated with the onboard NIC of this entry 
+		"
+		::= {serverOnboardNICInfoEntry 4}    
+	serverOnboardNICInfoBrandingString  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The slot on riser associated with the onboard NIC of this entry 
+		"
+		::= {serverOnboardNICInfoEntry 5}  
+	serverOnboardNICInfoMACAddress  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The device type associated with the onboard NIC of this entry 
+		"
+		::= {serverOnboardNICInfoEntry 6}
+    serverOnboardNICInfoIPAddress  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vender associated with the onboard NIC of this entry 
+		"
+		::= {serverOnboardNICInfoEntry 7}
+	--serverOnboardNICInfo  end 	    
+	--serverPowerSupplyUnitInfo start  
+	serverPSUInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverPSUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of PSU information relevant to this entity's PSU"
+			::= {serverPowerSupplyUnitInfo 1}
+			
+	serverPSUInfoEntry OBJECT-TYPE
+	    SYNTAX     serverPSUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The PSU information associated with the PSU of this entry."
+	    INDEX   { 
+				  serverPSUInfoIndex,
+	    		  serverPSUInfoName  
+	            }
+	    ::= { serverPSUInfoTable 1 }   
+	
+	serverPSUInfoEntry ::= SEQUENCE {
+	    serverPSUInfoIndex				Integer32,
+	    serverPSUInfoName				DisplayString,
+	    serverPSUInfoPresent			Integer32,
+	    serverPSUInfoMFRID				DisplayString,
+	    serverPSUInfoMFRModel			DisplayString,
+	    serverPSUInfoSerialNO			DisplayString,
+	    serverPSUInfoPoutMax			DisplayString,
+	    serverPSUInfoFWVer				DisplayString
+	}
+	  	---serverPSUInfoEntry START----  
+	serverPSUInfoIndex  OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverPSUInfoEntry 1} 
+	
+	serverPSUInfoName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The PSU name associated with the PSU of this entry.
+		"
+		::= {serverPSUInfoEntry 2} 	  
+	serverPSUInfoPresent  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						 Absent(0),
+						Present(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The present status associated with the PSU of this entry .
+		"
+		::= {serverPSUInfoEntry 3}  
+		
+	serverPSUInfoMFRID  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The MFR ID associated with the PSU of this entry.
+		"
+		::= {serverPSUInfoEntry 4} 
+		
+	serverPSUInfoMFRModel  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The MFR model associated with the PSU of this entry.
+		"
+		::= {serverPSUInfoEntry 5}  
+					
+	serverPSUInfoSerialNO  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The serial number associated with the PSU of this entry .
+		"
+		::= {serverPSUInfoEntry 6}
+	       				
+	serverPSUInfoPoutMax  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The max ouput power associated with the PSU of this entry .
+		"
+		::= {serverPSUInfoEntry 7}
+	        				
+	serverPSUInfoFWVer  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The firmware version associated with the PSU of this entry .
+		"
+		::= {serverPSUInfoEntry 8}         
+	  --serverPowerSupplyUnitInfo   END-----     
+	  --serverTemperatureMonitor  
+	serverTemperatureSensorTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverTemperatureSensorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of temperature sensor information relevant to this entity's temperature sensor."
+			::= {serverTemperatureMonitor 1}
+			
+	serverTemperatureSensorEntry OBJECT-TYPE
+	    SYNTAX     serverTemperatureSensorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The temperature sensor information associated with the temperature sensor of this entry."
+	    INDEX   { 
+				  serverTemperatureSensorIndex,
+	    		  serverTemperatureSensorName      
+	            }
+	    ::= { serverTemperatureSensorTable 1 }   
+	
+	serverTemperatureSensorEntry ::= SEQUENCE {
+	 	serverTemperatureSensorIndex 		Integer32,
+	    serverTemperatureSensorName		DisplayString,
+	    serverTemperatureSensorStatus		Integer32,
+	    serverTemperatureSensorReading		DisplayString,
+	    serverTemperatureSensorLowNRT		DisplayString,
+	    serverTemperatureSensorLowCT		DisplayString,
+	    serverTemperatureSensorLowNCT		DisplayString,
+	    serverTemperatureSensorUpNCT		DisplayString,  
+	    serverTemperatureSensorUpCT         DisplayString,
+	    serverTemperatureSensorUpNRT        DisplayString,
+	   }
+	
+	serverTemperatureSensorIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverTemperatureSensorEntry 1} 
+	       
+	serverTemperatureSensorName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The temperature sensor name associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 2} 
+	serverTemperatureSensorStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		}  
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The sensor status associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 3} 
+		  
+	serverTemperatureSensorReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 4} 
+			  
+	serverTemperatureSensorLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 5}   
+				  
+	serverTemperatureSensorLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 6}
+	  
+	serverTemperatureSensorLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 7}
+			  
+	serverTemperatureSensorUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 8}
+	  
+	serverTemperatureSensorUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 9}
+	  
+	serverTemperatureSensorUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverTemperatureSensorEntry 10}			
+	--serverTemperatureSensorEntry end 
+	--serverFannitor  
+	  
+	serverFanSensorTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverFanSensorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The table of fan sensor information relevant to this entity's fan sensor."
+			::= {serverFanMonitor 1}
+			
+	serverFanSensorEntry OBJECT-TYPE
+	    SYNTAX     serverFanSensorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The fan sensor information associated with the fan sensor of this entry."
+	    INDEX   { 
+				  serverFanSensorIndex,
+	    		  serverFanSensorName   
+	            }
+	    ::= { serverFanSensorTable 1 }   
+	
+	serverFanSensorEntry ::= SEQUENCE {
+		serverFanSensorIndex		Integer32,
+	    serverFanSensorName		DisplayString,
+	    serverFanSensorStatus		Integer32,
+	    serverFanSensorReading		DisplayString,
+	    serverFanSensorLowNRT		DisplayString,
+	    serverFanSensorLowCT		DisplayString,
+	    serverFanSensorLowNCT		DisplayString,
+	    serverFanSensorUpNCT		DisplayString,  
+	    serverFanSensorUpCT			DisplayString,
+	    serverFanSensorUpNRT		DisplayString,
+	}
+	serverFanSensorIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverFanSensorEntry 1} 
+	   		       
+	serverFanSensorName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The sensor name associated with the fan sensor of this entry.
+		"
+		::= {serverFanSensorEntry 2} 
+	serverFanSensorStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The sensor status associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 3} 
+		  
+	serverFanSensorReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 4} 
+			  
+	serverFanSensorLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 5}   
+				  
+	serverFanSensorLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 6}
+	      		  
+	serverFanSensorLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 7}
+			  
+	serverFanSensorUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 8}
+	      		  
+	serverFanSensorUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 9}
+		  
+	serverFanSensorUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the temperature sensor of this entry.
+		"
+		::= {serverFanSensorEntry 10}			
+	  --serverFanSensorEntry end 
+	
+	serverDriveSlotStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverDriveSlotStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "
+	           The table of drive slot status information relevant to this entity's drive slot.
+	           "
+			::= {serverDriveSlotMonitor 1}
+			
+	serverDriveSlotStatusEntry OBJECT-TYPE
+	    SYNTAX     serverDriveSlotStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The status information associated with the drive slot of this entry."
+	    INDEX   { 
+				  serverDriveSlotStatusIndex,
+	    		  serverDriveSlotStatusName		                
+	            }
+	    ::= { serverDriveSlotStatusTable 1 }   
+	
+	serverDriveSlotStatusEntry ::= SEQUENCE {
+	  	serverDriveSlotStatusIndex			Integer32,
+	    serverDriveSlotStatusName			DisplayString,
+	    serverDriveSlotStatus				Integer32,
+	    serverDriveSlotStatusReading		DisplayString,
+	    serverDriveSlotStatusLowNRT			DisplayString,
+	    serverDriveSlotStatusLowCT			DisplayString,
+	    serverDriveSlotStatusLowNCT			DisplayString,
+	    serverDriveSlotStatusUpNCT			DisplayString,  
+	    serverDriveSlotStatusUpCT           DisplayString,
+	    serverDriveSlotStatusUpNRT          DisplayString,
+	}
+	
+	serverDriveSlotStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverDriveSlotStatusEntry 1} 
+	      
+	serverDriveSlotStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The drive slot name associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 2}
+		 
+	serverDriveSlotStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		}
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The drive slot Status associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 3} 
+		  
+	serverDriveSlotStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 4} 
+			  
+	serverDriveSlotStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 5}   
+				  
+	serverDriveSlotStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 6}
+	      		  
+	serverDriveSlotStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 7}
+			  
+	serverDriveSlotStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 8}
+	      		  
+	serverDriveSlotStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 9}
+		  
+	serverDriveSlotStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the drive slot of this entry.
+		"
+		::= {serverDriveSlotStatusEntry 10}	
+				
+	--serverDriveSlotStatusEntry end  
+	             
+		--serverProcessorStatus start 
+	serverProcessorStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverProcessorStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    " 
+	     The table of processor status information relevant to this entity's processor.
+	    "
+		::= {serverProcessorMonitor 1}
+			
+	serverProcessorStatusEntry OBJECT-TYPE
+	    SYNTAX     serverProcessorStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The processor status information associated with the processor of this entry.
+	    "
+	    INDEX   { 
+					serverProcessorStatusIndex,	    		  
+					serverProcessorStatusName		                
+	            }
+	    ::= { serverProcessorStatusTable 1 }   
+	
+	serverProcessorStatusEntry ::= SEQUENCE {
+		serverProcessorStatusIndex			Integer32,
+	    serverProcessorStatusName			DisplayString,
+	  	serverProcessorStatus				Integer32,
+	    serverProcessorStatusReading		DisplayString,
+	    serverProcessorStatusLowNRT			DisplayString,
+	    serverProcessorStatusLowCT			DisplayString,
+	    serverProcessorStatusLowNCT			DisplayString,
+	    serverProcessorStatusUpNCT			DisplayString,  
+	    serverProcessorStatusUpCT           DisplayString,
+	    serverProcessorStatusUpNRT          DisplayString,
+	}
+	
+	serverProcessorStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverProcessorStatusEntry 1} 
+	      
+	serverProcessorStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The processor status name associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 2} 
+	serverProcessorStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The processor status associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 3} 
+		  
+	serverProcessorStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 4} 
+			  
+	serverProcessorStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 5}   
+				  
+	serverProcessorStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 6}
+	      		  
+	serverProcessorStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 7}
+			  
+	serverProcessorStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 8}
+	      		  
+	serverProcessorStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 9}
+		  
+	serverProcessorStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the processor of this entry.
+		"
+		::= {serverProcessorStatusEntry 10}           
+	   --          
+	--serverVoltageStatus start 
+	serverVoltageStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverVoltageStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "
+	           The table of voltage status information relevant to this entity's system voltage.
+	           "
+		::= {serverVoltageMonitor 1}
+			
+	serverVoltageStatusEntry OBJECT-TYPE
+	    SYNTAX     serverVoltageStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	        "
+	           The voltage status information associated with the processor of this system voltage.
+			"
+	    INDEX   { 
+				  serverVoltageStatusIndex,
+	    		  serverVoltageStatusName		                
+	            }
+	    ::= { serverVoltageStatusTable 1 }   
+	
+	serverVoltageStatusEntry ::= SEQUENCE {
+		serverVoltageStatusIndex			Integer32,
+	    serverVoltageStatusName			DisplayString,
+	  	serverVoltageStatus			Integer32,
+	    serverVoltageStatusReading			DisplayString,
+	    serverVoltageStatusLowNRT			DisplayString,
+	    serverVoltageStatusLowCT				DisplayString,
+	    serverVoltageStatusLowNCT			DisplayString,
+	    serverVoltageStatusUpNCT				DisplayString,  
+	    serverVoltageStatusUpCT              DisplayString,
+	    serverVoltageStatusUpNRT             DisplayString,
+	   }
+	
+	serverVoltageStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverVoltageStatusEntry 1} 
+	      
+	serverVoltageStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The voltage status name associated with the system voltage of this entry.		
+		"
+		::= {serverVoltageStatusEntry 2} 
+	serverVoltageStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The system voltage Status associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 3} 
+		  
+	serverVoltageStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 4} 
+			  
+	serverVoltageStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 5}   
+				  
+	serverVoltageStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 6}
+	      		  
+	serverVoltageStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 7}
+			  
+	serverVoltageStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 8}
+	      		  
+	serverVoltageStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 9}
+		  
+	serverVoltageStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the system voltage of this entry.
+		"
+		::= {serverVoltageStatusEntry 10}          
+	   
+	--serverVoltageStatus end        
+	--serverMemoryStatus start 
+	serverMemoryStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverMemoryStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "
+	             The table of memory status information relevant to this entity's system memory.
+	           "
+			::= {serverMemoryMonitor 1}
+			
+	serverMemoryStatusEntry OBJECT-TYPE
+	    SYNTAX     serverMemoryStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The memory status information associated with the processor of this system memory.
+	    "
+	    INDEX   {
+				  serverMemoryStatusIndex, 
+	    		  serverMemoryStatusName		                
+	            }
+	    ::= { serverMemoryStatusTable 1 }   
+	
+	serverMemoryStatusEntry ::= SEQUENCE {
+		serverMemoryStatusIndex				Integer32,
+	    serverMemoryStatusName			DisplayString,
+	  	serverMemoryStatus					Integer32,
+	    serverMemoryStatusReading			DisplayString,
+	    serverMemoryStatusLowNRT			DisplayString,
+	    serverMemoryStatusLowCT				DisplayString,
+	    serverMemoryStatusLowNCT			DisplayString,
+	    serverMemoryStatusUpNCT				DisplayString,  
+	    serverMemoryStatusUpCT              DisplayString,
+	    serverMemoryStatusUpNRT             DisplayString,
+	}
+	
+	serverMemoryStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverMemoryStatusEntry 1} 
+	      
+	serverMemoryStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The memory status name associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 2} 
+	serverMemoryStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The system memory Status associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 3} 
+		  
+	serverMemoryStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 4} 
+			  
+	serverMemoryStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 5}   
+				  
+	serverMemoryStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 6}
+	      		  
+	serverMemoryStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 7}
+			  
+	serverMemoryStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 8}
+	      		  
+	serverMemoryStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 9}
+		  
+	serverMemoryStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the system memory of this entry.
+		"
+		::= {serverMemoryStatusEntry 10}          
+	   
+	-- serverMemoryStatus end             
+	   
+	--serverPowerSupply   start 
+	--serverPowerSupplyStatus start 
+	serverPowerSupplyStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverPowerSupplyStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of power supply status information relevant to this entity's power supply.
+	    "
+			::= {serverPowerSupply	 1}
+			
+	serverPowerSupplyStatusEntry OBJECT-TYPE
+	    SYNTAX     serverPowerSupplyStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The power supply status information associated with the power supply of this entry.
+	    "
+	    INDEX   { 
+				  serverPowerSupplyStatusIndex,
+	    		  serverPowerSupplyStatusName		                
+	            }
+	    ::= { serverPowerSupplyStatusTable 1 }   
+	
+	serverPowerSupplyStatusEntry ::= SEQUENCE {
+			serverPowerSupplyStatusIndex			Integer32,
+	              serverPowerSupplyStatusName			DisplayString,
+	        	  serverPowerSupplyStatus			Integer32,
+	              serverPowerSupplyStatusReading			DisplayString,
+	              serverPowerSupplyStatusLowNRT			DisplayString,
+	              serverPowerSupplyStatusLowCT				DisplayString,
+	              serverPowerSupplyStatusLowNCT			DisplayString,
+	              serverPowerSupplyStatusUpNCT				DisplayString,  
+	              serverPowerSupplyStatusUpCT              DisplayString,
+	              serverPowerSupplyStatusUpNRT             DisplayString,
+	   }
+	
+	serverPowerSupplyStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverPowerSupplyStatusEntry 1} 
+	      
+	serverPowerSupplyStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power supply status name associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 2}
+		 
+	serverPowerSupplyStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power supply Status associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 3} 
+		  
+	serverPowerSupplyStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 4} 
+			  
+	serverPowerSupplyStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 5}   
+				  
+	serverPowerSupplyStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 6}
+	      		  
+	serverPowerSupplyStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 7}
+			  
+	serverPowerSupplyStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 8}
+	      		  
+	serverPowerSupplyStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 9}
+		  
+	serverPowerSupplyStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the power supply of this entry.
+		"
+		::= {serverPowerSupplyStatusEntry 10}          
+	   
+	-- serverPowerSupplyStatus end 
+	
+	-- serverPowerUnit	start
+	serverPowerUnitStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverPowerUnitStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of power unit status information relevant to this entity's power unit.
+	    "
+			::= {serverPowerUnit	 1}
+			
+	serverPowerUnitStatusEntry OBJECT-TYPE
+	    SYNTAX     serverPowerUnitStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The power unit status information associated with the power unit of this entry.
+	    "
+	    INDEX   { 
+	    		  serverPowerUnitStatusIndex,
+				  serverPowerUnitStatusName		                
+	            }
+	    ::= { serverPowerUnitStatusTable 1 }   
+	
+	serverPowerUnitStatusEntry ::= SEQUENCE {
+			serverPowerUnitStatusIndex			Integer32,
+	              serverPowerUnitStatusName			DisplayString,
+	        	  serverPowerUnitStatus			Integer32,
+	              serverPowerUnitStatusReading			DisplayString,
+	              serverPowerUnitStatusLowNRT			DisplayString,
+	              serverPowerUnitStatusLowCT				DisplayString,
+	              serverPowerUnitStatusLowNCT			DisplayString,
+	              serverPowerUnitStatusUpNCT				DisplayString,  
+	              serverPowerUnitStatusUpCT              DisplayString,
+	              serverPowerUnitStatusUpNRT             DisplayString,
+	   }
+	
+	serverPowerUnitStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverPowerUnitStatusEntry 1} 
+	      
+	serverPowerUnitStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power unit status Name associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 2}
+		 
+	serverPowerUnitStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power unit Status associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 3} 
+		  
+	serverPowerUnitStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 4} 
+			  
+	serverPowerUnitStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 5}   
+				  
+	serverPowerUnitStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 6}
+	      		  
+	serverPowerUnitStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 7}
+			  
+	serverPowerUnitStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 8}
+	      		  
+	serverPowerUnitStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 9}
+		  
+	serverPowerUnitStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the power unit of this entry.
+		"
+		::= {serverPowerUnitStatusEntry 10} 	
+	-- serverPowerUnit	end 
+	-- serverEventLoggingDisabled   start  
+	serverEventLoggingDisabledStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverEventLoggingDisabledStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of event logging status information relevant to this entity's event logging.
+	    "
+			::= {serverEventLoggingDisabled	 1}
+			
+	serverEventLoggingDisabledStatusEntry OBJECT-TYPE
+	    SYNTAX     serverEventLoggingDisabledStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The event logging status information associated with the event logging of this entry.
+	    "
+	    INDEX   { 
+	    		  serverEventLoggingDisabledStatusIndex,
+				  serverEventLoggingDisabledStatusName		                
+	            }
+	    ::= { serverEventLoggingDisabledStatusTable 1 }   
+	
+	serverEventLoggingDisabledStatusEntry ::= SEQUENCE {
+			serverEventLoggingDisabledStatusIndex			Integer32,
+	              serverEventLoggingDisabledStatusName			DisplayString,
+	        	  serverEventLoggingDisabledStatus			Integer32,
+	              serverEventLoggingDisabledStatusReading			DisplayString,
+	              serverEventLoggingDisabledStatusLowNRT			DisplayString,
+	              serverEventLoggingDisabledStatusLowCT				DisplayString,
+	              serverEventLoggingDisabledStatusLowNCT			DisplayString,
+	              serverEventLoggingDisabledStatusUpNCT				DisplayString,  
+	              serverEventLoggingDisabledStatusUpCT              DisplayString,
+	              serverEventLoggingDisabledStatusUpNRT             DisplayString,
+	   }
+	
+	serverEventLoggingDisabledStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 1} 
+	      
+	serverEventLoggingDisabledStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The event logging status Name associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 2}
+		 
+	serverEventLoggingDisabledStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The event logging Status associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 3} 
+		  
+	serverEventLoggingDisabledStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 4} 
+			  
+	serverEventLoggingDisabledStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 5}   
+				  
+	serverEventLoggingDisabledStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 6}
+	      		  
+	serverEventLoggingDisabledStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 7}
+			  
+	serverEventLoggingDisabledStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 8}
+	      		  
+	serverEventLoggingDisabledStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 9}
+		  
+	serverEventLoggingDisabledStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the event logging of this entry.
+		"
+		::= {serverEventLoggingDisabledStatusEntry 10}	
+	-- serverEventLoggingDisabled   end 
+	-- serverManagementSubsystemHealth 	start
+	serverManagementSubsystemHealthStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverManagementSubsystemHealthStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of management subsystem health status information relevant to this entity's management subsystem health.
+	    "
+			::= {serverManagementSubsystemHealth	 1}
+			
+	serverManagementSubsystemHealthStatusEntry OBJECT-TYPE
+	    SYNTAX     serverManagementSubsystemHealthStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The management subsystem health status information associated with the management subsystem health of this entry.
+	    "
+	    INDEX   { 
+	    		  serverManagementSubsystemHealthStatusIndex,
+				  serverManagementSubsystemHealthStatusName		                
+	            }
+	    ::= { serverManagementSubsystemHealthStatusTable 1 }   
+	
+	serverManagementSubsystemHealthStatusEntry ::= SEQUENCE {
+			serverManagementSubsystemHealthStatusIndex			Integer32,
+	              serverManagementSubsystemHealthStatusName			DisplayString,
+	        	  serverManagementSubsystemHealthStatus			Integer32,
+	              serverManagementSubsystemHealthStatusReading			DisplayString,
+	              serverManagementSubsystemHealthStatusLowNRT			DisplayString,
+	              serverManagementSubsystemHealthStatusLowCT				DisplayString,
+	              serverManagementSubsystemHealthStatusLowNCT			DisplayString,
+	              serverManagementSubsystemHealthStatusUpNCT				DisplayString,  
+	              serverManagementSubsystemHealthStatusUpCT              DisplayString,
+	              serverManagementSubsystemHealthStatusUpNRT             DisplayString,
+	   }
+	
+	serverManagementSubsystemHealthStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 1} 
+	      
+	serverManagementSubsystemHealthStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The management subsystem health status Name associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 2}
+		 
+	serverManagementSubsystemHealthStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The management subsystem health Status associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 3} 
+		  
+	serverManagementSubsystemHealthStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 4} 
+			  
+	serverManagementSubsystemHealthStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 5}   
+				  
+	serverManagementSubsystemHealthStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 6}
+	      		  
+	serverManagementSubsystemHealthStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 7}
+			  
+	serverManagementSubsystemHealthStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 8}
+	      		  
+	serverManagementSubsystemHealthStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 9}
+		  
+	serverManagementSubsystemHealthStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the management subsystem health of this entry.
+		"
+		::= {serverManagementSubsystemHealthStatusEntry 10}	
+	-- serverManagementSubsystemHealth 	end
+	--serverMicrocontrollerAndCoprocessor start 
+	serverMicrocontrollerAndCoprocessorStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverMicrocontrollerAndCoprocessorStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of microcontroller and coprocessor status information relevant to this entity's microcontroller and coprocessor.
+	    "
+			::= {serverMicrocontrollerAndCoprocessor	 1}
+			
+	serverMicrocontrollerAndCoprocessorStatusEntry OBJECT-TYPE
+	    SYNTAX     serverMicrocontrollerAndCoprocessorStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The microcontroller and coprocessor status information associated with the microcontroller and coprocessor of this entry.
+	    "
+	    INDEX   { 
+	    		  serverMicrocontrollerAndCoprocessorStatusIndex,
+				  serverMicrocontrollerAndCoprocessorStatusName		                
+	            }
+	    ::= { serverMicrocontrollerAndCoprocessorStatusTable 1 }   
+	
+	serverMicrocontrollerAndCoprocessorStatusEntry ::= SEQUENCE {
+			serverMicrocontrollerAndCoprocessorStatusIndex			Integer32,
+	              serverMicrocontrollerAndCoprocessorStatusName			DisplayString,
+	        	  serverMicrocontrollerAndCoprocessorStatus			Integer32,
+	              serverMicrocontrollerAndCoprocessorStatusReading			DisplayString,
+	              serverMicrocontrollerAndCoprocessorStatusLowNRT			DisplayString,
+	              serverMicrocontrollerAndCoprocessorStatusLowCT				DisplayString,
+	              serverMicrocontrollerAndCoprocessorStatusLowNCT			DisplayString,
+	              serverMicrocontrollerAndCoprocessorStatusUpNCT				DisplayString,  
+	              serverMicrocontrollerAndCoprocessorStatusUpCT              DisplayString,
+	              serverMicrocontrollerAndCoprocessorStatusUpNRT             DisplayString,
+	   }
+	
+	serverMicrocontrollerAndCoprocessorStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 1} 
+	      
+	serverMicrocontrollerAndCoprocessorStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The microcontroller and coprocessor status Name associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 2}
+		 
+	serverMicrocontrollerAndCoprocessorStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The microcontroller and coprocessor Status associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 3} 
+		  
+	serverMicrocontrollerAndCoprocessorStatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 4} 
+			  
+	serverMicrocontrollerAndCoprocessorStatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 5}   
+				  
+	serverMicrocontrollerAndCoprocessorStatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 6}
+	      		  
+	serverMicrocontrollerAndCoprocessorStatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 7}
+			  
+	serverMicrocontrollerAndCoprocessorStatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 8}
+	      		  
+	serverMicrocontrollerAndCoprocessorStatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 9}
+		  
+	serverMicrocontrollerAndCoprocessorStatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the microcontroller and coprocessor of this entry.
+		"
+		::= {serverMicrocontrollerAndCoprocessorStatusEntry 10}	
+	
+	--serverMicrocontrollerAndCoprocessor end 
+	--serverFrontHDStatus start
+	serverFrontHDStatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverFrontHDStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of front harddisk status information relevant to this entity's front harddisk.
+	    "
+			::= {serverFrontHDStatus	 1}
+			
+	serverFrontHDStatusEntry OBJECT-TYPE
+	    SYNTAX     serverFrontHDStatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The front harddisk status information associated with the front harddisk of this entry.
+	    "
+	    INDEX   { 
+	    		  serverFrontHDStatusIndex,
+				  serverFrontHDStatusName		                
+	            }
+	    ::= { serverFrontHDStatusTable 1 }   
+	
+	serverFrontHDStatusEntry ::= SEQUENCE {
+			serverFrontHDStatusIndex		Integer32,
+	        serverFrontHDStatusName			DisplayString,
+	        serverFrontHDStatusPresent		DisplayString,
+			serverFrontHDStatus    			DisplayString,
+			serverFrontHDStatusLocation    	DisplayString,
+			serverFrontHDStatusRebuild    	DisplayString
+	   }
+	
+	serverFrontHDStatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverFrontHDStatusEntry 1} 
+	      
+	serverFrontHDStatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The front harddisk status Name associated with the front harddisk of this entry.
+		"
+		::= {serverFrontHDStatusEntry 2}
+		 
+	serverFrontHDStatusPresent OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The front harddisk present Status associated with the front harddisk of this entry.
+		"
+		::= {serverFrontHDStatusEntry 3} 
+		 
+	serverFrontHDStatus OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The front harddisk Status associated with the front harddisk of this entry.
+		"
+		::= {serverFrontHDStatusEntry 4} 
+		 
+	serverFrontHDStatusLocation OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The front harddisk Status associated with the front harddisk of this entry.
+		"
+		::= {serverFrontHDStatusEntry 5} 
+		 
+	serverFrontHDStatusRebuild OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The front harddisk Status associated with the front harddisk of this entry.
+		"
+		::= {serverFrontHDStatusEntry 6} 
+	--serverFrontHDStatus end 
+	--serverWatchdog2 start
+ 	serverWatchdog2StatusTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverWatchdog2StatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The table of watchdog 2 status information relevant to this entity's watchdog 2.
+	    "
+			::= {serverWatchdog2	 1}
+			
+	serverWatchdog2StatusEntry OBJECT-TYPE
+	    SYNTAX     serverWatchdog2StatusEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    	The watchdog 2 status information associated with the watchdog 2 of this entry.
+	    "
+	    INDEX   { 
+	    		  serverWatchdog2StatusIndex,
+				  serverWatchdog2StatusName		                
+	            }
+	    ::= { serverWatchdog2StatusTable 1 }   
+	
+	serverWatchdog2StatusEntry ::= SEQUENCE {
+			serverWatchdog2StatusIndex			Integer32,
+	              serverWatchdog2StatusName			DisplayString,
+	        	  serverWatchdog2Status			Integer32,
+	              serverWatchdog2StatusReading			DisplayString,
+	              serverWatchdog2StatusLowNRT			DisplayString,
+	              serverWatchdog2StatusLowCT				DisplayString,
+	              serverWatchdog2StatusLowNCT			DisplayString,
+	              serverWatchdog2StatusUpNCT				DisplayString,  
+	              serverWatchdog2StatusUpCT              DisplayString,
+	              serverWatchdog2StatusUpNRT             DisplayString,
+	   }
+	
+	serverWatchdog2StatusIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverWatchdog2StatusEntry 1} 
+	      
+	serverWatchdog2StatusName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The watchdog 2 status Name associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 2}
+		 
+	serverWatchdog2Status OBJECT-TYPE
+		SYNTAX 			Integer32{
+						NA(0),
+						normal(1),
+						warning(2),
+						critial(3)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The watchdog 2 Status associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 3} 
+		  
+	serverWatchdog2StatusReading OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 4} 
+			  
+	serverWatchdog2StatusLowNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 5}   
+				  
+	serverWatchdog2StatusLowCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 6}
+	      		  
+	serverWatchdog2StatusLowNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 7}
+			  
+	serverWatchdog2StatusUpNCT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 8}
+	      		  
+	serverWatchdog2StatusUpCT OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 9}
+		  
+	serverWatchdog2StatusUpNRT OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the watchdog 2 of this entry.
+		"
+		::= {serverWatchdog2StatusEntry 10}	
+
+	--serverWatchdog2 end
+	
+	
+	-- serverPowerSupplyMonitor start 
+	
+	serverPowerSupplyMonitorTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverPowerSupplyMonitorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	     The table of power supply monitor information relevant to this entity's power supply monitor.
+	    "
+		::= {serverPowerSupplyMonitor 1}
+			
+	serverPowerSupplyMonitorEntry OBJECT-TYPE
+	    SYNTAX     serverPowerSupplyMonitorEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The power supply status information associated with the power supply monitor of this entry.
+	    "
+	    INDEX   { 
+				  serverPowerSupplyMonitorIndex,
+	    		  serverPowerSupplyMonitorName		                
+	            }
+	    ::= { serverPowerSupplyMonitorTable 1 }   
+	
+	serverPowerSupplyMonitorEntry ::= SEQUENCE {
+		serverPowerSupplyMonitorIndex				Integer32,
+	    serverPowerSupplyMonitorName			DisplayString,
+	  	serverPowerSupplyMonitorPresent			Integer32,
+	    serverPowerSupplyMonitorAlert			DisplayString,
+	    serverPowerSupplyMonitorTemp			DisplayString,
+	    serverPowerSupplyMonitorPowerIn			DisplayString,
+	    serverPowerSupplyMonitorPowerOut		DisplayString,
+	    serverPowerSupplyMonitorVoltIn			DisplayString,  
+	    serverPowerSupplyMonitorVoltOut         DisplayString,
+	    serverPowerSupplyMonitorCurrentIn       DisplayString,
+		serverPowerSupplyMonitorCurrentOut		DisplayString,  
+	    serverPowerSupplyMonitorFWVersion       DisplayString
+	   }
+	
+	
+	serverPowerSupplyMonitorIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverPowerSupplyMonitorEntry 1} 
+	      
+	serverPowerSupplyMonitorName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power supply monitor name associated with the power supply monitor of this entry.
+		"
+		::= {serverPowerSupplyMonitorEntry 2} 
+	serverPowerSupplyMonitorPresent OBJECT-TYPE
+		SYNTAX 			Integer32{
+						absent(0),
+						prsent(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The power supply monitor status associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 3} 
+		  
+	serverPowerSupplyMonitorAlert OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 4} 
+			  
+	serverPowerSupplyMonitorTemp OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-recoverable threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 5}   
+				  
+	serverPowerSupplyMonitorPowerIn OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 6}
+	      		  
+	serverPowerSupplyMonitorPowerOut OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The lower non-critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 7}
+			  
+	serverPowerSupplyMonitorVoltIn OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 8}
+	      		  
+	serverPowerSupplyMonitorVoltOut OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 9}
+		  
+	serverPowerSupplyMonitorCurrentIn OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-recoverable threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 10}  
+	
+	serverPowerSupplyMonitorCurrentOut OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper non-critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 11}
+	      		  
+	serverPowerSupplyMonitorFWVersion OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The upper critical threshold associated with the power supply monitor of this entry .
+		"
+		::= {serverPowerSupplyMonitorEntry 12}
+	
+	
+	--serverBIOSSetupOptions 	start     
+	serverBIOSSetupOptionsTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverBIOSSetupOptionsEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	     The table of BIOS advanced options information relevant to this entity's BIOS advanced options.
+	    "
+		::= {serverBIOSSetupOptions 1}
+			
+	serverBIOSSetupOptionsEntry OBJECT-TYPE
+	    SYNTAX     serverBIOSSetupOptionsEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The BIOS advanced options information associated with the BIOS advanced options of this entry.
+	    "
+	    INDEX   { 
+	    		  serverBIOSSetupOptionsIndex,
+	    		  serverBIOSSetupOptions	                
+	            }
+	    ::= { serverBIOSSetupOptionsTable 1 }   
+	
+	serverBIOSSetupOptionsEntry ::= SEQUENCE {
+		serverBIOSSetupOptionsIndex				Integer32,
+	    serverBIOSSetupOptions			DisplayString,
+	    serverBIOSSetupOptionsValue	DisplayString
+	}
+		
+	serverBIOSSetupOptionsIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverBIOSSetupOptionsEntry 1} 
+	      
+	serverBIOSSetupOptions OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The BIOS advanced options Name associated with the BIOS advanced options of this entry.
+		"
+		::= {serverBIOSSetupOptionsEntry 2} 
+		  
+	serverBIOSSetupOptionsValue OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The reading value associated with the BIOS advanced options of this entry .
+		"
+		::= {serverBIOSSetupOptionsEntry 3} 	 
+	--serverBIOSSetupOptions 	end 
+	-- serverFRUInfo start 
+	serverFRUInfoTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverFRUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	     The table of FRU basic information relevant to this entity's FRU basic information.
+	    "
+		::= {serverFRUInfo 1}
+			
+	serverFRUInfoEntry OBJECT-TYPE
+	    SYNTAX     serverFRUInfoEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The FRU basic information associated with the FRU basic information of this entry.
+	    "
+	    INDEX   { 
+	    		  serverFRUInfoIndex,
+	    		  serverFRUInfoAttribute		                
+	            }
+	    ::= { serverFRUInfoTable 1 }   
+	
+	serverFRUInfoEntry ::= SEQUENCE {
+		serverFRUInfoIndex					Integer32,
+	    serverFRUInfoAttribute				DisplayString,
+	    serverFRUInfoSetupAttributeValue	DisplayString
+	}
+		
+	serverFRUInfoIndex OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverFRUInfoEntry 1} 
+	      
+	serverFRUInfoAttribute OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The attribute name associated with the FRU basic information of this entry.
+		"
+		::= {serverFRUInfoEntry 2} 
+		  
+	serverFRUInfoSetupAttributeValue OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The attribute value associated with the FRU basic information of this entry .
+		"
+		::= {serverFRUInfoEntry 3}	
+	-- serverFRUInfo end   
+	 --bmcNetwork start 
+	bmcNetworkDedicatedInterfaceTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF bmcNetworkDedicatedInterfaceEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The table of dedicated interface information relevant to this entity's dedicated interface.
+	    "
+		::= {bmcNetworkDedicatedInterface 1}
+			
+	bmcNetworkDedicatedInterfaceEntry OBJECT-TYPE
+	    SYNTAX     bmcNetworkDedicatedInterfaceEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "The dedicated interface information associated with the dedicated interface of this entry."
+	    INDEX   { 
+				  bmcNetworkDedicatedInterfaceIndex,
+	    		  bmcNetworkDedicatedInterfaceName		                
+	            }
+	    ::= { bmcNetworkDedicatedInterfaceTable 1 }   
+	
+	bmcNetworkDedicatedInterfaceEntry ::= SEQUENCE {
+		bmcNetworkDedicatedInterfaceIndex					Integer32,
+	    bmcNetworkDedicatedInterfaceName					DisplayString,
+	    bmcNetworkDedicatedInterfaceEnable					Integer32,
+		bmcNetworkDedicatedInterfaceMACAdress				PhysAddress,
+	    bmcNetworkDedicatedInterfaceIPv4ObtainMethodConf	Integer32,
+	    bmcNetworkDedicatedInterfaceIPv4Adress				IpAddress,
+	    bmcNetworkDedicatedInterfaceIPv4SubnetMask			IpAddress,
+	    bmcNetworkDedicatedInterfaceIPv4Gateway				IpAddress,
+		bmcNetworkDedicatedInterfaceVlanEnable				Integer32,
+		bmcNetworkDedicatedInterfaceVlanID					Integer32,
+		bmcNetworkDedicatedInterfaceVlanPriority			Integer32
+	}
+	bmcNetworkDedicatedInterfaceIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"  
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 1}           
+	         
+	bmcNetworkDedicatedInterfaceName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The interface name associated with the dedicated interface of this entry.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 2} 
+	
+	bmcNetworkDedicatedInterfaceEnable OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+					} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The dedicated interface enable associated with the dedicated interface of this entry.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 3}  
+	
+	bmcNetworkDedicatedInterfaceMACAdress OBJECT-TYPE
+		SYNTAX 			PhysAddress 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The MAC adress associated with the dedicated interface of this entry.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 4} 
+	
+	bmcNetworkDedicatedInterfaceIPv4ObtainMethodConf  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						static(1),
+						dhcp(2)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Obtain Method associated with the dedicated interface of this entry.
+			1 for static IP.
+			2 for DHCP.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 5} 
+	
+	bmcNetworkDedicatedInterfaceIPv4Adress OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 adress associated with the dedicated interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 6}
+	bmcNetworkDedicatedInterfaceIPv4SubnetMask OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 subnet mask associated with the dedicated interface of this entry.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 7}    
+	   
+	bmcNetworkDedicatedInterfaceIPv4Gateway OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Default gateway associated with the dedicated interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 8}    
+	
+	bmcNetworkDedicatedInterfaceVlanEnable OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+					} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan enable status associated with the dedicated interface of this entry.
+			If you want to enbaled the Vlan function,make sure you had configure the Vlan ID first.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 9}
+	
+	bmcNetworkDedicatedInterfaceVlanID OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan ID associated with the dedicated interface of this entry.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 10}
+	
+	bmcNetworkDedicatedInterfaceVlanPriority OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan priority associated with the dedicated interface of this entry.
+			If you want to confiure the Vlan priority,make sure you had enable the Vlan.
+			If you want to change the Vlan priority ,you should diabled Vlan and configure again.
+		"
+		::= {bmcNetworkDedicatedInterfaceEntry 11}       
+	       
+	       
+	--Shared   
+	--bmcNetworkSharedInterface
+	bmcNetworkSharedInterfaceTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF bmcNetworkSharedInterfaceEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "
+	           The table of shared interface information relevant to this entity's shared interface.
+	           "
+			::= {bmcNetworkSharedInterface 1}
+			
+	bmcNetworkSharedInterfaceEntry OBJECT-TYPE
+	    SYNTAX     bmcNetworkSharedInterfaceEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	           "
+	           The shared interface information associated with the shared interface of this entry.
+	           "
+	    INDEX   { 
+				  bmcNetworkSharedInterfaceIndex,
+	    		  bmcNetworkSharedInterfaceName		                
+	            }
+	    ::= { bmcNetworkSharedInterfaceTable 1 }   
+		
+	bmcNetworkSharedInterfaceEntry ::= SEQUENCE {
+		bmcNetworkSharedInterfaceIndex					Integer32,
+	    bmcNetworkSharedInterfaceName					DisplayString,
+		bmcNetworkSharedInterfaceEnable					Integer32,
+	    bmcNetworkSharedInterfaceMACAdress				PhysAddress,
+	    bmcNetworkSharedInterfaceIPv4ObtainMethodConf	Integer32,
+	    bmcNetworkSharedInterfaceIPv4Adress				IpAddress,
+	    bmcNetworkSharedInterfaceIPv4SubnetMask			IpAddress,
+	    bmcNetworkSharedInterfaceIPv4Gateway			IpAddress,
+		bmcNetworkSharedInterfaceVlanEnable				Integer32,
+		bmcNetworkSharedInterfaceVlanID					Integer32,
+		bmcNetworkSharedInterfaceVlanPriority			Integer32
+		
+	}
+	bmcNetworkSharedInterfaceIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"  
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 1}    
+		         
+		         
+	bmcNetworkSharedInterfaceName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The name of the interface
+		"
+		::= {bmcNetworkSharedInterfaceEntry 2} 
+		
+	bmcNetworkSharedInterfaceEnable OBJECT-TYPE
+		SYNTAX 			Integer32{
+							disable(0),
+							enable(1)
+						}  
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The interface name associated with the shared interface of this entry.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 3} 
+		
+	bmcNetworkSharedInterfaceMACAdress OBJECT-TYPE
+		SYNTAX 			PhysAddress 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The MAC Adress associated with the shared interface of this entry.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 4} 
+		
+	bmcNetworkSharedInterfaceIPv4ObtainMethodConf  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						static(1),
+						dhcp(2)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 obtain method associated with the shared interface of this entry .
+			1 for static IP.
+			2 for DHCP.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 5}   
+		
+	bmcNetworkSharedInterfaceIPv4Adress OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Adress associated with the shared interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkSharedInterfaceEntry 6}
+	bmcNetworkSharedInterfaceIPv4SubnetMask OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 subnet mask associated with the shared interface of this entry.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 7}    
+		  
+	bmcNetworkSharedInterfaceIPv4Gateway OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Default gateway associated with the shared interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkSharedInterfaceEntry 8}    
+		
+		
+	bmcNetworkSharedInterfaceVlanEnable OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+					} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan enable status associated with the shared interface of this entry.
+			If you want to enbaled the Vlan function,make sure you had configure the Vlan ID first.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 9}
+		
+	bmcNetworkSharedInterfaceVlanID OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan ID associated with the shared interface of this entry.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 10}
+		
+	bmcNetworkSharedInterfaceVlanPriority OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan priority associated with the shared interface of this entry.
+			If you want to confiure the Vlan priority,make sure you had enable the Vlan.
+			If you want to change the Vlan priority ,you should diabled Vlan and configure again.
+		"
+		::= {bmcNetworkSharedInterfaceEntry 11}  
+	    
+	--bond    
+	--bmcNetworkBondInterface  start 
+	bmcNetworkBondInterfaceTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF bmcNetworkBondInterfaceEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The table of bond interface information relevant to this entity's bond interface.
+	    "
+		::= {bmcNetworkBondInterface 1}
+				
+	bmcNetworkBondInterfaceEntry OBJECT-TYPE
+	   SYNTAX     bmcNetworkBondInterfaceEntry
+	   MAX-ACCESS read-only
+	   STATUS     current
+	   DESCRIPTION
+	          "
+	          The bond interface information associated with the bond interface of this entry.
+	          "
+	   INDEX   { 
+					bmcNetworkBondInterfaceIndex,
+	   		  		bmcNetworkBondInterfaceName		                
+	           }
+	   ::= { bmcNetworkBondInterfaceTable 1 }   
+	
+	bmcNetworkBondInterfaceEntry ::= SEQUENCE {
+		bmcNetworkBondInterfaceIndex					Integer32,
+	    bmcNetworkBondInterfaceName						DisplayString,
+	    bmcNetworkBondInterfaceMACAdress				PhysAddress,
+	    bmcNetworkBondInterfaceIPv4ObtainMethodConf		Integer32,
+	    bmcNetworkBondInterfaceIPv4Adress				IpAddress,
+	    bmcNetworkBondInterfaceIPv4SubnetMask			IpAddress,
+	    bmcNetworkBondInterfaceIPv4Gateway				IpAddress,
+		bmcNetworkBondInterfaceVlanEnable				Integer32,
+		bmcNetworkBondInterfaceVlanID					Integer32,
+		bmcNetworkBondInterfaceVlanPriority				Integer32
+	 } 
+
+	bmcNetworkBondInterfaceIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"  
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {bmcNetworkBondInterfaceEntry 1}    
+		         
+		         
+	bmcNetworkBondInterfaceName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The name of the interface
+		"
+		::= {bmcNetworkBondInterfaceEntry 2} 
+		
+		
+	bmcNetworkBondInterfaceMACAdress OBJECT-TYPE
+		SYNTAX 			PhysAddress 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The MAC Adress associated with the Bond interface of this entry.
+		"
+		::= {bmcNetworkBondInterfaceEntry 3} 
+		
+	bmcNetworkBondInterfaceIPv4ObtainMethodConf  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						static(1),
+						dhcp(2)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 obtain method associated with the Bond interface of this entry .
+			1 for static IP.
+			2 for DHCP.
+		"
+		::= {bmcNetworkBondInterfaceEntry 4}   
+		
+	bmcNetworkBondInterfaceIPv4Adress OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Adress associated with the Bond interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkBondInterfaceEntry 5}
+	bmcNetworkBondInterfaceIPv4SubnetMask OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 subnet mask associated with the Bond interface of this entry.
+		"
+		::= {bmcNetworkBondInterfaceEntry 6}    
+		  
+	bmcNetworkBondInterfaceIPv4Gateway OBJECT-TYPE
+		SYNTAX 			IpAddress 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The IPv4 Default gateway associated with the Bond interface of this entry.
+			If you want to set static ipaddress and the gateway is invalid for the new ipaddress,
+			you should set the gateway to 0.0.0.0 .
+		"
+		::= {bmcNetworkBondInterfaceEntry 7}    
+		
+		
+	bmcNetworkBondInterfaceVlanEnable OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+					} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan enable status associated with the Bond interface of this entry.
+			If you want to enbaled the Vlan function,make sure you had configure the Vlan ID first.
+		"
+		::= {bmcNetworkBondInterfaceEntry 8}
+		
+	bmcNetworkBondInterfaceVlanID OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan ID associated with the Bond interface of this entry.
+		"
+		::= {bmcNetworkBondInterfaceEntry 9}
+		
+	bmcNetworkBondInterfaceVlanPriority OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The vlan priority associated with the Bond interface of this entry.
+			If you want to confiure the Vlan priority,make sure you had enable the Vlan.
+			If you want to change the Vlan priority ,you should diabled Vlan and configure again.
+		"
+		::= {bmcNetworkBondInterfaceEntry 10}  
+	--bmcNetworkBondInterfaceConf start 	  
+	bmcNetworkBondInterfaceConf    OBJECT IDENTIFIER ::= {bmcNetworkBondInterface 2}	
+	bmcNetworkBondInterfaceEnable  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disableBond(0),
+						bondToEth0(1),
+						bondToEth1(2),
+						bondToBoth(3)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"	
+		The bond interface enable status of the bond interface. 
+		"
+		::= {bmcNetworkBondInterfaceConf 1} 		
+
+	--bmcNetworkBondInterfaceConf end 
+	--bmcNetworkInterfaceDNSConf  start 
+	--bmcNetworkInterfaceDNSHostConf        OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSConf 1}
+	--bmcNetworkInterfaceDNSRegister        OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSConf 2} 
+	--bmcNetworkInterfaceDNSDomainConf      OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSConf 3} 
+	--bmcNetworkInterfaceDNSDomainServerConf      OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSConf 4}   
+	bmcNetworkInterfaceDNSHostSetting  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						manual(0),
+						automatic(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The host setting of the BMC network interface DNS configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 1}  
+	bmcNetworkInterfaceDNSHostName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The host name of the BMC network interface DNS configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 2} 
+    
+    --bmcNetworkInterfaceDNSRegisterEth0     OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSRegister 1} 
+ 	bmcNetworkInterfaceDNSRegisterEth0Enable  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS eth0 enable of the BMC network interface DNS register.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 3}  
+     bmcNetworkInterfaceDNSRegisterEth0Conf  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						directDynamicDNS (0),
+						dhcpClientFQDN (1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS eth0 configuration of the BMC network interface DNS register.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 4}
+	--bmcNetworkInterfaceDNSRegisterEth1     OBJECT IDENTIFIER ::= {bmcNetworkInterfaceDNSRegister 2} 
+	bmcNetworkInterfaceDNSRegisterEth1Enable  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						disable(0),
+						enable(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS eth1 enable of the BMC network interface DNS register.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 5}  
+     bmcNetworkInterfaceDNSRegisterEth1Conf  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						directDynamicDNS (0),
+						dhcpClientFQDN (1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS eth1 configuration of the BMC network interface DNS register.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 6}    
+	--bmcNetworkInterfaceDNSDomainConf       Network Interface
+	bmcNetworkInterfaceDNSDomainNetworkInterface  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						manual (0),
+						eth0v4 (1),  
+						eth0v6 (2), 
+						eth1v4 (3),  
+						eth1v6 (4)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS domain network interface of the BMC network interface DNS domain configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 7}      
+	bmcNetworkInterfaceDNSDomainName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS domain name of the BMC network interface DNS domain configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 8}
+	--bmcNetworkInterfaceDNSDomainServerConf 
+	bmcNetworkInterfaceDNSDomainServerInterface  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						manual (0),
+						shared (1),  
+						dedicated (2)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS server interface of the BMC network interface DNS server configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 9}  
+	bmcNetworkInterfaceDNSDomainServerIPPriority  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						na(0),
+						ipv4 (1),
+						ipv6 (2)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS server IP priority of the BMC network interface DNS server configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 10}
+	bmcNetworkInterfaceDNSDomainServerIPaddr1  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS server IP address 1 of the BMC network interface DNS server configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 11}
+	bmcNetworkInterfaceDNSDomainServerIPaddr2  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS server IP address 2 of the BMC network interface DNS server configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 12} 
+	bmcNetworkInterfaceDNSDomainServerIPaddr3  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The DNS server IP address 3 of the BMC network interface DNS server configuration.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 13}	
+	bmcNetworkInterfaceDNSConfApply OBJECT-TYPE
+		SYNTAX 			Integer32{
+						apply(1)
+		}
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set 1 to make the configuration of DNS to apply.
+		read always return 0.	
+		"
+		::= {bmcNetworkInterfaceDNSConf 14}		
+	--bmcNetworkInterfaceDNSConf  end
+    --bmcNetworkInterfaceSNMPConf start
+	bmcNetworkInterfaceSNMPV3UserConf       OBJECT IDENTIFIER ::= {bmcNetworkInterfaceSNMPConf 1}
+
+	bmcNetworkInterfaceSNMPV3UserName OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The name of the SNMPv3 user you want to set.	
+		"
+		::= {bmcNetworkInterfaceSNMPV3UserConf 1}	
+	bmcNetworkInterfaceSNMPV3UserAuthProto OBJECT-TYPE
+		SYNTAX 			Integer32{
+						none(0),
+						sha(1),
+						md5(2)
+		}
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The authentication protocol of the SNMPv3 user you want to set.	
+		0 for without authentication protocol.
+		1 for SHA.
+		2 for MD5.
+		"
+		::= {bmcNetworkInterfaceSNMPV3UserConf 2}
+	bmcNetworkInterfaceSNMPV3UserAuthPassPhrase OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The authentication protocol pass phrase of the SNMPv3 user you want to set.
+		If you set authentication protocol to 0 ,you should not set authentication protocol pass phrase.	
+		"
+		::= {bmcNetworkInterfaceSNMPV3UserConf 3}
+	bmcNetworkInterfaceSNMPV3UserPrivProto OBJECT-TYPE
+		SYNTAX 			Integer32{
+						none(0),
+						des(1),
+						aes(2)
+		}
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The privacy protocol of the SNMPv3 user you want to set.	
+		0 for without privacy protocol.
+		1 for DES.
+		2 for AES.
+		"
+		::= {bmcNetworkInterfaceSNMPV3UserConf 4}
+	bmcNetworkInterfaceSNMPV3UserPrivPassPhrase OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The privacy protocol pass phrase of the SNMPv3 user you want to set.
+		If you set privacy protocol to 0 ,you should not set privacy protocol pass phrase.	
+		"
+		::= {bmcNetworkInterfaceSNMPV3UserConf 5}
+
+	bmcNetworkInterfaceSNMPVACMConf       OBJECT IDENTIFIER ::= {bmcNetworkInterfaceSNMPConf 2}
+
+	bmcNetworkInterfaceSNMPVerSupportConf OBJECT-TYPE
+		SYNTAX 			Integer32{
+					snmpv3Only(0),
+					all(1)
+		}
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP version support of the snmp server.
+		0 for only support SNMPv3.
+		1 for all,support SNMPv1/SNMPv2c/SNMv3.	
+		"
+		::= {bmcNetworkInterfaceSNMPVACMConf 1}	
+	bmcNetworkInterfaceSNMPCommunityConf OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP v1/v2c community of the snmp server.
+		"
+		::= {bmcNetworkInterfaceSNMPVACMConf 2}	
+		
+	bmcNetworkInterfaceSNMPSystemNameConf OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP v1/v2c system name of the snmp server.
+		"
+		::= {bmcNetworkInterfaceSNMPVACMConf 3}	
+
+	bmcNetworkInterfaceSNMPV1V2cSetEnableConf OBJECT-TYPE
+		SYNTAX 			Integer32{
+					disable(0),
+					enable(1)
+		}
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP v1/v2c set enable of the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPVACMConf 4}	
+
+	bmcNetworkInterfaceSNMPIPAccessContol OBJECT-TYPE
+		SYNTAX 			Integer32{
+					default(0),
+					specify(1)
+		}
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP IP address access contol support of the snmp server.
+		0 for default , allow any IP to access the snmp server .
+		1 for specify , only allow the specify IP address to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPVACMConf 6}	
+
+	bmcNetworkInterfaceSNMPAllowedIPAddress  OBJECT IDENTIFIER ::= {bmcNetworkInterfaceSNMPConf  7}
+
+	bmcNetworkInterfaceSNMPAllowedIPAddressStart1 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address start 1 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 1}	
+	bmcNetworkInterfaceSNMPAllowedIPAddressEnd1 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address end 1 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 2}	
+	bmcNetworkInterfaceSNMPAllowedIPAddressStart2 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address start 2 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 3}	
+	bmcNetworkInterfaceSNMPAllowedIPAddressEnd2 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address end 2 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 4}	
+	bmcNetworkInterfaceSNMPAllowedIPAddressStart3 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address start 3 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 5}	
+	bmcNetworkInterfaceSNMPAllowedIPAddressEnd3 OBJECT-TYPE
+		SYNTAX 			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the IP address end 3 whitch allowed to access the snmp server.	
+		"
+		::= {bmcNetworkInterfaceSNMPAllowedIPAddress 6}	
+
+	bmcNetworkInterfaceSNMPConfTakeEffect OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the SNMP conf to take effect.
+		0 for read, read always return 0. 
+		1 for take effect.	
+		"
+		::= {bmcNetworkInterfaceSNMPConf 99}	
+
+	--bmcNetworkInterfaceSNMPConf end 
+
+	--NTP START 
+	--serverBMCNTPConf         OBJECT IDENTIFIER ::= {serverBMCSettings 3}
+	bmcNTPDateAndTime  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		The date and time of the BMC.	
+		"
+		::= {serverBMCNTPConf 1} 
+	bmcNTPAutoSync  OBJECT-TYPE
+		SYNTAX 			Integer32{
+						manual(0),
+						auto(1)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The auto sync enable status of the NTP conf.	
+		"
+		::= {serverBMCNTPConf 2} 
+	bmcNTPServer OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The NTP server of the NTP conf.			
+		"
+		::= {serverBMCNTPConf 3} 
+	bmcNTPUTCTimezone OBJECT-TYPE
+		SYNTAX 			Integer32(-720..720)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The UTC time zone of the NTP config.	
+		"
+		::= {serverBMCNTPConf 4} 
+	bmcNTPDateYear OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The year of the NTP conf.	
+		"
+		::= {serverBMCNTPConf 5} 
+	bmcNTPDateMonth OBJECT-TYPE
+		SYNTAX 			Integer32 (1..12)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The month of the NTP conf	
+		"
+		::= {serverBMCNTPConf 6} 
+	bmcNTPDateDay OBJECT-TYPE
+		SYNTAX 			Integer32 (1..31)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The day of the NTP conf	
+		"
+		::= {serverBMCNTPConf 7} 
+	bmcNTPTimeHour OBJECT-TYPE
+		SYNTAX 			Integer32 (0..23)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The hour of the NTP conf	
+		"
+		::= {serverBMCNTPConf 8}
+	bmcNTPTimeMinite OBJECT-TYPE
+		SYNTAX 			Integer32 (0..59)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The minite of the NTP conf	
+		"
+		::= {serverBMCNTPConf 9}
+	bmcNTPTimeSecond OBJECT-TYPE
+		SYNTAX 			Integer32 (0..59)
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+		The second of the NTP conf	
+		"
+		::= {serverBMCNTPConf 10}  
+	--serverBMCUserConf        OBJECT IDENTIFIER ::= {serverBMCSettings 8}
+	serverBMCUserConfTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverBMCUserConfEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The table of BMC user information relevant to this entity's user ID.
+	    "
+		::= {serverBMCUserConf 1}   
+	serverBMCUserSetConf        OBJECT IDENTIFIER ::= {serverBMCUserConf 2}
+				
+	serverBMCUserConfEntry OBJECT-TYPE
+	   SYNTAX     serverBMCUserConfEntry
+	   MAX-ACCESS read-only
+	   STATUS     current
+	   DESCRIPTION
+	          "
+	          The BMC user information associated with the user ID of this entry.
+	          "
+	   INDEX   { 
+					serverBMCUserConfIndex,
+	   		  		serverBMCUserConfUsername		                
+	           }
+	   ::= { serverBMCUserConfTable 1 }   
+	
+	serverBMCUserConfEntry ::= SEQUENCE {
+		serverBMCUserConfIndex			Integer32,
+	    serverBMCUserConfUserID			DisplayString,
+	    serverBMCUserConfUsername			DisplayString,
+	    serverBMCUserConfUserAccess			DisplayString,
+	    serverBMCUserConfNetworkPrivilege		DisplayString,
+	    serverBMCUserConfSNMPStatus			DisplayString,
+	    serverBMCUserConfEmailID			DisplayString,
+	    serverBMCUserConfGroupName			DisplayString,
+	    serverBMCUserConfGroupID			DisplayString,
+	 } 
+	 
+	serverBMCUserConfIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"  
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverBMCUserConfEntry 1}    
+	          
+	          
+	serverBMCUserConfUserID OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user ID associated with the user ID of this entry.		
+		"
+		::= {serverBMCUserConfEntry 2} 
+	
+	serverBMCUserConfUsername OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user name associated with the user ID of this entry.
+		"
+		::= {serverBMCUserConfEntry 3} 
+	
+	serverBMCUserConfUserAccess OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user access associated with the user ID of this entry.
+		"
+		::= {serverBMCUserConfEntry 4}  
+		
+	serverBMCUserConfNetworkPrivilege OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user network privilege associated with the user ID of this entry.
+		"
+		::= {serverBMCUserConfEntry 5}    
+	   
+	serverBMCUserConfSNMPStatus OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user SNMP status associated with the user ID of this entry.
+		"
+		::= {serverBMCUserConfEntry 6}    
+	   
+	serverBMCUserConfEmailID  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Email ID associated with the user ID of this entry.		"
+		::= {serverBMCUserConfEntry 7}	 
+	   
+	serverBMCUserConfGroupName  OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user group name associated with the user ID of this entry.		"
+		::= {serverBMCUserConfEntry 8}	
+
+	serverBMCUserConfGroupID  OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user group ID associated with the user ID of this entry.		"
+		::= {serverBMCUserConfEntry 9}	  
+	--	serverBMCUserSetConf
+	serverBMCUserConfSetUserID OBJECT-TYPE
+		SYNTAX 			Integer32(1..16) 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user ID of the user to set.		
+		"
+		::= {serverBMCUserSetConf 1}  
+	serverBMCUserConfSetUserName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user ID of the user to set.		
+		"
+		::= {serverBMCUserSetConf 2} 
+	serverBMCUserConfSetUserPasswdLength OBJECT-TYPE
+		SYNTAX 			Integer32{
+						Bytes16(16),
+						Bytes20(20)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user password length of the user to set.		
+		"
+		::= {serverBMCUserSetConf 3}  
+	serverBMCUserConfSetUserPasswd OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user password of the user to set.		
+		"
+		::= {serverBMCUserSetConf 4}
+	--serverBMCUserConfSetUserPasswdConfirm OBJECT-TYPE
+	--	SYNTAX 			DisplayString 
+	--	MAX-ACCESS		read-write
+	--	STATUS			current
+	--	DESCRIPTION 
+	--	"
+	--		The user password confirm of the user to set.		
+	--	"
+	--	::= {serverBMCUserSetConf 5}
+	serverBMCUserConfSetUserAccess OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			disable(0),
+			            enable(1)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user access of the user to set.		
+		"
+		::= {serverBMCUserSetConf 6}  
+	serverBMCUserConfSetUserNetworkPrivilege OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			administrator(4),
+			            operator(3),
+			            user(2),
+			            oemProprietary(5),
+			            noAccess(15)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user network privilege of the user to set.		
+		"
+		::= {serverBMCUserSetConf 7}   
+	serverBMCUserConfSetUserEmailID OBJECT-TYPE
+		SYNTAX 			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user email ID of the user to set.		
+		"
+		::= {serverBMCUserSetConf 8} 
+	serverBMCUserConfDeleteUser OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			deleteUser(0)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user want to delete.
+			write 0 to delete the user.
+			read always return 0xff;		
+		"
+		::= {serverBMCUserSetConf 9} 	
+
+	serverBMCUserConfSetUserGroupID OBJECT-TYPE
+		SYNTAX 			Integer32(1..16) 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user group ID of the user to set.		
+		"
+		::= {serverBMCUserSetConf 10} 
+
+	--serverBMCUserGroupConf        OBJECT IDENTIFIER ::= {serverBMCSettings 9}
+	serverBMCUserGroupConfTable	OBJECT-TYPE
+	    SYNTAX     SEQUENCE OF serverBMCUserGroupConfEntry
+	    MAX-ACCESS read-only
+	    STATUS     current
+	    DESCRIPTION
+	    "
+	    The table of BMC user information relevant to this entity's user ID.
+	    "
+		::= {serverBMCUserConf 3}   
+	serverBMCUserGroupSetConf        OBJECT IDENTIFIER ::= {serverBMCUserConf 4}
+				
+	serverBMCUserGroupConfEntry OBJECT-TYPE
+	   SYNTAX     serverBMCUserGroupConfEntry
+	   MAX-ACCESS read-only
+	   STATUS     current
+	   DESCRIPTION
+	          "
+	          The BMC user information associated with the user ID of this entry.
+	          "
+	   INDEX   { 
+					serverBMCUserGroupConfIndex,
+	   		  		serverBMCUserGroupConfUserGroupname		                
+	           }
+	   ::= { serverBMCUserGroupConfTable 1 }   
+	
+	serverBMCUserGroupConfEntry ::= SEQUENCE {
+		serverBMCUserGroupConfIndex			Integer32,
+	    serverBMCUserGroupConfUserGroupID			Integer32,
+	    serverBMCUserGroupConfUserGroupname			DisplayString,
+	    serverBMCUserGroupConfGroupNetworkPrivilege		Integer32,
+	 } 
+	 
+	serverBMCUserGroupConfIndex  OBJECT-TYPE
+		SYNTAX 			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"  
+			The index value which uniquely identifies 
+			the interface to which this entry is applicable.
+		"
+		::= {serverBMCUserGroupConfEntry 1}    
+	          
+	          
+	serverBMCUserGroupConfUserGroupID OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group ID associated with the user Group ID of this entry.		
+		"
+		::= {serverBMCUserGroupConfEntry 2} 
+	
+	serverBMCUserGroupConfUserGroupname OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group name associated with the user Group ID of this entry.
+		"
+		::= {serverBMCUserGroupConfEntry 3} 
+	
+		
+	serverBMCUserGroupConfGroupNetworkPrivilege OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			administrator(4),
+			            operator(3),
+			            user(2),
+			            oemProprietary(5),
+			            noAccess(15)
+		}
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group network privilege associated with the user Group ID of this entry.
+		"
+		::= {serverBMCUserGroupConfEntry 4}    
+	   
+	--serverBMCUserGroupSetConf
+	serverBMCUserGroupConfSetUserGroupID OBJECT-TYPE
+		SYNTAX 			Integer32(1..16) 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group ID of the user Group to set.		
+		"
+		::= {serverBMCUserGroupSetConf 1}  
+	serverBMCUserGroupConfSetUserGroupName OBJECT-TYPE
+		SYNTAX 			DisplayString 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group Name of the user Group to set.		
+		"
+		::= {serverBMCUserGroupSetConf 2} 
+	
+	serverBMCUserGroupConfSetUserGroupNetworkPrivilege OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			administrator(4),
+			            operator(3),
+			            user(2),
+			            oemProprietary(5),
+			            noAccess(15)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user Group network privilege of the user to set.		
+		"
+		::= {serverBMCUserGroupSetConf 3}   
+
+	serverBMCUserGroupConfSetUserGroupDelete OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			deleteGroup(0)
+		} 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION 
+		"
+			The user group want to delete.
+			write 0 to delete the user group.
+			return always return 255;	
+		"
+		::= {serverBMCUserGroupSetConf 100} 
+	--serverPowerControl      start
+	serverPowerStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			powerOff(0),
+			                powerOn(1)
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		Get the server current  status of the power for read.			
+		0 for server power off;
+		1 for server power on;					
+		"
+		::= {serverPowerControl 1}  
+	serverPowerStatusControl OBJECT-TYPE
+		SYNTAX 			Integer32{
+		    			powerOff(0),
+			                powerOn(1),
+					powerCycle(2),
+					warmReset(3),
+					powerForceOff(4)
+		} 
+		MAX-ACCESS		write-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the server current status of the power .	
+		0 for set server power off;
+		1 for set server power on;
+		2 for set server power cycle;
+		3 for set server warmreset;
+		4 for set server power force off;	
+		read always return 0xff;				
+		"
+		::= {serverPowerControl 2}  
+	--serverPowerControl      end
+	--serverLocatedControl    start
+	serverIDLEDStatus OBJECT-TYPE
+		SYNTAX 			Integer32{
+						ledOff(0),
+							ledOn(1),
+		} 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		Get the system ID LED  status.			
+		0 for system ID LED  power off;
+		1 for system ID LED  power on;	
+		"
+		::= {serverLocatedControl 1} 
+	serverIDLEDStatusControl OBJECT-TYPE
+		SYNTAX 			Integer32 
+		MAX-ACCESS		write-only
+		STATUS			current
+		DESCRIPTION 
+		"
+		Set the system ID LED  status.			
+		0 for system ID LED  power off;
+		other for system ID LED  power on time (seconds);	
+		read always return 0xff;				
+		"
+		::= {serverLocatedControl 2}   
+	--serverLocatedControl    end
+
+
+END
