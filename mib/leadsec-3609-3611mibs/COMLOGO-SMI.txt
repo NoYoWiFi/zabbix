@@ -1,0 +1,60 @@
+COMLOGO-SMI DEFINITIONS ::= BEGIN 
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, 
+    enterprises                        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION                 FROM SNMPv2-TC;
+
+leadsec MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Structure of Management Information for Beijing Comlogo Technology Co."
+    ::= { enterprises 15227 }
+
+--
+-- Comlogo MIB tree structure
+--
+
+Products OBJECT-IDENTITY
+    STATUS  current
+    DESCRIPTION
+            "The root of comlogo's security MIB objects."
+    ::= { leadsec 1 }
+
+Common OBJECT-IDENTITY
+    STATUS  current
+    DESCRIPTION
+            "The root of comlogo's Common MIB objects."
+    ::= { leadsec 200 }
+
+Snmptrap OBJECT-IDENTITY
+    STATUS  current
+    DESCRIPTION
+            "The root of comlogo's snmp trap MIB objects."
+    ::= { leadsec 300 }
+
+lnvSNMP OBJECT-IDENTITY
+    STATUS  current
+    DESCRIPTION
+            "The root of comlogo's SNMP objects."
+    ::= { leadsec 350 }
+
+NetAddressIPv4::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1d.1d.1d.1d/1d"
+    STATUS       current
+    DESCRIPTION
+        "Represents a non-global IPv4 network address together
+         with its zone index:
+
+           octets   contents         encoding
+            1-4     IPv4 address     network-byte order
+            5       prefix           network-byte order"
+
+    SYNTAX OCTET STRING (SIZE (5))
+
+END
+
+

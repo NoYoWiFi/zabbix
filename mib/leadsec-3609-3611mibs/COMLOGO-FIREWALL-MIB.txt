@@ -1,0 +1,24 @@
+COMLOGO-FIREWALL-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32,
+    IpAddress                                   FROM SNMPv2-SMI
+    DisplayString, DateAndTime                  FROM SNMPv2-TC
+    Products 									FROM COMLOGO-SMI;
+
+lnvFirewall MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for firewall information."
+    ::= { Products 22}
+
+--
+-- Firewall information
+--
+
+END
+
+
