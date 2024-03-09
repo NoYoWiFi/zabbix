@@ -60,7 +60,7 @@ case ${option} in
     if [ ! -d "/etc/yum.repos.d/bak/" ]; then
         mkdir /etc/yum.repos.d/bak/
         mv /etc/yum.repos.d/* /etc/yum.repos.d/bak/
-        tar -zxvf ./patch/repos.tar.gz -C /etc/yum.repos.d/
+        tar -zxvf ./patch/rockylinux_8/repos.tar.gz -C /etc/yum.repos.d/
     fi
     yum install -y yum-utils \
         device-mapper-persistent-data \
@@ -115,11 +115,8 @@ update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=d
 if [ ! -f "./Dockerfiles/build-base/centos/go1.19.13.linux-amd64.tar.gz" ]; then
     \cp ./patch/go1.19.13.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
 fi
-if [ ! -f "./Dockerfiles/build-base/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/build-base/centos/
-fi
-sed -i -e "/^ADD/,+2d" "$ZABBIX_BUILD_BASE"
-sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\nADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_BUILD_BASE
+sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_BASE"
+sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
 sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
@@ -151,9 +148,6 @@ zabbix_server_mysql() {
 if [ ! -f "./Dockerfiles/server-mysql/centos/zbx_db_partitiong.sql" ]; then
     \cp ./patch/zbx_db_partitiong.sql ./Dockerfiles/server-mysql/centos/
 fi
-if [ ! -f "./Dockerfiles/server-mysql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/server-mysql/centos/
-fi
 if [ ! -f "./Dockerfiles/server-mysql/centos/pip.sh" ]; then
     \cp ./patch/pip.sh ./Dockerfiles/server-mysql/centos/
 fi
@@ -162,8 +156,8 @@ if [ ! -f "./Dockerfiles/server-mysql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; 
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_MYSQL
 update_config_var $ZABBIX_SERVER_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+4d" "$ZABBIX_SERVER_MYSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_SERVER_MYSQL
+sed -i -e "/^ADD/,+3d" "$ZABBIX_SERVER_MYSQL"
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_SERVER_MYSQL
 sed -i -e "/    dnf -y clean all/d" "$ZABBIX_SERVER_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_MYSQL"
 sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_MYSQL
@@ -232,17 +226,14 @@ fi
 if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]}" ]; then
     \cp ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./Dockerfiles/web-nginx-mysql/centos/
 fi
-if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-mysql/centos/
-fi
 if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/nginx.sh" ]; then
     \cp ./patch/nginx.sh ./Dockerfiles/web-nginx-mysql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_MYSQL
 update_config_var $WEB_NGINX_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+2d" $WEB_NGINX_MYSQL
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_MYSQL
-#sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
+sed -i -e "/^ADD/,+1d" $WEB_NGINX_MYSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_MYSQL
+#sed -i '/STOPSIGNAL SIGTERM/i ADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
 # sed -i -e "/    sh \/tmp\/nginx.sh/d" $WEB_NGINX_MYSQL
 # sed -i -e "/    dnf -y clean all/d" $WEB_NGINX_MYSQL
 # sed -i '/EXPOSE 8080/i\    dnf -y clean all && \\\n    sh /tmp/nginx.sh\n' $WEB_NGINX_MYSQL
@@ -288,14 +279,9 @@ esac
 }
 
 zabbix_agent2() {
-if [ ! -f "./Dockerfiles/agent2/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/agent2/centos/
-fi
 # \cp ./patch/agent2.sh ./Dockerfiles/agent2/centos/
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_AGENT2"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_AGENT2
 # sed -i -e "/    sh \/tmp\/agent2.sh/d" "$ZABBIX_AGENT2"
 # sed -i '/REPOLIST=/i \    sh /tmp/agent2.sh && \\' $ZABBIX_AGENT2
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
@@ -305,29 +291,16 @@ update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_C
 }
 
 zabbix_snmptraps() {
-if [ ! -f "./Dockerfiles/snmptraps/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/snmptraps/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_SNMPTRAPS"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_SNMPTRAPS
 }
 
 zabbix_java_gateway() {
-if [ ! -f "./Dockerfiles/java-gateway/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/java-gateway/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_JAVA_GATEWAY"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_JAVA_GATEWAY
 }
 
 zabbix_proxy_mysql() {
-if [ ! -f "./Dockerfiles/proxy-mysql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/proxy-mysql/centos/
-fi
 if [ ! -f "./Dockerfiles/proxy-mysql/centos/zbx_db_partitiong.sql" ]; then
     \cp ./patch/zbx_db_partitiong.sql ./Dockerfiles/proxy-mysql/centos/
 fi
@@ -339,8 +312,8 @@ if [ ! -f "./Dockerfiles/proxy-mysql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; t
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_MYSQL
 update_config_var $ZABBIX_PROXY_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+4d" "$ZABBIX_PROXY_MYSQL"
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_PROXY_MYSQL
+sed -i -e "/^ADD/,+3d" "$ZABBIX_PROXY_MYSQL"
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_PROXY_MYSQL
 sed -i -e "/    dnf -y clean all/d" "$ZABBIX_PROXY_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_MYSQL"
 sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
@@ -403,13 +376,8 @@ sed -i "${NUMINDEX}i\\$var_value_01" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 }
 
 zabbix_web_service() {
-if [ ! -f "./Dockerfiles/web-service/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/web-service/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_WEB_SERVICE"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_WEB_SERVICE
 }
 
 escape_spec_char() {

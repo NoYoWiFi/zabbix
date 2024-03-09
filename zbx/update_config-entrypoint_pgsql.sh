@@ -62,7 +62,7 @@ case ${option} in
     if [ ! -d "/etc/yum.repos.d/bak/" ]; then
         mkdir /etc/yum.repos.d/bak/
         mv /etc/yum.repos.d/* /etc/yum.repos.d/bak/
-        tar -zxvf ./patch/repos.tar.gz -C /etc/yum.repos.d/
+        tar -zxvf ./patch/rockylinux_8/repos.tar.gz -C /etc/yum.repos.d/
     fi
     yum install -y yum-utils \
         device-mapper-persistent-data \
@@ -114,11 +114,8 @@ update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=d
 if [ ! -f "./Dockerfiles/build-base/centos/go1.19.13.linux-amd64.tar.gz" ]; then
     \cp ./patch/go1.19.13.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
 fi
-if [ ! -f "./Dockerfiles/build-base/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/build-base/centos/
-fi
-sed -i -e "/^ADD/,+2d" "$ZABBIX_BUILD_BASE"
-sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\nADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_BUILD_BASE
+sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_BASE"
+sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
 sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
@@ -150,9 +147,6 @@ sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_PGSQL
 }
 
 zabbix_server_pgsql() {
-if [ ! -f "./Dockerfiles/server-pgsql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/server-pgsql/centos/
-fi
 if [ ! -f "./Dockerfiles/server-pgsql/centos/pip.sh" ]; then
     \cp ./patch/pip.sh ./Dockerfiles/server-pgsql/centos/
 fi
@@ -162,11 +156,11 @@ fi
 \cp ./patch/timescaledb.sql ./Dockerfiles/server-pgsql/centos/
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_PGSQL
 update_config_var $ZABBIX_SERVER_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+4d" "$ZABBIX_SERVER_PGSQL"
+sed -i -e "/^ADD/,+3d" "$ZABBIX_SERVER_PGSQL"
 #3ADD
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD timescaledb.sql /usr/share/doc/zabbix-server-postgresql/timescaledb.sql\n' $ZABBIX_SERVER_PGSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD timescaledb.sql /usr/share/doc/zabbix-server-postgresql/timescaledb.sql\n' $ZABBIX_SERVER_PGSQL
 #4ADD
-#sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_SERVER_PGSQL
+#sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_SERVER_PGSQL
 sed -i -e "/    dnf -y clean all/d" "$ZABBIX_SERVER_PGSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_PGSQL"
 sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
@@ -174,9 +168,6 @@ sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBI
 
 zabbix_proxy_pgsql() {
 \cp -vrf ./Dockerfiles/server-pgsql ./Dockerfiles/proxy-pgsql
-if [ ! -f "./Dockerfiles/proxy-pgsql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/proxy-pgsql/centos/
-fi
 if [ ! -f "./Dockerfiles/proxy-pgsql/centos/pip.sh" ]; then
     \cp ./patch/pip.sh ./Dockerfiles/proxy-pgsql/centos/
 fi
@@ -216,11 +207,11 @@ sed -i -e 's|prepare_server|prepare_proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
 
 
 update_config_var $ZABBIX_PROXY_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+4d" "$ZABBIX_PROXY_PGSQL"
+sed -i -e "/^ADD/,+3d" "$ZABBIX_PROXY_PGSQL"
 #3ADD
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD timescaledb.sql /usr/share/doc/zabbix-proxy-postgresql/timescaledb.sql\n' $ZABBIX_PROXY_PGSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD timescaledb.sql /usr/share/doc/zabbix-proxy-postgresql/timescaledb.sql\n' $ZABBIX_PROXY_PGSQL
 #4ADD
-#sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD repos.tar.gz /etc/yum.repos.d/\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_PGSQL
+#sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_PGSQL
 sed -i -e "/    dnf -y clean all/d" "$ZABBIX_PROXY_PGSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_PGSQL"
 sed -i '/EXPOSE 10051/i\    dnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_PGSQL
@@ -233,17 +224,14 @@ fi
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]}" ]; then
     \cp ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./Dockerfiles/web-nginx-pgsql/centos/
 fi
-if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/web-nginx-pgsql/centos/
-fi
 if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/nginx.sh" ]; then
     \cp ./patch/nginx.sh ./Dockerfiles/web-nginx-pgsql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_PGSQL
 update_config_var $WEB_NGINX_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+2d" $WEB_NGINX_PGSQL
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_PGSQL
-#sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\nADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_PGSQL
+sed -i -e "/^ADD/,+1d" $WEB_NGINX_PGSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_PGSQL
+#sed -i '/STOPSIGNAL SIGTERM/i ADD simkai.ttf /usr/share/zabbix/assets/fonts/\nADD nginx.sh /tmp/nginx.sh\n' $WEB_NGINX_PGSQL
 #sed -i -e "/    sh \/tmp\/nginx.sh/d" $WEB_NGINX_PGSQL
 #sed -i -e "/    dnf -y clean all/d" $WEB_NGINX_PGSQL
 #sed -i '/EXPOSE 8080/i\    dnf -y clean all && \\\n    sh /tmp/nginx.sh\n' $WEB_NGINX_PGSQL
@@ -289,47 +277,27 @@ esac
 }
 
 zabbix_agent2() {
-if [ ! -f "./Dockerfiles/agent2/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/agent2/centos/
-fi
 update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_AGENT2"
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
 sed -i '/best/a\        --allowerasing \\' $ZABBIX_AGENT2
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\""
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\""
 }
 
 zabbix_snmptraps() {
-if [ ! -f "./Dockerfiles/snmptraps/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/snmptraps/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_SNMPTRAPS"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_SNMPTRAPS
 }
 
 zabbix_java_gateway() {
-if [ ! -f "./Dockerfiles/java-gateway/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/java-gateway/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_JAVA_GATEWAY"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_JAVA_GATEWAY
 }
 
 zabbix_web_service() {
-if [ ! -f "./Dockerfiles/web-service/centos/repos.tar.gz" ]; then
-    \cp ./patch/repos.tar.gz ./Dockerfiles/web-service/centos/
-fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_WEB_SERVICE"
-sed -i '/STOPSIGNAL SIGTERM/i ADD repos.tar.gz /etc/yum.repos.d/\n' $ZABBIX_WEB_SERVICE
 }
 
 escape_spec_char() {
