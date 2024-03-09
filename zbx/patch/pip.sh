@@ -1,5 +1,17 @@
 #/bin/bash
-yum -y install python3
+set -eux && \
+INSTALL_PKGS="python3 \
+        python3-pip" && \
+microdnf -y install \
+    --disablerepo "*" \
+    --enablerepo "baseos" \
+    --enablerepo "appstream" \
+    --enablerepo "crb" \
+    --enablerepo="epel" \
+    --setopt=install_weak_deps=0 \
+    --setopt=keepcache=0 \
+    --best \
+    --nodocs ${INSTALL_PKGS}
 mkdir ~/.pip
 touch ~/.pip/pip.conf
 cat > ~/.pip/pip.conf << EOF

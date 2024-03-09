@@ -141,7 +141,7 @@ sed -i -e "/mkdir \/tmp\/fonts\//d" "$ZABBIX_BUILD_MYSQL"
 sed -i '/RUN/i ADD NotoSansCJKjp-hinted.zip /tmp/fonts/\n' $ZABBIX_BUILD_MYSQL
 sed -i '/    cp \/tmp\/create_server.sql.gz/d' $ZABBIX_BUILD_MYSQL
 sed -i '/    strip \/tmp\/zabbix-\${ZBX_VERSION}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create_server.sql.gz database/mysql/create_server.sql.gz && \\' $ZABBIX_BUILD_MYSQL
-sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn && \\\n    go env -w GOPROXY=https://goproxy.cn && \\' $ZABBIX_BUILD_MYSQL
+sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn,direct && \\\n    go env -w GO111MODULE=on && \\\n    go env -w GOPROXY=https://goproxy.cn,direct && \\' $ZABBIX_BUILD_MYSQL
 sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_MYSQL
 }
 
