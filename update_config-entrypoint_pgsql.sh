@@ -20,8 +20,10 @@ set +e
 # Script trace mode
 set -o xtrace
 
-GV_VERSION=$(cat ./patch/.version)
-GV_VERSION_DOCKER=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
+GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 
 help() {
 	awk -F'### ' '/^###/ { print $2 }' "$0"

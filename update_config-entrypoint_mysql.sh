@@ -19,16 +19,16 @@ set +e
 
 # Script trace mode
 set -o xtrace
-
-GV_VERSION=$(cat ./patch/.version)
-GV_VERSION_DOCKER=$(cat ./patch/.version_docker)
+GV_ENV_SHELL="./patch/.env_shell"
+source ./patch/getEnv.sh
+GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
+GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 
 help() {
 	awk -F'### ' '/^###/ { print $2 }' "$0"
 }
 
 init() {
-sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_mysql_local.yaml
 chmod 755 -R ./
 option=$(cat /etc/redhat-release | cut -c 22)
 if [[ " " == "${option}" ]]; then
