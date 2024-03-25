@@ -1,0 +1,32 @@
+{
+    "zabbix_export": {
+        "version": "6.0",
+        "date": "2024-03-02T14:36:02Z",
+        "media_types": [
+            {
+                "name": "\u77ed\u4fe1\u544a\u8b66",
+                "type": "SCRIPT",
+                "script_name": "sms.py",
+                "parameters": [
+                    "{ALERT.SENDTO}",
+                    "{ALERT.SUBJECT}",
+                    "{ALERT.MESSAGE}"
+                ],
+                "message_templates": [
+                    {
+                        "event_source": "TRIGGERS",
+                        "operation_mode": "PROBLEM",
+                        "subject": "\u6545\u969c: {EVENT.NAME}",
+                        "message": "{ITEM.VALUE1}"
+                    },
+                    {
+                        "event_source": "TRIGGERS",
+                        "operation_mode": "RECOVERY",
+                        "subject": "\u6062\u590d: {EVENT.NAME}",
+                        "message": "{ITEM.VALUE1}"
+                    }
+                ]
+            }
+        ]
+    }
+}

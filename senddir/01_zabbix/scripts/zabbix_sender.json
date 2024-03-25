@@ -1,0 +1,209 @@
+{
+    "zabbix_export": {
+        "version": "6.0",
+        "date": "2023-09-19T06:33:31Z",
+        "groups": [
+            {
+                "uuid": "6f6799aa69e844b4b3918f779f2abf08",
+                "name": "Zabbix servers"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "b48cf2b0aecc4b96a461aac3f0242c45",
+                "template": "zabbix_sender",
+                "name": "zabbix_sender",
+                "groups": [
+                    {
+                        "name": "Zabbix servers"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "11a92370541942e089f8cbba68ae4d56",
+                        "name": "get discovery",
+                        "type": "EXTERNAL",
+                        "key": "zabbix_sender.py[\"--type=ssh\",\"--ip={$HOST.IP}\",\"--port={$STORWIZE_PORT}\",\"--user={$STORWIZE_USER}\",\"--pwd={$STORWIZE_PASSWORD}\",\"--host={HOST.NAME}\",\"--discovery\"]",
+                        "delay": "30m",
+                        "request_method": "POST"
+                    },
+                    {
+                        "uuid": "ae9f5506d5cd4e6f9adcbc6dfb059822",
+                        "name": "get status",
+                        "type": "EXTERNAL",
+                        "key": "zabbix_sender.py[\"--type=ssh\",\"--ip={$HOST.IP}\",\"--port={$STORWIZE_PORT}\",\"--user={$STORWIZE_USER}\",\"--pwd={$STORWIZE_PASSWORD}\",\"--host={HOST.NAME}\",\"--status\"]",
+                        "delay": "3m",
+                        "request_method": "POST"
+                    },
+                    {
+                        "uuid": "bd509d76e23d4b52ba64816364b3bcb0",
+                        "name": "get discovery",
+                        "type": "EXTERNAL",
+                        "key": "zabbix_sender.py[\"--type=telnet\",\"--ip={$HOST.IP}\",\"--port={$STORWIZE_PORT}\",\"--user={$STORWIZE_USER}\",\"--pwd={$STORWIZE_PASSWORD}\",\"--host={HOST.NAME}\",\"--discovery\"]",
+                        "delay": "30m"
+                    },
+                    {
+                        "uuid": "4beec366046f4f008f4a4d1eb67ac678",
+                        "name": "get status",
+                        "type": "EXTERNAL",
+                        "key": "zabbix_sender.py[\"--type=telnet\",\"--ip={$HOST.IP}\",\"--port={$STORWIZE_PORT}\",\"--user={$STORWIZE_USER}\",\"--pwd={$STORWIZE_PASSWORD}\",\"--host={HOST.NAME}\",\"--status\"]",
+                        "delay": "3m"
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "1877c7ee93f04e60b8418b6f7f602418",
+                        "name": "df",
+                        "type": "TRAP",
+                        "key": "df",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "79da2ac849e149609b7682ce8c90ee81",
+                                "name": "\u78c1\u76d8{#MOUNTED}\u5bb9\u91cf",
+                                "type": "TRAP",
+                                "key": "size.df[{#MOUNTED}]",
+                                "delay": "0",
+                                "preprocessing": [
+                                    {
+                                        "type": "MULTIPLIER",
+                                        "parameters": [
+                                            "1024"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "73ec1182a81f4ec1ba1995b28c29fceb",
+                                "name": "\u78c1\u76d8{#MOUNTED}\u4f7f\u7528\u7387",
+                                "type": "TRAP",
+                                "key": "used.df[{#MOUNTED}]",
+                                "delay": "0",
+                                "units": "%"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "04bfa3f861074cc3a3ff394d2d6538b9",
+                        "name": "discpu",
+                        "type": "TRAP",
+                        "key": "discpu",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "8aa13696511f492ea9867d8248ac7a57",
+                                "name": "\u4ea4\u6362\u673aCPU\u4f7f\u7528\u7387",
+                                "type": "TRAP",
+                                "key": "discpu.[{#INDEX}]",
+                                "delay": "0",
+                                "units": "%"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "b75f41ee85984c73831f0e30b7dbb0dd",
+                        "name": "disinterface",
+                        "type": "TRAP",
+                        "key": "disinterface",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "94e26ad2b0fe434a85e2252d63c301b4",
+                                "name": "\u4ea4\u6362\u673a\u63a5\u53e3{#INTERFACE}\u7269\u7406\u72b6\u6001",
+                                "type": "TRAP",
+                                "key": "physical.disinterface[{#INTERFACE}]",
+                                "delay": "0"
+                            },
+                            {
+                                "uuid": "8d578854902749c9bc1d3dfa58514360",
+                                "name": "\u4ea4\u6362\u673a\u63a5\u53e3{#INTERFACE}\u534f\u8bae\u72b6\u6001",
+                                "type": "TRAP",
+                                "key": "protocol.disinterface[{#INTERFACE}]",
+                                "delay": "0"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "ff46021125cf4c108d902b4fe942b2bb",
+                        "name": "disname",
+                        "type": "TRAP",
+                        "key": "disname",
+                        "delay": "0",
+                        "lifetime": "1d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "9d5f472fceb7428ca18b2baa3d2dff87",
+                                "name": "\u4ea4\u6362\u673a\u540d\u79f0",
+                                "type": "TRAP",
+                                "key": "disname[{#INDEX}]",
+                                "delay": "0",
+                                "trends": "0",
+                                "value_type": "TEXT"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "43d7d82c6ae9485f82d2a8516813ceb3",
+                        "name": "linux_checkping",
+                        "type": "TRAP",
+                        "key": "linux_checkping",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "c8c3056590834039817d3a53ab49a7d1",
+                                "name": "\u4e3b\u673a{#NAME}\u72b6\u6001",
+                                "type": "TRAP",
+                                "key": "linux_checkping.status[{#INDEX}]",
+                                "delay": "0",
+                                "units": "ms",
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "e8e92dfaf20d4a8382853e974bba3e23",
+                                        "expression": "last(/zabbix_sender/linux_checkping.status[{#INDEX}],#3)>=999",
+                                        "name": "\u4e3b\u673a{#NAME}\u8fde\u63a5\u8d85\u65f6",
+                                        "priority": "WARNING",
+                                        "manual_close": "YES"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "742eb6da60ab430883beb48e52a70f1b",
+                        "name": "netstat",
+                        "type": "TRAP",
+                        "key": "netstat",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "07d8672402be47d18bd2ba658e3e29ec",
+                                "name": "\u7aef\u53e3{#NAME}\u72b6\u6001",
+                                "type": "TRAP",
+                                "key": "state.netstat[{#NAME}]",
+                                "delay": "0"
+                            }
+                        ]
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$HOST.IP}",
+                        "value": "172.169.10.4"
+                    },
+                    {
+                        "macro": "{$STORWIZE_PASSWORD}",
+                        "value": "123.com"
+                    },
+                    {
+                        "macro": "{$STORWIZE_PORT}",
+                        "value": "22"
+                    },
+                    {
+                        "macro": "{$STORWIZE_USER}",
+                        "value": "root"
+                    }
+                ]
+            }
+        ]
+    }
+}

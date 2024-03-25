@@ -1,0 +1,8 @@
+# 0 */1 * * * /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type='linux' --host='Zabbix server' --discovery
+# * * * * * sleep 10; /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type='linux' --host='Zabbix server' --status
+
+0 */1 * * * /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type="sftp" --host="IP" --discovery
+30/* * * * * /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type="sftp" --host="IP" --status
+
+0 */1 * * * /etc/zabbix/venv_centos7/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type="ssh" --host="IP" --discovery
+*/30 * * * * /etc/zabbix/venv_centos7/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type="ssh" --host="IP" --status

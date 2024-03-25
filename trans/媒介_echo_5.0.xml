@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2024-02-01T07:07:27Z</date>
+    <media_types>
+        <media_type>
+            <name>echo</name>
+            <type>SCRIPT</type>
+            <script_name>echo.sh</script_name>
+            <parameters>
+                <parameter>{ALERT.SENDTO}</parameter>
+                <parameter>{ALERT.SUBJECT}</parameter>
+                <parameter>{ALERT.MESSAGE}</parameter>
+            </parameters>
+            <message_templates>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>PROBLEM</operation_mode>
+                    <subject>故障: {EVENT.NAME}</subject>
+                    <message>告警可见主机名: {HOST.NAME}&#13;
+触发器状态: {TRIGGER.VALUE}&#13;
+告警时间: {EVENT.TIME}&#13;
+告警日期: {EVENT.DATE}&#13;
+告警名称: {EVENT.NAME}&#13;
+告警主机: {HOST.HOST}&#13;
+告警级别: {EVENT.SEVERITY}&#13;
+告警ID: {EVENT.ID}&#13;
+瞬时数据: {ITEM.VALUE1}</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>RECOVERY</operation_mode>
+                    <subject>恢复: {EVENT.NAME}</subject>
+                    <message>告警可见主机名: {HOST.NAME}&#13;
+触发器状态: {TRIGGER.VALUE}&#13;
+告警时间: {EVENT.TIME}&#13;
+告警日期: {EVENT.DATE}&#13;
+告警名称: {EVENT.NAME}&#13;
+告警主机: {HOST.HOST}&#13;
+告警级别: {EVENT.SEVERITY}&#13;
+告警ID: {EVENT.ID}&#13;
+瞬时数据: {ITEM.VALUE1}</message>
+                </message_template>
+            </message_templates>
+        </media_type>
+    </media_types>
+</zabbix_export>
