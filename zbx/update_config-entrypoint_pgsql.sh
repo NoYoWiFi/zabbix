@@ -520,10 +520,21 @@ elif [ $# -ge 1 ]; then
     fi
     
     if [[ "$1" == "restart" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml restart
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml start
         exit 1
     fi
-    
+
+    if [[ "$1" == "down" ]]; then
+        sh ./patch/down_pgsql.sh
+        exit 1
+    fi
+
+    if [[ "$1" == "prxdown" ]]; then
+        sh ./patch/down_pgsql_proxy.sh
+        exit 1
+    fi
+
     if [[ "$1" == "rm" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml rm
         exit 1
