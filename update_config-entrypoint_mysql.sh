@@ -203,12 +203,8 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "restart" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml restart
-        exit 1
-    fi
-
-    if [[ "$1" == "rm" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml rm
+        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml stop
+        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml start
         exit 1
     fi
 
@@ -219,6 +215,11 @@ elif [ $# -ge 1 ]; then
 
     if [[ "$1" == "prxdown" ]]; then
         sh ./patch/down_mysql_proxy.sh
+        exit 1
+    fi
+
+    if [[ "$1" == "rm" ]]; then
+        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml rm
         exit 1
     fi
 
