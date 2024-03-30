@@ -12,8 +12,6 @@ GV_ENV_SHELL="./patch/.env_shell"
 source ./patch/getEnv.sh
 DPassword=${GV_ARR_ENV[GV_ZABBIX_DPASSWORD]}
 shellFolder=$(dirname $(readlink -f "$0"))
-        \cp patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
-        exit 1
 case ${1} in
     "trans")
         echo "trans"
