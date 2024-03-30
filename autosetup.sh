@@ -58,7 +58,7 @@ else
     curl -s https://packagecloud.io/install/repositories/timescale/timescaledb/script.rpm.sh | sudo bash
 	\cp Rocky-AppStream.repo /etc/yum.repos.d/
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
-    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-38PGDG.noarch.rpm
+    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-40PGDG.noarch.rpm
 #    https://mirrors.aliyun.com/postgresql/repos/yum/common/redhat/rhel-8-x86_64/pgdg-redhat-repo-42.0-38PGDG.noarch.rpm
 #    sed -i -e "/rhel-\$releasever-\$basearch/s/rhel-\$releasever-\$basearch/rhel-8-x86_64/" /etc/yum.repos.d/pgdg-redhat-all.repo
     escape_spec_char() {
