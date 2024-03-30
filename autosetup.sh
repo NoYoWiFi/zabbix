@@ -116,9 +116,9 @@ case ${1} in
         ;;
     "install")
         echo "install"
-        \cp mysql/create_server_5.0-latest.sql.gz /usr/share/doc/zabbix-server-mysql-*/
-        chmod 766 /usr/share/doc/zabbix-server-mysql-*/create_server_5.0-latest.sql.gz
-        zcat /usr/share/doc/zabbix-server-mysql-*/create_server_5.0-latest.sql.gz | mysql -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
+        \cp mysql/create_server_5.0-latest_mysql.sql.gz /usr/share/doc/zabbix-server-mysql-*/
+        chmod 766 /usr/share/doc/zabbix-server-mysql-*/create_server_5.0-latest_mysql.sql.gz
+        zcat /usr/share/doc/zabbix-server-mysql-*/create_server_5.0-latest_mysql.sql.gz | mysql -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
         ;;
     "proxy")
         echo "proxy"
@@ -134,6 +134,8 @@ setenforce 0
 service firewalld stop
 chkconfig firewalld off
 sed -i "/SELINUX=enforcing/s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+sed -i -e "/zbx-agent2/d" /etc/hosts
+echo "127.0.0.1 zbx-agent2" >> /etc/hosts
 case ${1} in
     "proxy")
         echo "proxy"
