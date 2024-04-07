@@ -192,16 +192,6 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
-    if [[ "$1" == "down" ]]; then
-        sh ./patch/down_pgsql.sh
-        exit 1
-    fi
-
-    if [[ "$1" == "prxdown" ]]; then
-        sh ./patch/down_pgsql_proxy.sh
-        exit 1
-    fi
-
     if [[ "$1" == "rm" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml rm
         exit 1
@@ -212,8 +202,13 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
-    if [[ "$1" == "prxdown" ]]; then
+    if [[ "$1" == "down_proxy" ]]; then
         sh ./patch/down_pgsql_proxy.sh
+        exit 1
+    fi
+
+    if [[ "$1" == "down_agent2" ]]; then
+        sh ./patch/down_agent2.sh
         exit 1
     fi
 

@@ -216,8 +216,13 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
-    if [[ "$1" == "prxdown" ]]; then
+    if [[ "$1" == "down_proxy" ]]; then
         sh ./patch/down_mysql_proxy.sh
+        exit 1
+    fi
+    
+    if [[ "$1" == "down_agent2" ]]; then
+        sh ./patch/down_agent2.sh
         exit 1
     fi
 
