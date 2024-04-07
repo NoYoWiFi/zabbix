@@ -39,6 +39,7 @@ services:
    - make6
    - start5
    - start6
+   - start_agent2
   depends_on:
    - postgres-server
    - zabbix-build-pgsql

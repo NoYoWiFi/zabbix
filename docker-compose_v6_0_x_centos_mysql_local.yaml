@@ -113,6 +113,7 @@ services:
    - make6
    - start5
    - start6
+   - start_agent2
   pid: "host"
   depends_on:
     - zabbix-build-mysql
