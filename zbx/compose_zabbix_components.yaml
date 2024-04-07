@@ -269,6 +269,7 @@ services:
   ports:
    - "${ZABBIX_AGENT2_PORT}:10050"
   restart: "${RESTART_POLICY}"
+  user: root
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
