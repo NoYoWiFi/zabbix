@@ -86,7 +86,6 @@ cat > /etc/docker/daemon.json << EOF
 }
 EOF
 service docker restart
-chmod 777 /var/run/docker.sock
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
     # curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
     \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
@@ -158,6 +157,31 @@ elif [ $# -ge 1 ]; then
         esac
         exit 1
     fi
+    
+    if [[ "$1" == "cp_proxy_mysql" ]]; then
+        option=$(echo ${GV_VERSION} | cut -c 1)
+        case ${option} in
+            5)
+            echo "zabbix 5 LTSC!"
+            ;;
+            6)
+            echo "zabbix 6 LTSC!"
+            mkdir -p ./zbx_env/etc/mysql
+            \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
+            \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
+            mkdir -p /var/log/loki
+            touch /var/log/loki/alert.log
+            echo "test" > /var/log/loki/alert.log
+            mkdir -p ./zbx_env/usr/lib/zabbix/alertscripts
+            \cp ./patch/echo.sh ./zbx_env/usr/lib/zabbix/alertscripts/
+            chmod 755 ./zbx_env/usr/lib/zabbix/alertscripts/echo.sh
+            ;;
+            *)
+            echo "Nothing to do"
+            ;;
+        esac
+        exit 1
+    fi
 
     if [[ "$1" == "start" ]]; then
         option=$(echo ${GV_VERSION_DOCKER} | cut -c 1)
@@ -177,7 +201,7 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
-    if [[ "$1" == "prxstart" ]]; then
+    if [[ "$1" == "start_proxy" ]]; then
         option=$(echo ${GV_VERSION} | cut -c 1)
         case ${option} in
             5)
@@ -192,6 +216,12 @@ elif [ $# -ge 1 ]; then
             echo "Nothing to do"
             ;;
         esac
+        exit 1
+    fi
+
+    if [[ "$1" == "start_agent2" ]]; then
+        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start_agent2 up -d
+
         exit 1
     fi
 

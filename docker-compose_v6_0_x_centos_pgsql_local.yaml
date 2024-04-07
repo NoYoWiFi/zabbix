@@ -114,6 +114,7 @@ services:
    - start6
    - prxstart5
    - prxstart6
+   - start_agent2
   depends_on:
     - zabbix-build-pgsql
   labels:
