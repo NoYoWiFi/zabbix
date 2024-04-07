@@ -558,7 +558,7 @@ elif [ $# -ge 1 ]; then
         exit 1
     fi
 
-    if [[ "$1" == "cp_proxy_mysql" ]]; then
+    if [[ "$1" == "cp_proxy" ]]; then
         option=$(echo ${GV_VERSION} | cut -c 1)
         case ${option} in
             5)
