@@ -66,14 +66,15 @@ mariadb zabbix -e "desc history"
 # 案例：
 # CALL partition_maintenance('zabbix', 'history', 28, 24, 14);  --对zabbix数据库的history表创建分区，数据保留28天，每隔24小时创建一个分区，每次创建14个分区
 #--保留3天历史数据
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history', $(date -d "-4 day" +%Y%m%d)2400);" 
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_log', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_str', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_text', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_uint', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends_uint', $(date -d "-4 day" +%Y%m%d)2400);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'proxy_history', $(date -d "-4 day" +%Y%m%d)2400);"
+# 000000可能需要换具体看 ll /var/lib/mysql/zabbix/history*后6位
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'history', $(date -d "-4 day" +%Y%m%d)000000);" 
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_log', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_str', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_text', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_uint', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends_uint', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'proxy_history', $(date -d "-4 day" +%Y%m%d)000000);"
 # 
 # --调用维护预定义的表创建、删除、增加分区的存储过程
 # CALL partition_maintenance_all('zabbix');

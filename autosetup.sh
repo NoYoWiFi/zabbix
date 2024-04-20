@@ -44,7 +44,7 @@ fi
 check_ip_status www.baidu.com
 if [ $? -ne 0 ];then
     echo "No network, need ISO mount /media"
-    if [ ! -d "/media/BaseOS/Packages/" ];then
+    if [ ! -d "/media/Packages/" ];then
         exit 1
     fi
     mkdir -p /etc/yum.repos.d/bak
