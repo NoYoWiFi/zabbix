@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qmls/main.qml</file>
+        <file>qmls/LV_TextField.qml</file>
+    </qresource>
+</RCC>
