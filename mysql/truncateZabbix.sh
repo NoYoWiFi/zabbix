@@ -1,7 +1,7 @@
 #/bin/bash
 #zabbix数据库history表清空
 #zabbix数据库密码
-DPassword="Passw0rd@123"
+DPassword="zabbix123"
 shellFolder=$(dirname $(readlink -f "$0"))
 systemctl stop zabbix-server > $shellFolder/error 2>&1
 if [ $? -ne '0' ]; then
@@ -10,9 +10,21 @@ if [ $? -ne '0' ]; then
 fi
 echo "zabbix-server stop success"
 mysql -e "use zabbix;truncate table history;"
+mysql -e "use zabbix;optimize table history;"
+mysql -e "use zabbix;truncate table history_log;"
+mysql -e "use zabbix;optimize table history_log;"
+mysql -e "use zabbix;truncate table history_str;"
+mysql -e "use zabbix;optimize table history_str;"
+mysql -e "use zabbix;truncate table history_text;"
+mysql -e "use zabbix;optimize table history_text;"
 mysql -e "use zabbix;truncate table history_uint;"
+mysql -e "use zabbix;optimize table history_uint;"
 mysql -e "use zabbix;truncate table trends;"
+mysql -e "use zabbix;optimize table trends;"
 mysql -e "use zabbix;truncate table trends_uint;"
+mysql -e "use zabbix;optimize table trends_uint;"
+mysql -e "use zabbix;truncate table proxy_history;"
+mysql -e "use zabbix;optimize table proxy_history;"
 mysqldump -uroot zabbix > /tmp/zabbix.sql
 mysql -e "drop database zabbix;"
 mysql -e "create database zabbix character set utf8 collate utf8_bin;"
