@@ -56,6 +56,9 @@ if [ $? -ne 0 ];then
     \cp Rocky-Media.repo /etc/yum.repos.d/
 else
     curl -s https://packagecloud.io/install/repositories/timescale/timescaledb/script.rpm.sh | sudo bash
+    if [ $? -ne 0 ];then
+        sh patch/script.rpm.sh
+    fi
 	\cp Rocky-AppStream.repo /etc/yum.repos.d/
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
     rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-40PGDG.noarch.rpm
