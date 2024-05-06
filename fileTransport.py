@@ -636,15 +636,6 @@ if __name__ == "__main__":
                                     __dic_mov_file_list.update({__lv_list_all_file[__i_04]: [{__column_9_list[__i_01]: ''}]})
                                 else:
                                     __dic_mov_file_list[__lv_list_all_file[__i_04]].append({__column_9_list[__i_01]: ''})
-                            # _host, _sftpport, _sftpuser, _sftppwd, _remotefilepath, _localdirpath,
-                            # column_2_list = []  # 协议
-                            # column_3_list = []  # 用户名
-                            # column_4_list = []  # 密码
-                            # column_5_list = []  # 端口
-                            # column_6_list = []  # 源目录
-                            # column_7_list = []  # 目的目录
-                            # column_8_list = []  # 文件队列
-                            # column_9_list = []  # 备份目录
                             __p = Process(target=__cus_file_trans_port.def_sftp_download_process, args=(__dic_01, __column_1_list[__i_01], __column_5_list[__i_01], __column_3_list[__i_01],
                                                                                                         __column_4_list[__i_01], __lv_list_all_file[__i_04],
                                                                                                         __column_7_list[__i_01]))
