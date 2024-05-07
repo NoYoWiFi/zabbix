@@ -4,7 +4,7 @@ from multiprocessing import Process, Manager
 import threading
 import socket
 import paramiko
-import time
+import datetime
 import sys
 import openpyxl
 import shutil
@@ -413,7 +413,8 @@ class CusFileTransPort(object):
             __sftpTransport.close()
             _dic_01['删除文件'].update({_remote_file_path: ''})
             _dic_01['备份文件'].update({_remote_file_path: ''})
-            with open('./下载日志.log', 'a+', encoding='utf-8') as __del_file:
+            __current_date = datetime.datetime.now().strftime('%Y%m%d')
+            with open(f'./download_{__current_date}.log', 'a+', encoding='utf-8') as __del_file:
                 __del_file.write(_dic_01 + '|' + _remote_file_path + '|' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '\n')
         except Exception as __err:
             print('下载进程错误：', __err)
@@ -468,7 +469,8 @@ class CusFileTransPort(object):
                     __index = __index + 1
             _dic_01['删除文件'].update({_local_file_path: ''})
             _dic_01['备份文件'].update({_local_file_path: ''})
-            with open('./上传日志.log', 'a+', encoding='utf-8') as __del_file:
+            __current_date = datetime.datetime.now().strftime('%Y%m%d')
+            with open(f'./upload_{__current_date}.log', 'a+', encoding='utf-8') as __del_file:
                 __del_file.write(_dic_01 + '|' + _local_file_path + '|' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '\n')
         except Exception as __err:
             print('上传进程错误：', __err)
