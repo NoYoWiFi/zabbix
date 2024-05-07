@@ -1,6 +1,6 @@
 import argparse
 import os
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Pool
 import threading
 import socket
 import paramiko
@@ -11,7 +11,7 @@ import shutil
 
 # THREADNUM = multiprocessing.cpu_count()
 # THREADNUM = os.cpu_count()
-THREADNUM = 5
+THREADNUM = 50
 MAX_PACKET_SIZE = 10 * 1024 * 1024
 FILEFLAG = ''
 
@@ -373,6 +373,7 @@ class CusFileTransPort(object):
         try:
             __sftpTransport = self.def_sftp_trans_port_connect(_host, _sftpport, _sftpuser, _sftppwd)
             __sftp_file_size = __sftpTransport.stat(_remote_file_path).st_size
+            __local_file_path = os.path.join(_local_dir_path, os.path.basename(_remote_file_path))
             __chunk_size = MAX_PACKET_SIZE  # 例如：每次上传1MB
 
             if not os.path.exists(_local_dir_path):
@@ -380,9 +381,9 @@ class CusFileTransPort(object):
                     os.mkdir(_local_dir_path)
                 else:
                     os.mkdir(os.path.dirname(_local_dir_path))
-            with open(os.path.join(_local_dir_path, os.path.basename(_remote_file_path)), "wb") as __open_local_file:
+            with open(__local_file_path, "wb") as __open_local_file:
                 __open_local_file.truncate(__sftp_file_size)
-            print('临时 ', _dic_01['目录进度'], _remote_file_path, os.path.join(_local_dir_path, os.path.basename(_remote_file_path)))
+            print('临时 ', _dic_01['目录进度'], _remote_file_path, __local_file_path)
 
             if __chunk_size > __sftp_file_size:
                 __chunk_size = __sftp_file_size
@@ -397,17 +398,24 @@ class CusFileTransPort(object):
                 # 创建并启动线程
                 __index = 0
                 __dic_02 = {}
+                __pool_01 = Pool(THREADNUM)
                 for __i01, (__start01, __end01) in enumerate(__offsets):
                     __current_process2 = __i01 + 1
                     __total_length01 = len(__offsets)
                     __process_percentage2 = (__current_process2 / __total_length01) * 100
                     __local_tmp_file = os.path.join(_local_dir_path, os.path.basename(_remote_file_path))
-                    __dic_02.update({'目录进度': _dic_01, '文件进度': __local_tmp_file + ' ' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)'})
+                    __dic_02.update({'目录进度': _dic_01, '文件进度': f'{__local_tmp_file} {__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)'})
                     # __dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remotefilepath, _localdirpath, local_base_path, start, end
-                    __t = threading.Thread(target=self.def_sftp_download_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_file_path, _local_dir_path, __start01, __end01))
-                    __t.start()
+                    # __t = threading.Thread(target=self.def_sftp_download_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_file_path, _local_dir_path, __start01, __end01))
+                    # __t.start()
+
+                    __t = __pool_01.apply_async(self.def_sftp_download_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_file_path, _local_dir_path, __start01, __end01))
+
                     if __index == THREADNUM or len(__offsets) <= THREADNUM:
-                        __t.join()
+                        # __t.join()
+                        __pool_01.close()
+                        __pool_01.join()
+                        __pool_01 = Pool(THREADNUM)
                         __index = 0
                     __index = __index + 1
             __sftpTransport.close()
@@ -415,7 +423,7 @@ class CusFileTransPort(object):
             _dic_01['备份文件'].update({_remote_file_path: ''})
             __current_date = datetime.datetime.now().strftime('%Y%m%d')
             with open(f'./download_{__current_date}.log', 'a+', encoding='utf-8') as __del_file:
-                __del_file.write(_dic_01 + '|' + _remote_file_path + '|' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '\n')
+                __del_file.write(f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '|' + _remote_file_path + '|' + __local_file_path + '\n')
         except Exception as __err:
             print('下载进程错误：', __err)
 
@@ -423,6 +431,7 @@ class CusFileTransPort(object):
         try:
             __chunk_size = MAX_PACKET_SIZE  # 例如：每次上传1MB
             __local_file_size = os.path.getsize(_local_file_path)
+            __remote_file_path = os.path.join(os.path.dirname(_remote_dir_path), os.path.basename(_local_file_path)).replace('\\', '/')
 
             __sftpTransport = self.def_sftp_trans_port_connect(_host, _sftpport, _sftpuser, _sftppwd)
 
@@ -435,10 +444,10 @@ class CusFileTransPort(object):
                 except Exception as err02:
                     print('目录：', err02, _remote_dir_path)
             finally:
-                with __sftpTransport.open(os.path.join(os.path.dirname(_remote_dir_path), os.path.basename(_local_file_path)).replace('\\', '/'), 'wb') as __remote_file:
+                with __sftpTransport.open(__remote_file_path, 'wb') as __remote_file:
                     # remote_file.seek(local_file_size)
                     __remote_file.truncate(__local_file_size)
-                print('临时 ', _dic_01['目录进度'], os.path.join(os.path.dirname(_remote_dir_path), os.path.basename(_local_file_path)).replace('\\', '/'))
+                print('临时 ', _dic_01['目录进度'], __remote_file_path)
                 __sftpTransport.close()
 
             if __chunk_size > __local_file_size:
@@ -454,24 +463,28 @@ class CusFileTransPort(object):
                 # 创建并启动线程
                 __index = 0
                 __dic_02 = {}
+                __pool_01 = Pool(THREADNUM)
                 for __i01, (__start01, __end01) in enumerate(__offsets):
                     __current_process2 = __i01 + 1
                     __total_length01 = len(__offsets)
                     __process_percentage2 = (__current_process2 / __total_length01) * 100
                     __remote_tmp_file = os.path.join(os.path.dirname(_remote_dir_path), os.path.basename(_local_file_path)).replace('\\', '/')
-                    __dic_02.update({'目录进度': _dic_01, '文件进度': __remote_tmp_file + ' ' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)'})
-
-                    __t = threading.Thread(target=self.def_sftp_upload_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_dir_path, _local_file_path, __start01, __end01))
-                    __t.start()
+                    __dic_02.update({'目录进度': _dic_01, '文件进度': f'{__remote_tmp_file} {__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)'})
+                    # __t = threading.Thread(target=self.def_sftp_upload_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_dir_path, _local_file_path, __start01, __end01))
+                    # __t.start()
+                    __t = __pool_01.apply_async(self.def_sftp_upload_chunk_thread, args=(__dic_02, _host, _sftpport, _sftpuser, _sftppwd, _remote_dir_path, _local_file_path, __start01, __end01))
                     if __index == THREADNUM or len(__offsets) <= THREADNUM:
-                        __t.join()
+                        # __t.join()
+                        __pool_01.close()
+                        __pool_01.join()
+                        __pool_01 = Pool(THREADNUM)
                         __index = 0
                     __index = __index + 1
             _dic_01['删除文件'].update({_local_file_path: ''})
             _dic_01['备份文件'].update({_local_file_path: ''})
             __current_date = datetime.datetime.now().strftime('%Y%m%d')
             with open(f'./upload_{__current_date}.log', 'a+', encoding='utf-8') as __del_file:
-                __del_file.write(_dic_01 + '|' + _local_file_path + '|' + f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '\n')
+                __del_file.write(f'{__total_length01}/{__current_process2} ({__process_percentage2:.2f}%)' + '|' + _local_file_path + '|' + __remote_file_path + '\n')
         except Exception as __err:
             print('上传进程错误：', __err)
 
@@ -604,6 +617,7 @@ if __name__ == "__main__":
                 __column_9_list.append(str(__cus_excel_op.def_get_cell_value(__i_00 + 2, 9)))
 
             __process_put_list01 = []
+            __process_put_list02 = []
             __process_mov_list01 = []
             __process_del_list01 = []
             __dic_del_file_list = Manager().dict()
@@ -625,6 +639,8 @@ if __name__ == "__main__":
                     else:
                         __offsets.append((__i_02 * __chunk_size, min((__i_02 + 1) * __chunk_size, (__i_02 + 9) * __chunk_size)))
                 for __i_03, (__start, __end) in enumerate(__offsets):
+                    # print(__offsets)
+                    # exit(1)
                     __dic_01 = {}
                     __current_process = __i_03 + 1
                     __total_length = len(__offsets)
@@ -641,10 +657,17 @@ if __name__ == "__main__":
                             __p = Process(target=__cus_file_trans_port.def_sftp_download_process, args=(__dic_01, __column_1_list[__i_01], __column_5_list[__i_01], __column_3_list[__i_01],
                                                                                                         __column_4_list[__i_01], __lv_list_all_file[__i_04],
                                                                                                         __column_7_list[__i_01]))
+                            # __p04 = Process(target=__cus_file_trans_port.def_sftp_download_process, args=(__dic_01, __column_1_list[__i_01], __column_5_list[__i_01], __column_3_list[__i_01],
+                            #                                                                             __column_4_list[__i_01], __lv_list_all_file[__i_04],
+                            #                                                                             __column_7_list[__i_01]))
                             __p.start()
+                            # __p04.start()
                             __process_put_list01.append(__p)
+                            # __process_put_list02.append(__p)
                         for __i_05 in __process_put_list01:
                             __i_05.join()
+                        # for __i_10 in __process_put_list02:
+                        #     __i_10.join()
                     except Exception as err:
                         print(__column_6_list[__i_01], '下载主进程错误：', err)
 
