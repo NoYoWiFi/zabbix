@@ -1,0 +1,78 @@
+COMLOGO-FIREWALL-CTRL DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32     FROM SNMPv2-SMI
+    lnvFirewall                                 FROM COMLOGO-FIREWALL-MIB;
+
+fwCtrlInfo MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for firewall control information."
+    ::= { lnvFirewall 1 }
+
+--
+-- Firewall control information 
+--
+
+
+
+fwCtrlDskThresh OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The disk threshhold in percent. Trap messages will
+             be sent when the percentage of space used on disk 
+             reaches or is beyond this value."
+    ::= { fwCtrlInfo 1}
+
+
+fwCtrlCPUThresh OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The CPU threshhold in percent. Trap messages will
+             be sent when the percentage of CPU time used reaches
+             or is beyond this value."
+    ::= { fwCtrlInfo 2}
+
+
+fwCtrlMemThresh OBJECT-TYPE
+    SYNTAX      Integer32 (0..100)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The memory threshhold in percent. Trap messages will
+             be sent when the percentage of memory used reaches
+             or is beyond this value."
+    ::= { fwCtrlInfo 3}
+
+
+fwCtrlTrapInterval OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The threshhold alert trap and startup trap messages 
+             will be sent at this interval."
+    ::= { fwCtrlInfo 4}
+
+
+--fwCtrlPolicyEffect OBJECT-TYPE
+--    SYNTAX      Integer32
+--    MAX-ACCESS  read-write
+--    STATUS      current
+--    DESCRIPTION
+--            "Set to 1 to make policies effect immediately."
+--    ::= { fwCtrlInfo 5}
+  
+
+END
+
+
+
+

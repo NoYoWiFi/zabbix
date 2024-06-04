@@ -1,0 +1,504 @@
+COMLOGO-FIREWALL-CONN DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32,
+    Counter32, IpAddress                        FROM SNMPv2-SMI
+    lnvFirewall                                 FROM COMLOGO-FIREWALL-MIB;
+
+fwConnection MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@Comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for firewall connection information."
+    ::= { lnvFirewall 101 }
+
+--
+-- Firewall Connection information
+--
+
+
+-- fwConnection OBJECT IDENTIFIER ::= { lnvFirewall 101 }
+
+fwConnThresh OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The connection threshhold. Trap messages will be
+             sent when the number of connections reaches
+             or is beyond this value."
+    ::= { fwConnection 1}
+
+fwConnNumber OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The total connection number at the current time."
+    ::= { fwConnection 2}
+
+fwConnStaticNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The total static connection number at the current time."
+    ::= { fwConnection 3}
+
+fwConnDynamicNum OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The total dynamic connection number at the current time."
+    ::= { fwConnection 4}
+
+fwConnSearch OBJECT IDENTIFIER ::= { fwConnection 10 }
+
+fwConnDirect OBJECT-TYPE
+    SYNTAX  INTEGER {
+                source(0),       -- search source IP addresses
+                destination(1),  -- search destination IP addresses
+                both(2)          -- search all IP addresses, not necessory yet.
+            }
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Indicate the address set to search. source(1) indicate 
+             to only search the source IP addresses of all connections,
+             destination(2) to only search the destination addresses, 
+             and both(3) to search all the source and destination IP
+             addresses of the connections."
+    ::= { fwConnSearch 1 }
+
+fwConnLower OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Indicate the lower limit of connection number to search,
+             that is, to search all the IPs with number of connections
+             greater than or equal to this value."
+    ::= { fwConnSearch 2 }
+
+fwConnUpper OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Indicate the upper limit of connection number to search,
+             that is, to search all the IPs with number of connections
+             less than or equal to this value."
+    ::= { fwConnSearch 3 }
+
+fwConnType OBJECT-TYPE
+    SYNTAX  INTEGER {
+                unspecified(0),      -- not set yet
+                static(1),     -- static IP
+                dynamic(2)     -- dynamic IP
+            }
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "The connection type."
+    ::= { fwConnSearch 4 }
+
+fwConnSearchIP OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Indicate the IP address to search."
+    ::= { fwConnSearch 5 }
+
+fwConnSearchTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwConnSearchEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of connection statistics entries."
+    ::= { fwConnSearch 10 }
+
+fwConnSearchEntry OBJECT-TYPE
+    SYNTAX      FwConnSearchEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing connection statistics information
+             at the current time."
+    INDEX   { fwConnIndex }
+    ::= { fwConnSearchTable 1 }
+
+FwConnSearchEntry ::=
+    SEQUENCE {
+        fwConnIndex      Integer32,
+        fwConnIP         IpAddress,
+        fwConnSrcNum     Counter32,
+        fwConnDesNum     Counter32,
+        fwConnSrcType    INTEGER,
+        fwConnSrcThres   Counter32,
+        fwConnDesType    INTEGER,
+        fwConnDesThres   Counter32,
+        fwConnIpType     INTEGER
+    }
+
+fwConnIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, for each entry."
+    ::= { fwConnSearchEntry 1 }
+
+
+fwConnIP OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Indicate the IP address to search."
+    ::= { fwConnSearchEntry 2 }
+
+fwConnSrcNum OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The number of connections with the source IP address as 
+             the fwConnIP address in this entry."
+    ::= { fwConnSearchEntry 3 }
+
+fwConnDesNum OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The number of connections with the destination IP address
+             as the fwConnIP address in this entry."
+    ::= { fwConnSearchEntry 4 }
+
+fwConnSrcType OBJECT-TYPE
+    SYNTAX  INTEGER {
+                no(1),         -- do not check
+                chk(2),        -- check
+                exlog(3),      -- log 
+                exdrop(4),     -- drop
+                exdroplog(5)   -- drop and log
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The check type of the IP address (fwConnIP) as source 
+             address."
+    ::= { fwConnSearchEntry 5 }
+
+fwConnSrcThres OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The threshold for number of connections with fwConnIP as
+             source IP address."
+    ::= { fwConnSearchEntry 6 }
+
+fwConnDesType OBJECT-TYPE
+    SYNTAX  INTEGER {
+                no(1),         -- do not check
+                chk(2),        -- check
+                exlog(3),      -- log 
+                exdrop(4),     -- drop
+                exdroplog(5)   -- drop and log
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The check type of the IP address (fwConnIP) as destination 
+             address."
+    ::= { fwConnSearchEntry 7 }
+
+fwConnDesThres OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The threshold for number of connections with fwConnIP as
+             destination IP address."
+    ::= { fwConnSearchEntry 8 }
+
+fwConnIpType OBJECT-TYPE
+    SYNTAX  INTEGER {
+                static(1),     -- static IP
+                dynamic(2)     -- dynamic IP
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The IP type."
+    ::= { fwConnSearchEntry 9 }
+
+
+---
+--- The top 10 source connections table
+---
+fwConnTopSrcCount OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The real number of top 10 source connection items."
+    ::= { fwConnection 11}
+
+fwConnTopSrcTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwConnTopSrcEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of IP address with which the number of 
+             connections as source address is top 10."
+    ::= { fwConnection 12 }
+
+fwConnTopSrcEntry OBJECT-TYPE
+    SYNTAX      FwConnTopSrcEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing connection statistics information
+             at the current time."
+    INDEX   { fwConnTopSrcIndex }
+
+    ::= { fwConnTopSrcTable 1 }
+
+FwConnTopSrcEntry ::=
+    SEQUENCE {
+        fwConnTopSrcIndex     Integer32,
+        fwConnTopSrcIP        IpAddress,
+        fwConnTopSrcNum       Counter32
+    }
+
+fwConnTopSrcIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, for each entry."
+    ::= { fwConnTopSrcEntry 1 }
+
+fwConnTopSrcIP OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "the source IP address ."
+    ::= { fwConnTopSrcEntry 2 }
+
+fwConnTopSrcNum OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Number of connections with the source address
+             fwConnTopSrcIP ."
+    ::= { fwConnTopSrcEntry 3 }
+
+
+
+---
+--- The top 10 destination connections table
+---
+fwConnTopDesCount OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The real number of top 10 source connection items."
+    ::= { fwConnection 13}
+
+fwConnTopDesTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwConnTopDesEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of IP address with which the number of 
+             connections as source address is top 10."
+    ::= { fwConnection 14 }
+
+fwConnTopDesEntry OBJECT-TYPE
+    SYNTAX      FwConnTopDesEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing connection statistics information
+             at the current time."
+    INDEX   { fwConnTopDesIndex }
+
+    ::= { fwConnTopDesTable 1 }
+
+FwConnTopDesEntry ::=
+    SEQUENCE {
+        fwConnTopDesIndex     Integer32,
+        fwConnTopDesIP        IpAddress,
+        fwConnTopDesNum       Counter32
+    }
+
+fwConnTopDesIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, for each entry."
+    ::= { fwConnTopDesEntry 1 }
+
+fwConnTopDesIP OBJECT-TYPE
+    SYNTAX  IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The destination IP address ."
+    ::= { fwConnTopDesEntry 2 }
+
+fwConnTopDesNum OBJECT-TYPE
+    SYNTAX  Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "Number of connections with the source address
+             fwConnTopDesIP ."
+    ::= { fwConnTopDesEntry 3 }
+
+-- the Connection Detail Information table
+
+
+fwConnDetailCount OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The number of  connections."
+    ::= { fwConnection 20}
+
+fwConnDetailTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF FwConnDetailEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A table containing connection information."
+    ::= { fwConnection 21 }
+
+fwConnDetailEntry OBJECT-TYPE
+    SYNTAX      FwConnDetailEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A conceptual row of the fwConnDetailTable containing information
+            about a particular current TCP/UDP connection.  Each row of this
+            table is transient, in that it ceases to exist when (or soon
+            after) the connection makes the transition to the CLOSED
+            state."
+--    INDEX   { fwConnSrcAddr,
+--              fwConnDesAddr,
+--              fwConnSrcPort,
+--              fwConnDesPort }
+    INDEX   { fwConnDetailIndex }
+    ::= { fwConnDetailTable 1 }
+
+FwConnDetailEntry ::= SEQUENCE {
+	fwConnDetailIndex Integer32,
+        fwConnSrcAddr   IpAddress,
+        fwConnDesAddr   IpAddress,
+        fwConnSrcPort   Integer32,
+        fwConnDesPort   Integer32,
+        fwConnProto     INTEGER,
+        fwConnState     INTEGER,
+        fwConnTimeOut   Integer32
+    }
+
+fwConnDetailIndex OBJECT-TYPE
+    SYNTAX  Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, for each entry."
+    ::= { fwConnDetailEntry 1 }
+
+fwConnSrcAddr OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The source IP address for this TCP/UDP connection.  In the case
+            of a connection in the listen state which is willing to
+            accept connections for any IP interface associated with the
+            node, the value 0.0.0.0 is used."
+    ::= { fwConnDetailEntry 2 }
+
+fwConnDesAddr OBJECT-TYPE
+    SYNTAX      IpAddress
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The destination IP address for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 3 }
+
+fwConnSrcPort OBJECT-TYPE
+    SYNTAX      Integer32 (0..65535)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The source port number for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 4 }
+
+fwConnDesPort OBJECT-TYPE
+    SYNTAX      Integer32 (0..65535)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The destination port number for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 5 }
+
+fwConnProto OBJECT-TYPE
+    SYNTAX      INTEGER {
+                    udp(0),
+                    tcp(1)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The protocal for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 6 }
+
+fwConnState OBJECT-TYPE
+    SYNTAX      INTEGER {
+                    none(0),
+                    closed(1),
+                    listen(2),
+                    synSent(3),
+                    synReceived(4),
+                    established(5),
+                    finWait1(6),
+                    finWait2(7),
+                    closeWait(8),
+                    lastAck(9),
+                    closing(10),
+                    timeWait(11)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The state for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 7 }
+
+fwConnTimeOut OBJECT-TYPE
+    SYNTAX      Integer32 (0..2147483647)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The timeout for this TCP/UDP connection."
+    ::= { fwConnDetailEntry 8 }
+
+END
+
+
+
+

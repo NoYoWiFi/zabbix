@@ -1,0 +1,182 @@
+COMLOGO-SYSRES-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Integer32, 
+    Counter32                                       FROM SNMPv2-SMI
+    DisplayString                                   FROM SNMPv2-TC        
+    Common											FROM COMLOGO-SMI;
+
+Resources MODULE-IDENTITY
+    LAST-UPDATED "201509080000Z"
+    ORGANIZATION "Beijing Comlogo Technology Co"
+    CONTACT-INFO
+            "E-mail: zhangml@comlogo.com.cn"
+    DESCRIPTION
+            "The Comlogo enterprise MIB for system resource."
+    ::= { Common 2 }
+
+--
+-- System Resource MIB tree structure
+--
+
+-- The agent only implements those of the following counters that the
+-- kernel supports! Don't expect all to be present.
+
+--
+-- CPU usage/watch reporting.
+--
+
+srCPUTable OBJECT-TYPE
+    SYNTAX	SEQUENCE OF SrCPUEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"A table containing information on CPU used 
+	 statistics."
+    ::= { Resources 1 }
+
+srCPUEntry OBJECT-TYPE
+    SYNTAX	SrCPUEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+        "An entry containing CPU used statistics."
+    INDEX	{ srCPUIndex }
+    ::= { srCPUTable  1 }
+
+SrCPUEntry ::= SEQUENCE {
+    srCPUIndex      Integer32,
+    srCPUUser       Integer32,
+    srCPUSystem     Integer32,
+    srCPUPercent    Integer32
+}
+
+srCPUIndex OBJECT-TYPE
+    SYNTAX	Integer32 (0..2147483647)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Index of CPU"
+    ::= { srCPUEntry 1 }
+
+srCPUUser OBJECT-TYPE
+    SYNTAX	Integer32 (0..100)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"percentage of user CPU time."
+    ::= { srCPUEntry 2 }
+
+srCPUSystem OBJECT-TYPE
+    SYNTAX	Integer32 (0..100)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"percentage of system CPU time."
+    ::= { srCPUEntry 3 }
+
+srCPUPercent OBJECT-TYPE
+    SYNTAX	Integer32 (0..100)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"percentage of idle CPU time (%)."
+    ::= { srCPUEntry 4 }
+
+
+--
+-- Memory usage/watch reporting.
+-- Not supported on all systems!
+--
+    
+srMemory OBJECT IDENTIFIER ::= { Resources 2 }
+
+srMemTotalReal OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Total Real/Physical Memory Size on the host (in kBytes)."
+    ::= { srMemory 1 }
+
+srMemTotalFree OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Total Available Memory on the host (in kBytes)."
+    ::= { srMemory 2 }
+
+srMemPercent OBJECT-TYPE
+	SYNTAX	Integer32
+	MAX-ACCESS	read-only
+	STATUS	current
+	DESCRIPTION
+	"percentage of Memory has been used (%)."
+    ::= { srMemory 3 }
+
+
+--
+-- Disk usage/watch reporting.
+--
+
+srDiskTable OBJECT-TYPE
+    SYNTAX	SEQUENCE OF SrDiskEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"Disk watching information.  Partions to be watched
+	 are configured by the snmpd.conf file of the agent."
+    ::= { Resources 3 }
+
+srDiskEntry OBJECT-TYPE
+    SYNTAX     SrDiskEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "An entry containing a disk and its statistics."
+    INDEX      { srDiskIndex }
+    ::= { srDiskTable 1 }
+
+SrDiskEntry ::= SEQUENCE {
+    srDiskIndex		Integer32,
+    srDiskTotal		Integer32,
+    srDiskAvail		Integer32,
+    srDiskPercent	Integer32
+}
+
+srDiskIndex OBJECT-TYPE
+    SYNTAX	Integer32 (0..65535)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Integer reference number (row number) for the disk mib."
+    ::= { srDiskEntry 1 }
+	
+srDiskTotal OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION  
+	"Total size of the disk/partion (kBytes)."
+    ::= { srDiskEntry 2 } 
+
+srDiskAvail OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION  
+	"Available space on the disk (KBytes)."
+    ::= { srDiskEntry 3 } 
+
+srDiskPercent OBJECT-TYPE
+    SYNTAX	Integer32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION  
+	"Percentage of space used on disk (%)."
+    ::= { srDiskEntry 4 } 
+
+END
+
+
