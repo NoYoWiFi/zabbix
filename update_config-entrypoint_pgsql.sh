@@ -37,7 +37,7 @@ if [[ " " == "${option}" ]]; then
 	option=$(cat /etc/redhat-release | cut -c 23)
 fi
 if [[ "." == "${option}" ]]; then
-	option=$(cat /etc/redhat-release | cut -c 1)
+	option=$(cat /etc/redhat-release | cut -c 21)
 fi
 case ${option} in
     8)
