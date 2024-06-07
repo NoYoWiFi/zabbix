@@ -34,6 +34,9 @@ option=$(cat /etc/redhat-release | cut -c 22)
 if [[ " " == "${option}" ]]; then
 	option=$(cat /etc/redhat-release | cut -c 23)
 fi
+if [[ "." == "${option}" ]]; then
+	option=$(cat /etc/redhat-release | cut -c 1)
+fi
 case ${option} in
     8)
     echo "Centos 8 catch!"
