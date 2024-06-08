@@ -1,42 +1,53 @@
 **zabbix 版本**
 
-`6.0.27`
+`6.0.30`
+
+`7.0.0`
+
 
 **项目地址**  
-[GitCode项目地址](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_docker)
+# 项目地址
+
+|标题|链接  |
+|--|--|
+|zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_6.0.x_docker) |
+| zabbix_6.4.x_docker| [zabbix_6.4.x_docker](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_6.4.x_docker) |
+# 一键安装包
+|标题|链接  |
+|--|--|
+| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_6.0.x_docker/zabbix-zabbix_6.0.x_docker.tar.gz) |
+| zabbix_6.4.x_docker | [zabbix_6.4.x_docker](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_6.4.x_docker/zabbix-zabbix_6.4.x_docker.tar.gz) |
 
 **效果图**
-```  
-[root@localhost zbx]# docker images;
-REPOSITORY                                                     TAG                                   IMAGE ID       CREATED          SIZE
-zabbix-web-nginx-pgsql                                         rocky-6.0-latest                      b67b259b0a8b   7 minutes ago    441MB
-zabbix-server-pgsql                                            rocky-6.0-latest                      d89d656e4dd2   7 minutes ago    431MB
-zabbix-proxy-pgsql                                             rocky-6.0-latest                      1eabdf15a0a0   7 minutes ago    425MB
-zabbix-web-service                                             rocky-6.0-latest                      0b5517385135   8 minutes ago    473MB
-zabbix-java-gateway                                            rocky-6.0-latest                      787d686971f9   26 minutes ago   460MB
-zabbix-agent2                                                  rocky-6.0-latest                      27d8d0a3e994   26 minutes ago   307MB
-zabbix-build-pgsql                                             rocky-6.0-latest                      dc70e7fdf506   2 hours ago      2.07GB
-zabbix-server-mysql                                            rocky-6.0-latest                      0ecb5beeb87f   3 hours ago      512MB
-zabbix-proxy-mysql                                             rocky-6.0-latest                      90d6b14d4fe1   3 hours ago      496MB
-zabbix-web-nginx-mysql                                         rocky-6.0-latest                      f76d91be3616   8 hours ago      515MB
-zabbix-snmptraps                                               rocky-6.0-latest                      7123f3cc0a20   24 hours ago     286MB
-zabbix-build-mysql                                             rocky-6.0-latest                      a070dc2c9bc1   31 hours ago     2.07GB
-zabbix-build-base                                              rocky-6.0-latest                      9c35feed350f   32 hours ago     1.39GB
-mariadb                                                        11.2.3                                7d65ebbd4dce   47 hours ago     405MB
-timescale/timescaledb                                          2.13.0-pg16                           37796458a471   3 weeks ago      284MB
-grafana/grafana-enterprise                                     10.0.11                               55a918349323   4 weeks ago      351MB
-grafana/loki                                                   2.9.4                                 652b79950756   5 weeks ago      74.6MB
-grafana/promtail                                               2.9.4                                 1c7475004f2f   5 weeks ago      198MB
-rockylinux                                                     8                                     c24baca6f6df   8 weeks ago      228MB
-
-```  
+```
+[root@localhost zabbix_docker]# docker images  
+REPOSITORY               TAG                 IMAGE ID       CREATED        SIZE  
+zabbix-server-mysql      centos-6.0-latest   5bbe1784ca86   4 days ago     889MB  
+zabbix-web-service       centos-6.0-latest   302c32090933   4 days ago     732MB  
+zabbix-proxy-mysql       centos-6.0-latest   2af003bb178b   4 days ago     673MB  
+zabbix-java-gateway      centos-6.0-latest   6825b642100d   4 days ago     720MB  
+zabbix-snmptraps         centos-6.0-latest   d444eab79de1   4 days ago     601MB  
+zabbix-agent2            centos-6.0-latest   ddb84f925c55   4 days ago     615MB  
+mariadb                  10.5.19-focal       cfe0a83e48d5   8 days ago     392MB  
+zabbix-web-nginx-mysql   centos-6.0-latest   64081ecac82f   6 weeks ago    774MB  
+quay.io/centos/centos    stream8             6a97c47aacfc   3 months ago   513MB  
+[root@localhost zabbix_docker]# [root@localhost zabbix_docker]# docker ps -a  
+CONTAINER ID   IMAGE                                      COMMAND                  CREATED          STATUS                    PORTS                                                                            NAMES  
+977e75774418   zabbix-web-nginx-mysql:centos-6.0-latest   "docker-entrypoint.sh"   15 minutes ago   Up 15 minutes (healthy)   0.0.0.0:80->8080/tcp, :::80->8080/tcp, 0.0.0.0:443->8443/tcp, :::443->8443/tcp   zabbix_docker-zabbix-web-nginx-mysql-1  
+0770a23343e9   zabbix-server-mysql:centos-6.0-latest      "/usr/bin/tini -- /u…"   15 minutes ago   Up 15 minutes             0.0.0.0:10051->10051/tcp, :::10051->10051/tcp                                    zabbix_docker-zabbix-server-1  
+98aecf59d879   zabbix-agent2:centos-6.0-latest            "/usr/bin/tini -- /u…"   15 minutes ago   Up 15 minutes             0.0.0.0:10050->10050/tcp, :::10050->10050/tcp, 31999/tcp                         zabbix_docker-zabbix-agent2-1  
+ec9e9cd0ed74   zabbix-java-gateway:centos-6.0-latest      "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes                                                                                              zabbix_docker-zabbix-java-gateway-1  
+d0d7d7977b99   zabbix-snmptraps:centos-6.0-latest         "/usr/sbin/snmptrapd…"   15 minutes ago   Up 15 minutes             0.0.0.0:162->1162/udp, :::162->1162/udp                                          zabbix_docker-zabbix-snmptraps-1  
+b72cdae7ba93   zabbix-web-service:centos-6.0-latest       "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes                                                                                              zabbix_docker-zabbix-web-service-1  
+0b8819153360   mariadb:10.5.19-focal                      "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes             0.0.0.0:3306->3306/tcp, :::3306->3306/tcp                                        zabbix_docker-mysql-server-1  
+[root@localhost zabbix_docker]#   
+```
   
 **集成全中文模板**  
   
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/8f09f045a9dc42a0bb47d97e3ec5963b.png)  
+![](https://img-blog.csdnimg.cn/img_convert/55715daf2df3eaa7a6e90c92d82309d0.png)  
   
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/ce76ece189844eaa94629d9c59beb845.png)
-
+![](https://img-blog.csdnimg.cn/img_convert/6359aa9e90881fe33fbb2f9ecfa21b9e.png)
 `[Rocky8|centos7|centos8]`
 
 **执行如下命令进行git安装**
@@ -49,7 +60,7 @@ yum -y install git
 
 ```
 ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
-ZBX_VERSION=zabbix_docker
+ZBX_VERSION=zabbix_6.0.x_docker
 ZBX_NAME=zabbix_docker-6.0-latest
 ZBX_DIR=/opt
 cd ${ZBX_DIR}
@@ -61,105 +72,35 @@ cd ${ZBX_DIR}/${ZBX_NAME}
 **执行如下命令安装docker服务**
 
 ```
-# sh update_config-entrypoint_mysql.sh init
-sh update_config-entrypoint_pgsql.sh init
+sh update_config-entrypoint_mysql.sh init
+# sh update_config-entrypoint_pgsql.sh init
 ```
 
 **执行如下命令下载docker镜像**
 
 ```
 sh update_config-entrypoint_mysql.sh down
-# sh update_config-entrypoint_mysql.sh prxdown
+# sh update_config-entrypoint_mysql.sh down_proxy
 # sh update_config-entrypoint_pgsql.sh down
-# sh update_config-entrypoint_pgsql.sh prxdown
+# sh update_config-entrypoint_pgsql.sh down_proxy
 ```
 
 **执行如下命令初始化配置文件**
 
 ```
 sh update_config-entrypoint_mysql.sh cp
+# sh update_config-entrypoint_mysql.sh cp_proxy
 # sh update_config-entrypoint_pgsql.sh cp
+# sh update_config-entrypoint_pgsql.sh cp_proxy
 ```
 
 **执行如下命令启动docker容器**
 
 ```
 sh update_config-entrypoint_mysql.sh start
-# sh update_config-entrypoint_mysql.sh prxstart
+# sh update_config-entrypoint_mysql.sh start_proxy
 # sh update_config-entrypoint_pgsql.sh start
-# sh update_config-entrypoint_pgsql.sh prxstart
-```
-
-**打开网页输入服务器IP地址访问zabbix**
-http://IP:8080 或 https://IP:8443
-用户名: Admin
-密码: zabbix
-
-**打开网页输入服务器IP地址访问grafana**
-https://IP:3000
-用户名: admin
-密码: admin
-
-**将grafana界面设置成中文**
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/2cc17fdd154217656975030bc6636523.png)
-
-**启用zabbix插件
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/844a584f0789fc28205b2b5a8302938c.png)
-
-**连接zabbix数据库插件**
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/c87b39af3050dac2ecb62c7365bc7a7b.png)
-
-**新建zabbix数据库连接**
-`https://zabbix-web-nginx-mysql:8443/api_jsonrpc.php`
-
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/c68d9dbf98134214aa759dd25bbfbb2e.png)
-
-**输入正确的用户名密码**
-`Admin/zabbix`
-
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/aa5fd658ee04a9dd7687e459b3064dbe.png)
-
-
-**zabbix-server服务器同时优化成了rsyslog日志服务器，rsyslog日志端口为514**
-日志存储路径为 /var/log/loki/
-
-**grafana优化集成了zabbix与Loki插件**
-请将任意.log后缀日志存入 /var/log/loki/即可连接到loki
-URL为http://IP:3100
-![](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/c469826e35f6d0735418cbb9ca008b22.png)
-
-**存储位置**
-
-映射的卷位于当前文件夹的zbx_env目录
-
-**zabbix-server配置文件位置**
-`/opt/zabbix_docker-6.0-latest/env_vars/.env_srv`
-
-**后期如果有新版本发布可以通过如下命令更新zabbix版本**
-
-```
-sh update_config-entrypoint_mysql.sh stop
-# sh update_config-entrypoint_pgsql.sh stop
-
-ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
-ZBX_VERSION=zabbix_docker
-ZBX_NAME=zabbix_docker-6.0-latest
-ZBX_DIR=/opt
-git init
-git remote add origin ${ZBX_SOURCES}
-cd ${ZBX_DIR}/${ZBX_NAME}
-git remote -v
-git fetch --all
-git reset --hard origin/${ZBX_VERSION}
-git pull  ${ZBX_SOURCES} ${ZBX_VERSION}
-chmod 755 -R ${ZBX_DIR}/${ZBX_NAME}
-cd ${ZBX_DIR}/${ZBX_NAME}
-
-sh update_config-entrypoint_mysql.sh down
-# sh update_config-entrypoint_pgsql.sh down
-
-sh update_config-entrypoint_mysql.sh start
-# sh update_config-entrypoint_pgsql.sh start
+# sh update_config-entrypoint_pgsql.sh start_proxy
 ```
 
 `[Ubuntu]`
@@ -186,7 +127,7 @@ root@ubuntu:/home/ubuntu# apt-get -y install docker-ce
 root@ubuntu:/home/ubuntu# service docker start
 root@ubuntu:/home/ubuntu# apt install git
 root@ubuntu:/home/ubuntu# ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
-root@ubuntu:/home/ubuntu# ZBX_VERSION=zabbix_docker
+root@ubuntu:/home/ubuntu# ZBX_VERSION=zabbix_6.0.x_docker
 root@ubuntu:/home/ubuntu# ZBX_NAME=zabbix_docker-6.0-latest
 root@ubuntu:/home/ubuntu# ZBX_DIR=/opt
 root@ubuntu:/home/ubuntu# cd ${ZBX_DIR}
@@ -204,10 +145,85 @@ root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh 
 root@ubuntu:/opt/zabbix_docker-6.0-latest# sh update_config-entrypoint_mysql.sh start
 ```
 
+
+**打开网页输入服务器IP地址访问zabbix**
+http://IP:8080 或 https://IP:8443
+用户名: Admin
+密码: zabbix
+
+**打开网页输入服务器IP地址访问grafana**
+https://IP:3000
+用户名: admin
+密码: admin
+
+**将grafana界面设置成中文**
+![](https://img-blog.csdnimg.cn/img_convert/3898d7faa3de8bc6dd1c00fb7e9f0806.png)
+
+**启用zabbix插件
+![](https://img-blog.csdnimg.cn/img_convert/f2fb7adc82f693acb60cc2f795a6597f.png)
+
+**连接zabbix数据库插件**
+![](https://img-blog.csdnimg.cn/img_convert/01bb2a2a4918bc5dd2d371a329efd46c.png)
+
+**新建zabbix数据库连接**
+`https://zabbix-web-nginx-mysql:8443/api_jsonrpc.php`
+
+![](https://img-blog.csdnimg.cn/img_convert/55e97ccad77c7c88301574f638d6d0b7.png)
+
+**输入正确的用户名密码**
+`Admin/zabbix`
+
+![](https://img-blog.csdnimg.cn/img_convert/c2eff0bfc204f6866d83b63e42652671.png)
+
+
+**zabbix-server服务器同时优化成了rsyslog日志服务器，rsyslog日志端口为514**
+日志存储路径为 /var/log/loki/
+
+**grafana优化集成了zabbix与Loki插件**
+请将任意.log后缀日志存入 /var/log/loki/即可连接到loki
+URL为http://IP:3100
+![](https://img-blog.csdnimg.cn/img_convert/4f4cb7f444a94411cc7619ad4b9fb316.png)
+
+**存储位置**
+
+映射的卷位于当前文件夹的zbx_env目录
+
+**zabbix-server配置文件位置**
+`/opt/zabbix_docker-6.0-latest/env_vars/.env_srv`
+
+**后期如果有新版本发布可以通过如下命令更新zabbix版本**
+
+```
+sh update_config-entrypoint_mysql.sh stop
+# sh update_config-entrypoint_pgsql.sh stop
+
+ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_VERSION=zabbix_6.0.x_docker
+ZBX_NAME=zabbix_docker-6.0-latest
+ZBX_DIR=/opt
+git init
+git remote add origin ${ZBX_SOURCES}
+cd ${ZBX_DIR}/${ZBX_NAME}
+git remote -v
+git fetch --all
+git reset --hard origin/${ZBX_VERSION}
+git pull  ${ZBX_SOURCES} ${ZBX_VERSION}
+chmod 755 -R ${ZBX_DIR}/${ZBX_NAME}
+cd ${ZBX_DIR}/${ZBX_NAME}
+
+sh update_config-entrypoint_mysql.sh down
+# sh update_config-entrypoint_pgsql.sh down
+
+sh update_config-entrypoint_mysql.sh start
+# sh update_config-entrypoint_pgsql.sh start
+```
+
+
+
 `交流群`  
   
 | zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
 |:------------------------------------------------------------------------------------------:| :--: |
-| ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/zabbix-dayi.png) | ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/zabbix_docker/vx_images/zabbix-hanhua.png) |
+| ![微信打赏](https://img-blog.csdnimg.cn/img_convert/22d15cdf72b989f4bf132adbc705fcad.png) | ![微信打赏](https://img-blog.csdnimg.cn/img_convert/221620e1baaca5ce5fdbc7fc09bb675b.png) |
 
-**全文完结**
+**全文完结** |

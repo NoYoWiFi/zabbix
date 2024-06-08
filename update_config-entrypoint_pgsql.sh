@@ -104,7 +104,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/var/lib/postgresql/data
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
@@ -153,7 +153,7 @@ elif [ $# -ge 1 ]; then
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/var/lib/postgresql/data
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
@@ -179,7 +179,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start6 up -d
             ;;
@@ -197,7 +197,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart6 up -d
             ;;
