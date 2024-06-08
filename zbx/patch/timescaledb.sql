@@ -77,14 +77,14 @@ SELECT add_retention_policy('history_str',
 
 SELECT remove_retention_policy('trends', true);
 SELECT add_retention_policy('trends', 
-                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'364 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
+                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'89 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
                            'Asia/Shanghai');
 SELECT remove_retention_policy('trends_uint', true);
 SELECT add_retention_policy('trends_uint', 
-                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'364 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
+                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'89 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
@@ -176,10 +176,10 @@ UPDATE config SET db_extension='timescaledb',hk_history_global=1,hk_trends_globa
 UPDATE config SET compression_status=1,compress_older='7d';
 
 ALTER SYSTEM SET max_connections = '2000';
-ALTER SYSTEM SET log_timezone='Asia/Shanghai';
-ALTER SYSTEM SET timezone='Asia/Shanghai';
-ALTER SYSTEM SET lc_messages='en_US.utf8';
-ALTER SYSTEM SET lc_monetary='en_US.utf8';
-ALTER SYSTEM SET lc_numeric='en_US.utf8';
-ALTER SYSTEM SET lc_time='en_US.utf8';
+alter SYSTEM SET log_timezone='Asia/Shanghai';
+alter SYSTEM SET timezone='Asia/Shanghai';
+alter SYSTEM SET lc_messages='en_US.utf8';
+alter SYSTEM SET lc_monetary='en_US.utf8';
+alter SYSTEM SET lc_numeric='en_US.utf8';
+alter SYSTEM SET lc_time='en_US.utf8';
 SELECT pg_reload_conf();
