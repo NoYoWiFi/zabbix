@@ -71,7 +71,7 @@ case ${option} in
         https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
     yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
     yum -y install git rsyslog
-    \cp ./trans/create_server_${GV_VERSION_DOCKER}_mysql.sql.gz ./patch/create_server.sql.gz
+    \cp ./trans/create_server_${GV_VERSION_DOCKER}_mysql.sql.gz ./patch/create.sql.gz
     ;;
     7)
     echo "Centos 7 catch!"
@@ -83,7 +83,7 @@ case ${option} in
             https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
         yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git rsyslog
-        \cp ./trans/create_server_${GV_VERSION_DOCKER}_mysql.sql.gz ./patch/create_server.sql.gz
+        \cp ./trans/create_server_${GV_VERSION_DOCKER}_mysql.sql.gz ./patch/create.sql.gz
     ;;
     *)
     echo "Nothing to do"
@@ -112,11 +112,11 @@ fi
 zabbix_build_base() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-if [ ! -f "./Dockerfiles/build-base/centos/go1.19.13.linux-amd64.tar.gz" ]; then
-    \cp ./patch/go1.19.13.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
+if [ ! -f "./Dockerfiles/build-base/centos/go1.22.4.linux-amd64.tar.gz" ]; then
+    \cp ./patch/go1.22.4.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
 fi
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_BASE"
-sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
+sed -i '/RUN/i ADD go1.22.4.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
 sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
@@ -125,21 +125,22 @@ sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $Z
 update_config_var $ZABBIX_BUILD_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
 \cp ./patch/zabbix-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
-\cp ./patch/mongodb_plugin.tar.gz ./Dockerfiles/build-mysql/centos/
-\cp ./patch/postgresql_plugin.tar.gz ./Dockerfiles/build-mysql/centos/
-\cp ./patch/create_server.sql.gz ./Dockerfiles/build-mysql/centos/
+\cp ./patch/mongodb-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
+\cp ./patch/postgresql-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
+\cp ./patch/mssql-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
+\cp ./patch/ember-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
+\cp ./patch/create.sql.gz ./Dockerfiles/build-mysql/centos/
 \cp ./patch/NotoSansCJKjp-hinted.zip ./Dockerfiles/build-mysql/centos/
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_MYSQL"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
-sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
+sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^    git -c/d" "$ZABBIX_BUILD_MYSQL"
-sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb_plugin.tar.gz /tmp/\nADD postgresql_plugin.tar.gz /tmp/\n" $ZABBIX_BUILD_MYSQL
-sed -i '/RUN/i ADD create_server.sql.gz /tmp/\n' $ZABBIX_BUILD_MYSQL
+sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb-plugin-${GV_VERSION}.tar.gz /tmp/\nADD postgresql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD mssql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD ember-plugin-${GV_VERSION}.tar.gz /tmp/\n" $ZABBIX_BUILD_MYSQL
+sed -i '/RUN/i ADD create.sql.gz /tmp/\n' $ZABBIX_BUILD_MYSQL
 sed -i -e "/^ADD NotoSansCJKjp-hinted.zip/,+1d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/mkdir \/tmp\/fonts\//d" "$ZABBIX_BUILD_MYSQL"
 sed -i '/RUN/i ADD NotoSansCJKjp-hinted.zip /tmp/fonts/\n' $ZABBIX_BUILD_MYSQL
-sed -i '/    cp \/tmp\/create_server.sql.gz/d' $ZABBIX_BUILD_MYSQL
-sed -i '/    strip \/tmp\/zabbix-\${ZBX_VERSION}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create_server.sql.gz database/mysql/create_server.sql.gz && \\' $ZABBIX_BUILD_MYSQL
+sed -i '/    cp \/tmp\/create.sql.gz/d' $ZABBIX_BUILD_MYSQL
+sed -i '/    strip \${ZBX_SOURCES_DIR}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create.sql.gz ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/create.sql.gz && \\' $ZABBIX_BUILD_MYSQL
 sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn,direct && \\\n    go env -w GO111MODULE=on && \\\n    go env -w GOPROXY=https://goproxy.cn,direct && \\' $ZABBIX_BUILD_MYSQL
 sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_MYSQL
 }
@@ -157,6 +158,7 @@ fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_MYSQL
 update_config_var $ZABBIX_SERVER_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+3d" "$ZABBIX_SERVER_MYSQL"
+sed -i '/reinstall/,+6d' $ZABBIX_SERVER_PGSQL
 sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_SERVER_MYSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_SERVER_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_MYSQL"
@@ -236,6 +238,7 @@ fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_MYSQL
 update_config_var $ZABBIX_PROXY_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+3d" "$ZABBIX_PROXY_MYSQL"
+sed -i '/reinstall/,+6d' $ZABBIX_PROXY_MYSQL
 sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_PROXY_MYSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_PROXY_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_MYSQL"
@@ -251,19 +254,19 @@ var_value_02="                --default-character-set=utf8mb4 \\"
 var_value_03="                -h \${DB_SERVER_HOST} -P \${DB_SERVER_PORT} \\"
 var_value_04="                -u \${DB_SERVER_ROOT_USER} \$ssl_opts \\"
 var_value_05="                \${DB_SERVER_DBNAME} < /opt/zbx_db_partitiong.sql"
-var_value_06="    mysql_query \"use zabbix;ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
-var_value_06_1="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
-var_value_06_2="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
-var_value_06_3="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_text DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
-var_value_06_4="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_uint DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
-var_value_06_5="    mysql_query \"use zabbix;ALTER TABLE zabbix.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
-var_value_06_6="    mysql_query \"use zabbix;ALTER TABLE zabbix.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
-var_value_06_7="    mysql_query \"use zabbix;ALTER TABLE zabbix.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);\" 1>/dev/null"
+var_value_06="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
+var_value_06_1="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
+var_value_06_2="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
+var_value_06_3="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.history_text DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
+var_value_06_4="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.history_uint DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);\" 1>/dev/null"
+var_value_06_5="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
+var_value_06_6="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
+var_value_06_7="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);\" 1>/dev/null"
 
-var_value_07="    mysql_query \"use zabbix;SHOW VARIABLES LIKE 'event_scheduler';\" 1>/dev/null"
-var_value_08="    mysql_query \"use zabbix;CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix');\" 1>/dev/null"
-var_value_09="    mysql_query \"use zabbix;SELECT * FROM INFORMATION_SCHEMA.events\G\" 1>/dev/null"
-var_value_10="    mysql_query \"use zabbix;CALL partition_maintenance_all('zabbix');\" 1>/dev/null"
+var_value_07="    mysql_query \"use zabbix_proxy;SHOW VARIABLES LIKE 'event_scheduler';\" 1>/dev/null"
+var_value_08="    mysql_query \"use zabbix_proxy;CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix_proxy');\" 1>/dev/null"
+var_value_09="    mysql_query \"use zabbix_proxy;SELECT * FROM INFORMATION_SCHEMA.events\G\" 1>/dev/null"
+var_value_10="    mysql_query \"use zabbix_proxy;CALL partition_maintenance_all('zabbix_proxy');\" 1>/dev/null"
 var_value_01=$(escape_spec_char "$var_value_01")
 var_value_02=$(escape_spec_char "$var_value_02")
 var_value_03=$(escape_spec_char "$var_value_03")
@@ -315,6 +318,7 @@ fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_MYSQL
 update_config_var $WEB_NGINX_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" $WEB_NGINX_MYSQL
+sed -i '/reinstall/,+6d' $WEB_NGINX_MYSQL
 sed -i -e "/^            curl-minimal/s/            curl-minimal/#            curl-minimal/" $WEB_NGINX_MYSQL
 sed -i -e "/--nodocs \${INSTALL_PKGS}/s/--nodocs \${INSTALL_PKGS}/--nodocs \${INSTALL_PKGS} tzdata/" $WEB_NGINX_MYSQL
 sed -i '/STOPSIGNAL SIGTERM/i ADD simkai.ttf /usr/share/zabbix/assets/fonts/\n' $WEB_NGINX_MYSQL
@@ -348,7 +352,7 @@ case ${option} in
     sed -i "/ZBX_GRAPH_FONT_NAME/d" Dockerfiles/web-nginx-mysql/centos/Dockerfile
     sed -i '/.pki/a \    sed -i \"/ZBX_GRAPH_FONT_NAME/s/DejaVuSans/simkai/\" /usr/share/zabbix/include/defines.inc.php && \\' $WEB_NGINX_MYSQL
     ;;
-    6)
+    6|7)
     echo "zabbix 6 LTSC!"
     sed -i '/.pki/ s/ \&\& \\//'  $WEB_NGINX_MYSQL
     sed -i '/.pki/ s/$/ \&\& \\/'  $WEB_NGINX_MYSQL
@@ -366,6 +370,7 @@ esac
 zabbix_agent2() {
 update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
+sed -i '/reinstall/,+6d' $ZABBIX_AGENT2
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
 sed -i -e "/libcurl-minimal/s/^/#/" $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\""
@@ -374,6 +379,7 @@ update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_C
 
 zabbix_snmptraps() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
+sed -i '/reinstall/,+6d' $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
@@ -384,6 +390,7 @@ update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax
 
 zabbix_web_service() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
+sed -i '/reinstall/,+6d' $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
@@ -471,7 +478,7 @@ elif [ $# -ge 1 ]; then
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             zabbix_web_service
             ;;
@@ -499,7 +506,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=make5 build
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=make6 build
             ;;
@@ -522,7 +529,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
@@ -572,7 +579,7 @@ elif [ $# -ge 1 ]; then
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
@@ -598,7 +605,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start6 up -d
             ;;
@@ -616,7 +623,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=prxstart5 up -d
             ;;
-            6)
+            6|7)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=prxstart6 up -d
             ;;

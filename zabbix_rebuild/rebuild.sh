@@ -89,38 +89,62 @@ if [ ! -d "/tmp/zabbix-docker-${ZBX_VERSION}" ]; then
     cd /tmp
     \cp zabbix-docker-${ZBX_VERSION}.tar.gz ${shellFolder}/
 fi
-if [ ! -d "/tmp/mongodb_plugin" ]; then
+if [ ! -d "/tmp/mongodb-plugin-${ZBX_VERSION}" ]; then
     cd /tmp
     ZBX_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/mongodb_plugin
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/mongodb-plugin-${ZBX_VERSION}
     if [ $? -ne '0' ]; then
      exit 1
     fi
-    tar -zcf mongodb_plugin.tar.gz mongodb_plugin/
+    tar -zcf mongodb-plugin-${ZBX_VERSION}.tar.gz mongodb-plugin-${ZBX_VERSION}/
     cd /tmp
-    \cp mongodb_plugin.tar.gz ${shellFolder}/
+    \cp mongodb-plugin-${ZBX_VERSION}.tar.gz ${shellFolder}/
 fi
-if [ ! -d "/tmp/postgresql_plugin" ]; then
+if [ ! -d "/tmp/postgresql-plugin-${ZBX_VERSION}" ]; then
     cd /tmp
     ZBX_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/postgresql_plugin
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/postgresql-plugin-${ZBX_VERSION}
     if [ $? -ne '0' ]; then
      exit 1
     fi
-    tar -zcf postgresql_plugin.tar.gz postgresql_plugin/
+    tar -zcf postgresql-plugin-${ZBX_VERSION}.tar.gz postgresql-plugin-${ZBX_VERSION}/
     cd /tmp
-    \cp postgresql_plugin.tar.gz ${shellFolder}/
+    \cp postgresql-plugin-${ZBX_VERSION}.tar.gz ${shellFolder}/
+fi
+if [ ! -d "/tmp/mssql-plugin-${ZBX_VERSION}" ]; then
+    cd /tmp
+    ZBX_SOURCES=https://git.zabbix.com/scm/ap/mssql.git
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/mssql-plugin-${ZBX_VERSION}
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf mssql-plugin-${ZBX_VERSION}.tar.gz mssql-plugin-${ZBX_VERSION}/
+    cd /tmp
+    \cp mssql-plugin-${ZBX_VERSION}.tar.gz ${shellFolder}/
+fi
+if [ ! -d "/tmp/ember-plugin-${ZBX_VERSION}" ]; then
+    cd /tmp
+    ZBX_SOURCES=https://git.zabbix.com/scm/ap/ember-plus.git
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/ember-plugin-${ZBX_VERSION}
+    if [ $? -ne '0' ]; then
+     exit 1
+    fi
+    tar -zcf ember-plugin-${ZBX_VERSION}.tar.gz ember-plugin-${ZBX_VERSION}/
+    cd /tmp
+    \cp ember-plugin-${ZBX_VERSION}.tar.gz ${shellFolder}/
 fi
 cd ${shellFolder}/
 mkdir -p /opt/zbx/
 tar -zxf ./zabbix-docker-${ZBX_VERSION}.tar.gz -C /opt/zbx/ --strip-components 1
 \cp -vrf ../zbx/ /opt/
-cat /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz
+cat /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz
 cat /opt/zbx/patch/NotoSansCJKjp-hinted.zip_* > /opt/zbx/patch/NotoSansCJKjp-hinted.zip
 \cp ./.env_shell /opt/zbx/patch/
 \cp zabbix-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
-\cp postgresql_plugin.tar.gz /opt/zbx/patch/
-\cp mongodb_plugin.tar.gz /opt/zbx/patch/
+\cp postgresql-plugin-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
+\cp mongodb-plugin-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
+\cp mssql-plugin-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
+\cp ember-plugin-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
 chmod 755 -R /opt/zbx/
 cd /opt/zbx/
 
