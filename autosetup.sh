@@ -144,6 +144,7 @@ echo "create database zabbix;" | sudo -u postgres psql
 echo "alter database \"zabbix\" owner to zabbix;" | sudo -u postgres psql
 echo "grant all on database \"zabbix\" to zabbix;" | sudo -u postgres psql
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz
+\cp ./pgsql/timescaledb.sql /usr/share/zabbix-sql-scripts/postgresql/
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/timescaledb.sql
 \cp pgsql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_pgsql.sql.gz /usr/share/zabbix-sql-scripts/postgresql/
 chmod 766 /usr/share/zabbix-sql-scripts/postgresql/create_server_${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}_pgsql.sql.gz
