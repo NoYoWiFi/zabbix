@@ -182,6 +182,7 @@ var_value_06_4="    mysql_query \"use zabbix;ALTER TABLE zabbix.history_uint DRO
 var_value_06_5="    mysql_query \"use zabbix;ALTER TABLE zabbix.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
 var_value_06_6="    mysql_query \"use zabbix;ALTER TABLE zabbix.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
 var_value_06_7="    mysql_query \"use zabbix;ALTER TABLE zabbix.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);\" 1>/dev/null"
+var_value_06_8="    mysql_query \"use zabbix;ALTER TABLE zabbix.auditlog DROP PRIMARY KEY,ADD primary key (auditid, clock);\" 1>/dev/null"
 
 var_value_07="    mysql_query \"use zabbix;SHOW VARIABLES LIKE 'event_scheduler';\" 1>/dev/null"
 var_value_08="    mysql_query \"use zabbix;CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix');\" 1>/dev/null"
@@ -200,6 +201,7 @@ var_value_06_4=$(escape_spec_char "$var_value_06_4")
 var_value_06_5=$(escape_spec_char "$var_value_06_5")
 var_value_06_6=$(escape_spec_char "$var_value_06_6")
 var_value_06_7=$(escape_spec_char "$var_value_06_7")
+var_value_06_8=$(escape_spec_char "$var_value_06_8")
 var_value_07=$(escape_spec_char "$var_value_07")
 var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
@@ -210,6 +212,7 @@ sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_07" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
+sed -i "${NUMINDEX}i\\$var_value_06_8" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_7" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_6" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_5" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
@@ -262,6 +265,7 @@ var_value_06_4="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.hist
 var_value_06_5="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
 var_value_06_6="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);\" 1>/dev/null"
 var_value_06_7="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);\" 1>/dev/null"
+var_value_06_8="    mysql_query \"use zabbix_proxy;ALTER TABLE zabbix_proxy.auditlog DROP PRIMARY KEY,ADD primary key (auditid, clock);\" 1>/dev/null"
 
 var_value_07="    mysql_query \"use zabbix_proxy;SHOW VARIABLES LIKE 'event_scheduler';\" 1>/dev/null"
 var_value_08="    mysql_query \"use zabbix_proxy;CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix_proxy');\" 1>/dev/null"
@@ -280,6 +284,7 @@ var_value_06_4=$(escape_spec_char "$var_value_06_4")
 var_value_06_5=$(escape_spec_char "$var_value_06_5")
 var_value_06_6=$(escape_spec_char "$var_value_06_6")
 var_value_06_7=$(escape_spec_char "$var_value_06_7")
+var_value_06_8=$(escape_spec_char "$var_value_06_8")
 var_value_07=$(escape_spec_char "$var_value_07")
 var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
@@ -290,6 +295,7 @@ sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_07" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
+sed -i "${NUMINDEX}i\\$var_value_06_8" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_7" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_6" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_06_5" $ZABBIX_PROXY_MYSQL_ENTRYPOINT

@@ -129,6 +129,7 @@ sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
 #    \cp ./patch/create.sql.gz ./Dockerfiles/build-pgsql/centos/
 \cp ./patch/create.sql.gz ./Dockerfiles/build-pgsql/centos/
 \cp ./patch/NotoSansCJKjp-hinted.zip ./Dockerfiles/build-pgsql/centos/
+\cp ./patch/timescaledb.sql ./Dockerfiles/build-pgsql/centos/
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^COPY create.sql.gz/d" "$ZABBIX_BUILD_PGSQL"
@@ -140,8 +141,9 @@ sed -i '/    cp \/tmp\/create.sql.gz/d' $ZABBIX_BUILD_PGSQL
 sed -i -e "/^ADD NotoSansCJKjp-hinted.zip/,+1d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/mkdir \/tmp\/fonts\//d" "$ZABBIX_BUILD_PGSQL"
 sed -i '/RUN/i ADD NotoSansCJKjp-hinted.zip /tmp/fonts/\n' $ZABBIX_BUILD_PGSQL
+sed -i '/RUN/i ADD timescaledb.sql /tmp/\n' $ZABBIX_BUILD_PGSQL
 #sed -i '/    strip \/tmp\/zabbix-\${ZBX_VERSION}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create.sql.gz database/postgresql/create.sql.gz && \\' $ZABBIX_BUILD_PGSQL
-sed -i '/    strip \${ZBX_SOURCES_DIR}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create.sql.gz ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/create.sql.gz && \\' $ZABBIX_BUILD_PGSQL
+sed -i '/    strip \${ZBX_SOURCES_DIR}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    \\cp /tmp/create.sql.gz ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/create.sql.gz && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/timescaledb.sql && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/proxy/database/${DB_TYPE}/timescaledb.sql && \\' $ZABBIX_BUILD_PGSQL
 sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn,direct && \\\n    go env -w GO111MODULE=on && \\\n    go env -w GOPROXY=https://goproxy.cn,direct && \\' $ZABBIX_BUILD_PGSQL
 sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_PGSQL
 }
@@ -153,13 +155,12 @@ fi
 if [ ! -f "./Dockerfiles/server-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; then
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/server-pgsql/centos/
 fi
-\cp ./patch/timescaledb.sql ./Dockerfiles/server-pgsql/centos/
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_PGSQL
 update_config_var $ZABBIX_SERVER_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i '/reinstall/,+6d' $ZABBIX_SERVER_PGSQL
-sed -i -e "/^ADD/,+3d" "$ZABBIX_SERVER_PGSQL"
+sed -i -e "/^ADD/,+2d" "$ZABBIX_SERVER_PGSQL"
 #3ADD
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD timescaledb.sql /usr/share/doc/zabbix-server-postgresql/timescaledb.sql\n' $ZABBIX_SERVER_PGSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
 #4ADD
 #sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_SERVER_PGSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_SERVER_PGSQL"
@@ -179,7 +180,6 @@ fi
 if [ ! -f "./Dockerfiles/proxy-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; then
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/proxy-pgsql/centos/
 fi
-\cp ./patch/timescaledb.sql ./Dockerfiles/proxy-pgsql/centos/
 sed -i -e 's|output\/server|output\/proxy|g' $ZABBIX_PROXY_PGSQL
 sed -i -e 's|Zabbix server|Zabbix proxy|g' $ZABBIX_PROXY_PGSQL
 sed -i -e 's|zabbix_server|zabbix_proxy|g' $ZABBIX_PROXY_PGSQL
@@ -213,10 +213,10 @@ sed -i -e 's|prepare_server|prepare_proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
 
 
 update_config_var $ZABBIX_PROXY_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-sed -i -e "/^ADD/,+3d" "$ZABBIX_PROXY_PGSQL"
+sed -i -e "/^ADD/,+2d" "$ZABBIX_PROXY_PGSQL"
 sed -i '/reinstall/,+6d' $ZABBIX_PROXY_PGSQL
 #3ADD
-sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD timescaledb.sql /usr/share/doc/zabbix-proxy-postgresql/timescaledb.sql\n' $ZABBIX_PROXY_PGSQL
+sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\n' $ZABBIX_PROXY_PGSQL
 #4ADD
 #sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_PGSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_PROXY_PGSQL"

@@ -6,6 +6,7 @@ ALTER TABLE public.history_uint DROP CONSTRAINT history_uint_pkey, ADD PRIMARY K
 ALTER TABLE public.trends DROP CONSTRAINT trends_pkey, ADD PRIMARY KEY (itemid, clock);
 ALTER TABLE public.trends_uint DROP CONSTRAINT trends_uint_pkey, ADD PRIMARY KEY (itemid, clock);
 ALTER TABLE public.proxy_history DROP CONSTRAINT proxy_history_pkey, ADD PRIMARY KEY (id, itemid, clock, ns);
+ALTER TABLE public.auditlog DROP CONSTRAINT auditlog_pkey, ADD PRIMARY KEY (auditid, clock);
 
 select create_hypertable('history', 'clock', chunk_time_interval => 86400, migrate_data => true);
 select create_hypertable('history_log', 'clock', chunk_time_interval => 86400, migrate_data => true);
@@ -15,6 +16,7 @@ select create_hypertable('history_uint', 'clock', chunk_time_interval => 86400, 
 select create_hypertable('trends', 'clock', chunk_time_interval => 86400, migrate_data => true);
 select create_hypertable('trends_uint', 'clock', chunk_time_interval => 86400, migrate_data => true);
 select create_hypertable('proxy_history', 'clock', chunk_time_interval => 86400, migrate_data => true);
+select create_hypertable('auditlog', 'clock', chunk_time_interval => 86400, migrate_data => true);
 
 DROP FUNCTION IF EXISTS zbx_ts_unix_now();
 CREATE OR REPLACE FUNCTION zbx_ts_unix_now()
@@ -34,6 +36,7 @@ SELECT set_integer_now_func('history_uint', 'zbx_ts_unix_now');
 SELECT set_integer_now_func('trends', 'zbx_ts_unix_now');
 SELECT set_integer_now_func('trends_uint', 'zbx_ts_unix_now');
 SELECT set_integer_now_func('proxy_history', 'zbx_ts_unix_now');
+SELECT set_integer_now_func('auditlog', 'zbx_ts_unix_now');
 
 SELECT remove_retention_policy('history', true);
 SELECT add_retention_policy('history', 
@@ -95,8 +98,15 @@ SELECT add_retention_policy('proxy_history',
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
-                           'Asia/Shanghai'
-);
+                           'Asia/Shanghai');
+SELECT remove_retention_policy('auditlog', true);
+SELECT add_retention_policy('auditlog', 
+                            EXTRACT(epoch FROM CAST(to_char(CURRENT_DATE - INTERVAL'89 day' + TIME'23:59:59', 'yyyy-mm-dd hh24:mi:ss') AS TIMESTAMPTZ))::INTEGER,
+                            true,
+                            justify_interval(interval '24 hours'),
+                            to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
+                           'Asia/Shanghai');
+
 
 ALTER TABLE history SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock,ns ASC', timescaledb.compress_segmentby = 'itemid');
 ALTER TABLE history_log SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock,ns ASC', timescaledb.compress_segmentby = 'itemid');
@@ -105,7 +115,8 @@ ALTER TABLE history_text SET (timescaledb.compress = true, timescaledb.compress_
 ALTER TABLE history_uint SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock,ns ASC', timescaledb.compress_segmentby = 'itemid');
 ALTER TABLE trends SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock ASC', timescaledb.compress_segmentby = 'itemid');
 ALTER TABLE trends_uint SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock ASC', timescaledb.compress_segmentby = 'itemid');
-ALTER TABLE proxy_history SET (timescaledb.compress = true, timescaledb.compress_orderby = 'id,clock,ns ASC', timescaledb.compress_segmentby = 'itemid');
+ALTER TABLE proxy_history SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock,ns ASC', timescaledb.compress_segmentby = 'itemid');
+ALTER TABLE auditlog SET (timescaledb.compress = true, timescaledb.compress_orderby = 'clock ASC', timescaledb.compress_segmentby = 'userid');
 
 SELECT remove_compression_policy('history', true);
 SELECT add_compression_policy('history', 
@@ -169,8 +180,14 @@ SELECT add_compression_policy('proxy_history',
                             true,
                             justify_interval(interval '24 hours'),
                             to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
-                            'Asia/Shanghai'
-);
+                            'Asia/Shanghai');
+SELECT remove_compression_policy('auditlog', true);
+SELECT add_compression_policy('auditlog', 
+                            date_part('epoch', justify_interval(INTERVAL '7d'))::INTEGER,
+                            true,
+                            justify_interval(interval '24 hours'),
+                            to_char(CURRENT_DATE + INTERVAL'1 day' + TIME'00:01:00', 'yyyy-mm-dd hh24:mi:ss')::TIMESTAMPTZ,
+                            'Asia/Shanghai');
 
 UPDATE config SET db_extension='timescaledb',hk_history_global=1,hk_trends_global=1;
 UPDATE config SET compression_status=1,compress_older='7d';
