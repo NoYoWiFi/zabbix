@@ -250,7 +250,7 @@ sed -i -e "/^\# Timeout/s/^# //" /etc/zabbix/zabbix_agent2.conf
 #![优化zabbix_server.conf配置文件]
 sed -i "/# DBHost=localhost/s/# DBHost=localhost/DBHost=localhost/" ${ZABBIX_CONFIG}
 sed -i "/# DBPassword=/s/# DBPassword=/DBPassword=$DPassword/" ${ZABBIX_CONFIG}
-sed -i "/# DBPort=/s/# DBPort=/DBPort=5432/" ${ZABBIX_CONFIG}
+sed -i "/# DBPort=/s/# DBPort=/DBPort=3306/" ${ZABBIX_CONFIG}
 sed -i "/# ListenIP=0.0.0.0/s/# ListenIP=0.0.0.0/ListenIP=0.0.0.0/" ${ZABBIX_CONFIG}
 sed -i "/# JavaGateway=/s/# JavaGateway=/JavaGateway=127.0.0.1/" ${ZABBIX_CONFIG}
 sed -i "/# JavaGatewayPort=10052/s/# JavaGatewayPort=10052/JavaGatewayPort=10052/" ${ZABBIX_CONFIG}

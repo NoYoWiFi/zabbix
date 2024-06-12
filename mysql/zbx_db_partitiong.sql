@@ -233,7 +233,7 @@ BEGIN
     SET @__PARTITION_COUNT = @__PARTITION_DAYS * (24 / @__HOUR_INTERVAL);
     -- 历史数据保留多少天
     SET @__HISTORY_DAYS = 90;
-    SET @__TRENDS_DAYS = 365;
+    SET @__TRENDS_DAYS = 90;
     CALL partition_maintenance(SCHEMA_NAME, 'history', @__HISTORY_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
     CALL partition_maintenance(SCHEMA_NAME, 'history_log', @__HISTORY_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
     CALL partition_maintenance(SCHEMA_NAME, 'history_str', @__HISTORY_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
@@ -242,5 +242,6 @@ BEGIN
     CALL partition_maintenance(SCHEMA_NAME, 'trends', @__TRENDS_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
     CALL partition_maintenance(SCHEMA_NAME, 'trends_uint', @__TRENDS_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
     CALL partition_maintenance(SCHEMA_NAME, 'proxy_history', @__HISTORY_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
+    CALL partition_maintenance(SCHEMA_NAME, 'auditlog', @__HISTORY_DAYS, @__HOUR_INTERVAL, @__PARTITION_COUNT);
 END$$
 DELIMITER ;
