@@ -28,6 +28,7 @@ mariadb zabbix -e "ALTER TABLE zabbix.history_uint ADD primary key (itemid,clock
 mariadb zabbix -e "ALTER TABLE zabbix.trends ADD primary key (itemid,clock);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.trends_uint ADD primary key (itemid,clock);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.proxy_history ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
+mariadb zabbix -e "ALTER TABLE zabbix.auditlog ADD primary key (auditid, clock);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
@@ -36,6 +37,7 @@ mariadb zabbix -e "ALTER TABLE zabbix.history_uint DROP PRIMARY KEY,ADD primary 
 mariadb zabbix -e "ALTER TABLE zabbix.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
+mariadb zabbix -e "ALTER TABLE zabbix.auditlog DROP PRIMARY KEY,ADD primary key (auditid, clock);" > /dev/null 2>&1
 
 mariadb zabbix -e "SHOW VARIABLES LIKE 'event_scheduler'";
 mariadb zabbix -e "CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix');"
@@ -75,6 +77,7 @@ mariadb zabbix -e "desc history"
 # mariadb zabbix -e "CALL partition_drop('zabbix', 'trends', $(date -d "-4 day" +%Y%m%d)000000);"
 # mariadb zabbix -e "CALL partition_drop('zabbix', 'trends_uint', $(date -d "-4 day" +%Y%m%d)000000);"
 # mariadb zabbix -e "CALL partition_drop('zabbix', 'proxy_history', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e "CALL partition_drop('zabbix', 'auditlog', $(date -d "-4 day" +%Y%m%d)000000);"
 # 
 # --调用维护预定义的表创建、删除、增加分区的存储过程
 # CALL partition_maintenance_all('zabbix');
