@@ -110,11 +110,11 @@ fi
 zabbix_build_base() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
-if [ ! -f "./Dockerfiles/build-base/centos/go1.19.13.linux-amd64.tar.gz" ]; then
-    \cp ./patch/go1.19.13.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
+if [ ! -f "./Dockerfiles/build-base/centos/go1.22.4.linux-amd64.tar.gz" ]; then
+    \cp ./patch/go1.22.4.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
 fi
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_BASE"
-sed -i '/RUN/i ADD go1.19.13.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
+sed -i '/RUN/i ADD go1.22.4.linux-amd64.tar.gz /usr/local/\n' $ZABBIX_BUILD_BASE
 sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 

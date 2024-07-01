@@ -137,7 +137,7 @@ cd ${shellFolder}/
 mkdir -p /opt/zbx/
 tar -zxf ./zabbix-docker-${ZBX_VERSION}.tar.gz -C /opt/zbx/ --strip-components 1
 \cp -vrf ../zbx/ /opt/
-cat /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.19.13.linux-amd64.tar.gz
+cat /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz
 cat /opt/zbx/patch/NotoSansCJKjp-hinted.zip_* > /opt/zbx/patch/NotoSansCJKjp-hinted.zip
 \cp ./.env_shell /opt/zbx/patch/
 \cp zabbix-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
