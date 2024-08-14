@@ -240,6 +240,8 @@ services:
     aliases:
      - zabbix-web-nginx-mysql
    zbx_net_frontend:
+    aliases:
+     - zabbix-web-nginx-mysql
   labels:
    com.zabbix.description: "Zabbix frontend on Nginx web-server with MySQL database support"
    com.zabbix.dbtype: "mysql"
@@ -321,7 +323,6 @@ services:
       memory: 4G
   env_file:
    - ${ENV_VARS_DIRECTORY}/.env_java
-  restart: "${RESTART_POLICY}"
   networks:
    zbx_net_backend:
     aliases:
@@ -355,7 +356,6 @@ services:
       memory: 4G
   env_file:
    - ${ENV_VARS_DIRECTORY}/.env_snmptraps
-  restart: "${RESTART_POLICY}"
   networks:
    zbx_net_frontend:
     aliases:
