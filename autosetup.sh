@@ -319,6 +319,7 @@ sed -i -e "/^Timeout/s/=.*/=30/" ${ZABBIX_CONFIG}
 sed -i -e "/^UnreachableDelay/s/=.*/=90/" ${ZABBIX_CONFIG}
 sed -i -e "/^UnreachablePeriod/s/=.*/=270/" ${ZABBIX_CONFIG}
 sed -i -e "/^UnavailableDelay/s/=.*/=360/" ${ZABBIX_CONFIG}
+sed -i -e "/^DBPort=/s/=.*/=3306/" ${ZABBIX_CONFIG}
 
 sed -i -e "/^\# DebugLevel/s/^# //" ${ZABBIX_CONFIG}
 sed -i -e "/^\# StartPollers/s/^# //" ${ZABBIX_CONFIG}

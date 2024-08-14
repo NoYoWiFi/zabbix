@@ -8,17 +8,17 @@ mariadb zabbix -e "DROP PROCEDURE partition_verify;" > /dev/null 2>&1
 mariadb zabbix -e "DROP EVENT zbx_partitioning;" > /dev/null 2>&1
 mariadb zabbix < ./zbx_db_partitiong.sql
 # mariadb zabbix -e "CALL partition_maintenance_all('zabbix');"
-lv_on=$(cat /etc/my.cnf |grep 'event_scheduler = ON')
-echo $lv_on
-if [[ x"$lv_on" != x ]]
-then
-    sed -i '/event_scheduler = ON/d' /etc/my.cnf
-    sed -i '/max_connections = 2000/d' /etc/my.cnf
-    sed -i '$d' /etc/my.cnf
-fi
-echo "[mysqld]" >> /etc/my.cnf
-echo "event_scheduler = ON" >> /etc/my.cnf
-echo "max_connections = 2000" >> /etc/my.cnf
+# lv_on=$(cat /etc/my.cnf |grep 'event_scheduler = ON')
+# echo $lv_on
+# if [[ x"$lv_on" != x ]]
+# then
+    # sed -i '/event_scheduler = ON/d' /etc/my.cnf
+    # sed -i '/max_connections = 2000/d' /etc/my.cnf
+    # sed -i '$d' /etc/my.cnf
+# fi
+# echo "[mysqld]" >> /etc/my.cnf
+# echo "event_scheduler = ON" >> /etc/my.cnf
+# echo "max_connections = 2000" >> /etc/my.cnf
 systemctl restart mariadb
 mariadb zabbix -e "ALTER TABLE zabbix.history ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
 mariadb zabbix -e "ALTER TABLE zabbix.history_log ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
