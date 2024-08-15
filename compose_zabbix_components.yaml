@@ -158,7 +158,6 @@ services:
   labels:
    com.zabbix.description: "Zabbix proxy with MySQL database support"
    com.zabbix.dbtype: "mysql"
-   
 
  proxy-pgsql:
   extends:
