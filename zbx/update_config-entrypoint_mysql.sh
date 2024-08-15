@@ -93,9 +93,7 @@ service docker start
 mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{
-  "registry-mirrors": ["https://xb10bnbv.mirror.aliyuncs.com"]
-}
+{"registry-mirrors": ["https://dockerpull.com"]}
 EOF
 PS_DOCKER=$(ps -ef | grep docker | grep -vE grep | grep -oE '.sock')
 if [${PS_DOCKER} = ""]; then
@@ -104,6 +102,7 @@ fi
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
     # curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    cat ./patch/docker-compose-linux-x86_64_* > ./patch/docker-compose-linux-x86_64
     \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
@@ -124,6 +123,7 @@ zabbix_build_mysql() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_MYSQL
 update_config_var $ZABBIX_BUILD_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
+#tar -zxf ./patch/zabbix-${GV_VERSION}.tar.gz -C ./Dockerfiles/build-mysql/centos/src/ --strip-components 1
 \cp ./patch/zabbix-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
 \cp ./patch/mongodb-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
 \cp ./patch/postgresql-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-mysql/centos/
@@ -133,6 +133,8 @@ sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
 \cp ./patch/NotoSansCJKjp-hinted.zip ./Dockerfiles/build-mysql/centos/
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_MYSQL"
+sed -i -e "/\/tmp\/src\/bootstrap.sh/,+4d" "$ZABBIX_BUILD_MYSQL"
+sed -i -e "/patch -p1/,+4d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^    git -c/d" "$ZABBIX_BUILD_MYSQL"
 sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb-plugin-${GV_VERSION}.tar.gz /tmp/\nADD postgresql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD mssql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD ember-plugin-${GV_VERSION}.tar.gz /tmp/\n" $ZABBIX_BUILD_MYSQL
 sed -i '/RUN/i ADD create.sql.gz /tmp/\n' $ZABBIX_BUILD_MYSQL

@@ -139,6 +139,7 @@ tar -zxf ./zabbix-docker-${ZBX_VERSION}.tar.gz -C /opt/zbx/ --strip-components 1
 \cp -vrf ../zbx/ /opt/
 cat /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz_* > /opt/zbx/patch/go1.22.4.linux-amd64.tar.gz
 cat /opt/zbx/patch/NotoSansCJKjp-hinted.zip_* > /opt/zbx/patch/NotoSansCJKjp-hinted.zip
+cat /opt/zbx/patch/docker-compose-linux-x86_64_* > /opt/zbx/patch/docker-compose-linux-x86_64
 \cp ./.env_shell /opt/zbx/patch/
 \cp zabbix-${ZBX_VERSION}.tar.gz /opt/zbx/patch/
 \cp postgresql-plugin-${ZBX_VERSION}.tar.gz /opt/zbx/patch/

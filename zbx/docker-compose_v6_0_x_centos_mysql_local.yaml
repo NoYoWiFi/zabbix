@@ -19,8 +19,6 @@ services:
   image: ${BUILD_BASE_MYSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   profiles:
    - build2
-  depends_on:
-   - ${BUILD_BASE_IMAGE}
 
  zabbix-server:
   extends:
@@ -41,7 +39,6 @@ services:
    - start6
   depends_on:
    - mysql-server
-   - zabbix-build-mysql
   labels:
    com.zabbix.description: "Zabbix server with MySQL database support"
    com.zabbix.os: "${CENTOS_OS_TAG}"
@@ -67,7 +64,6 @@ services:
    - mysql-server
    - zabbix-java-gateway
    - zabbix-snmptraps
-   - zabbix-build-mysql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -92,7 +88,6 @@ services:
   depends_on:
    - mysql-server
    - zabbix-server
-   - zabbix-build-mysql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -115,8 +110,6 @@ services:
    - start6
    - start_agent2
   pid: "host"
-  depends_on:
-    - zabbix-build-mysql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -139,8 +132,6 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  depends_on:
-   - zabbix-build-mysql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -177,8 +168,6 @@ services:
   profiles:
    - make6
    - start6
-  depends_on:
-   - zabbix-build-mysql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -199,7 +188,7 @@ services:
   # else find the right id with the id -u command
   # adding the mount volume point which we create earlier
  grafana:
-  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG}
+  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG:-null}
   container_name: zbx-grafana
   restart: unless-stopped
   user: '0'
@@ -226,7 +215,7 @@ services:
    zbx_net_frontend:
 
  loki:
-  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG}
+  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG:-null}
   container_name: zbx-loki
   restart: unless-stopped
   user: '0'
@@ -252,7 +241,7 @@ services:
    zbx_net_frontend:
    
  promtail:
-  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG}
+  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG:-null}
   container_name: zbx-promtail
   restart: unless-stopped
   user: '0'

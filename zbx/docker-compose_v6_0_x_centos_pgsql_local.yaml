@@ -19,8 +19,6 @@ services:
   image: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   profiles:
    - build2
-  depends_on:
-   - zabbix-build-base
 
  zabbix-server:
   extends:
@@ -41,7 +39,6 @@ services:
    - start6
   depends_on:
    - postgres-server
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -64,7 +61,6 @@ services:
    - prxstart6
   depends_on:
    - postgres-server
-   - zabbix-build-pgsql
    - zabbix-java-gateway
    - zabbix-snmptraps
   labels:
@@ -91,7 +87,6 @@ services:
   depends_on:
    - postgres-server
    - zabbix-server
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -115,8 +110,6 @@ services:
    - prxstart5
    - prxstart6
    - start_agent2
-  depends_on:
-    - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -140,8 +133,6 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  depends_on:
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -178,8 +169,6 @@ services:
   profiles:
    - make6
    - start6
-  depends_on:
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -198,7 +187,7 @@ services:
    - prxstart6
 
  grafana:
-  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG}
+  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG:-null}
   container_name: zbx-grafana
   restart: unless-stopped
   user: '0'
@@ -225,7 +214,7 @@ services:
    zbx_net_frontend:
 
  loki:
-  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG}
+  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG:-null}
   container_name: zbx-loki
   restart: unless-stopped
   user: '0'
@@ -251,7 +240,7 @@ services:
    zbx_net_frontend:
    
  promtail:
-  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG}
+  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG:-null}
   container_name: zbx-promtail
   restart: unless-stopped
   user: '0'
