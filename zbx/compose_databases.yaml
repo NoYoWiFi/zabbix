@@ -1,4 +1,3 @@
-version: '3.8'
 services:
  mysql-server:
   image: "${MYSQL_IMAGE}:${MYSQL_IMAGE_TAG}"
@@ -9,6 +8,7 @@ services:
     hard: 655350
   command:
    - mysqld
+#   - --skip-mysqlx
    - --character-set-server=utf8mb4
    - --collation-server=utf8mb4_bin
    - --default-authentication-plugin=mysql_native_password
@@ -20,6 +20,7 @@ services:
 #   - --ssl-cert=/run/secrets/server-cert.pem
 #   - --ssl-key=/run/secrets/server-key.pem
   restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
    - ${ENV_VARS_DIRECTORY}/mysql_init/init_proxy_db.sql:/docker-entrypoint-initdb.d/mysql_init_proxy.sql:ro
@@ -41,10 +42,10 @@ services:
   ports:
    - "${ZABBIX_MARIADB_PORT}:3306"
   networks:
-   zbx_net_database:
+   database:
     aliases:
      - mysql-server
-   zbx_net_frontend:
+   frontend:
     aliases:
      - mysql-server
 
@@ -52,6 +53,7 @@ services:
   image: "${POSTGRESQL_IMAGE}:${POSTGRESQL_IMAGE_TAG}"
 #  command: -c ssl=on -c ssl_cert_file=/run/secrets/server-cert.pem -c ssl_key_file=/run/secrets/server-key.pem -c ssl_ca_file=/run/secrets/root-ca.pem
   restart: "${RESTART_POLICY}"
+  attach: false
   ulimits:
    nproc: 655350
    nofile:
@@ -72,8 +74,9 @@ services:
    - "${ZABBIX_TIMESQL_PORT}:5432"
   stop_grace_period: 1m
   networks:
-   zbx_net_backend:
+   database:
     aliases:
      - postgres-server
-   zbx_net_frontend:
-
+   frontend:
+    aliases:
+     - postgres-server
