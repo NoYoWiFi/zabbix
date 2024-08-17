@@ -216,18 +216,18 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "stop" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
+        docker-compose -f compose_zabbix_components.yaml stop
         exit 1
     fi
 
     if [[ "$1" == "restart" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
+        docker-compose -f compose_zabbix_components.yaml stop
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml start
         exit 1
     fi
 
     if [[ "$1" == "rm" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml rm
+        docker-compose -f compose_zabbix_components.yaml rm
         exit 1
     fi
 
