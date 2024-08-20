@@ -61,8 +61,8 @@ else
     fi
 	\cp Rocky-AppStream.repo /etc/yum.repos.d/
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
-    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-40PGDG.noarch.rpm
-#    https://mirrors.aliyun.com/postgresql/repos/yum/common/redhat/rhel-8-x86_64/pgdg-redhat-repo-42.0-38PGDG.noarch.rpm
+    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-43PGDG.noarch.rpm
+#    https://mirrors.aliyun.com/postgresql/repos/yum/common/redhat/rhel-8-x86_64/pgdg-redhat-repo-42.0-43PGDG.noarch.rpm
 #    sed -i -e "/rhel-\$releasever-\$basearch/s/rhel-\$releasever-\$basearch/rhel-8-x86_64/" /etc/yum.repos.d/pgdg-redhat-all.repo
     escape_spec_char() {
     local var_value=$1
