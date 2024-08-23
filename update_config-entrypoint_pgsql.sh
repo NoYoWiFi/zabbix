@@ -79,6 +79,7 @@ EOF
 service docker restart
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
     # curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    cat ./patch/docker-compose-linux-x86_64_* > ./patch/docker-compose-linux-x86_64
     \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
@@ -209,7 +210,7 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "start_agent2" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start_agent2 up -d
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start_agent2 up -d
 
         exit 1
     fi

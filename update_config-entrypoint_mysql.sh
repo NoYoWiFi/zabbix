@@ -91,6 +91,7 @@ EOF
 service docker restart
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
     # curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    cat ./patch/docker-compose-linux-x86_64_* > ./patch/docker-compose-linux-x86_64
     \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi

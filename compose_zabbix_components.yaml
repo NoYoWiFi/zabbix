@@ -1,9 +1,10 @@
-version: '3.8'
 services:
  server:
+  init: true
   ports:
    - "${ZABBIX_SERVER_PORT}:10051"
   restart: "${RESTART_POLICY}"
+  attach: true
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw 
@@ -62,10 +63,12 @@ services:
   env_file:
    - ${ENV_VARS_DIRECTORY}/.env_db_mysql
   networks:
-   zbx_net_backend:
+   backend:
      aliases:
       - zabbix-server-mysql
-   zbx_net_frontend:
+   frontend:
+     aliases:
+      - zabbix-server-mysql
   labels:
    com.zabbix.description: "Zabbix server with MySQL database support"
    com.zabbix.dbtype: "mysql"
@@ -83,16 +86,20 @@ services:
    - POSTGRES_USER
    - POSTGRES_PASSWORD
   networks:
-   zbx_net_backend:
+   backend:
      aliases:
       - zabbix-server-pgsql
-   zbx_net_frontend:
+   frontend:
+     aliases:
+      - zabbix-server-pgsql
   labels:
    com.zabbix.description: "Zabbix server with PostgreSQL database support"
    com.zabbix.dbtype: "pgsql"
 
  proxy:
+  init: true
   restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
@@ -148,17 +155,18 @@ services:
   ports:
    - "${ZABBIX_PROXY_MYSQL_PORT}:10051"
   networks:
-   zbx_net_database:
+   database:
      aliases:
       - zabbix-proxy-mysql
-   zbx_net_backend:
+   backend:
      aliases:
       - zabbix-proxy-mysql
-   zbx_net_frontend:
+   frontend:
+     aliases:
+      - zabbix-proxy-mysql
   labels:
    com.zabbix.description: "Zabbix proxy with MySQL database support"
    com.zabbix.dbtype: "mysql"
-   
 
  proxy-pgsql:
   extends:
@@ -176,18 +184,25 @@ services:
   ports:
    - "${ZABBIX_PROXY_PGSQL_PORT}:10051"
   networks:
-   zbx_net_backend:
+   database:
      aliases:
       - zabbix-proxy-pgsql
-   zbx_net_frontend:
+   backend:
+     aliases:
+      - zabbix-proxy-pgsql
+   frontend:
+     aliases:
+      - zabbix-proxy-pgsql
   labels:
    com.zabbix.description: "Zabbix server with PostgreSQL database support"
    com.zabbix.dbtype: "pgsql"
+
  web-nginx:
   ports:
    - "${ZABBIX_WEB_NGINX_HTTP_PORT}:8080"
    - "${ZABBIX_WEB_NGINX_HTTPS_PORT}:8443"
   restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
@@ -236,10 +251,12 @@ services:
 #   - client-cert.pem
 #   - root-ca.pem
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - zabbix-web-nginx-mysql
-   zbx_net_frontend:
+   frontend:
+    aliases:
+     - zabbix-web-nginx-mysql
   labels:
    com.zabbix.description: "Zabbix frontend on Nginx web-server with MySQL database support"
    com.zabbix.dbtype: "mysql"
@@ -257,18 +274,22 @@ services:
    - POSTGRES_USER
    - POSTGRES_PASSWORD
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - zabbix-web-nginx-pgsql
-   zbx_net_frontend:
+   frontend:
+    aliases:
+     - zabbix-web-nginx-pgsql
   labels:
    com.zabbix.description: "Zabbix frontend on Nginx web-server with PostgreSQL database support"
    com.zabbix.dbtype: "pgsql"
 
  agent2:
+  init: true
   ports:
    - "${ZABBIX_AGENT2_PORT}:10050"
   restart: "${RESTART_POLICY}"
+  attach: false
   user: root
   volumes:
    - /etc/localtime:/etc/localtime:rw
@@ -293,11 +314,14 @@ services:
   privileged: true
   pid: "host"
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - zabbix-agent2
      - zabbix-agent2-passive
-   zbx_net_frontend:
+   frontend:
+    aliases:
+     - zabbix-agent2
+     - zabbix-agent2-passive
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix agent 2"
@@ -308,6 +332,7 @@ services:
   ports:
    - "${ZABBIX_JAVA_GATEWAY_PORT}:10052"
   restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - /etc/localtime:/etc/localtime:rw
    - /etc/timezone:/etc/timezone:rw
@@ -321,12 +346,13 @@ services:
       memory: 4G
   env_file:
    - ${ENV_VARS_DIRECTORY}/.env_java
-  restart: "${RESTART_POLICY}"
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - zabbix-java-gateway
-   zbx_net_frontend:
+   frontend:
+    aliases:
+     - zabbix-java-gateway
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix Java Gateway"
@@ -340,6 +366,7 @@ services:
   ports:
    - "${ZABBIX_SNMPTRAPS_PORT}:1162/udp"
   restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - snmptraps:/var/lib/zabbix/snmptraps:rw
    - /etc/localtime:/etc/localtime:rw
@@ -355,12 +382,13 @@ services:
       memory: 4G
   env_file:
    - ${ENV_VARS_DIRECTORY}/.env_snmptraps
-  restart: "${RESTART_POLICY}"
   networks:
-   zbx_net_frontend:
+   frontend:
     aliases:
      - zabbix-snmptraps
-   zbx_net_backend:
+   backend:
+    aliases:
+     - zabbix-snmptraps
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix snmptraps"
@@ -370,6 +398,8 @@ services:
  web-service:
   ports:
    - "${ZABBIX_WEB_SERVICE_PORT}:10053"
+  restart: "${RESTART_POLICY}"
+  attach: false
   volumes:
    - ${DATA_DIRECTORY}/var/lib/zabbix/enc:/var/lib/zabbix/enc:rw
    - /etc/localtime:/etc/localtime:rw
@@ -389,12 +419,13 @@ services:
    - ${ENV_VARS_DIRECTORY}/.env_web_service
   cap_add:
    - SYS_ADMIN
-  restart: "${RESTART_POLICY}"
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - zabbix-web-service
-   zbx_net_frontend:
+   frontend:
+    aliases:
+     - zabbix-web-service
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix web service"
