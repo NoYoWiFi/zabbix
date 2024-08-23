@@ -1,4 +1,3 @@
-version: '3.8'
 services:
  zabbix-build-base:
   build:
@@ -19,8 +18,6 @@ services:
   image: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   profiles:
    - build2
-  depends_on:
-   - zabbix-build-base
 
  zabbix-server:
   extends:
@@ -41,7 +38,6 @@ services:
    - start6
   depends_on:
    - postgres-server
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -64,7 +60,6 @@ services:
    - prxstart6
   depends_on:
    - postgres-server
-   - zabbix-build-pgsql
    - zabbix-java-gateway
    - zabbix-snmptraps
   labels:
@@ -91,7 +86,6 @@ services:
   depends_on:
    - postgres-server
    - zabbix-server
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -115,8 +109,6 @@ services:
    - prxstart5
    - prxstart6
    - start_agent2
-  depends_on:
-    - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -132,7 +124,6 @@ services:
     BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   image: ${ZABBIX_JAVA_GATEWAY_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-java-gateway
-  restart: always
   profiles:
    - make5
    - make6
@@ -140,8 +131,6 @@ services:
    - start6
    - prxstart5
    - prxstart6
-  depends_on:
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -178,8 +167,6 @@ services:
   profiles:
    - make6
    - start6
-  depends_on:
-   - zabbix-build-pgsql
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -198,7 +185,7 @@ services:
    - prxstart6
 
  grafana:
-  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG}
+  image: grafana/grafana-enterprise:${GRAFANA_IMAGE_TAG:-null}
   container_name: zbx-grafana
   restart: unless-stopped
   user: '0'
@@ -218,14 +205,14 @@ services:
    - ./zbx_env/data:/var/lib/grafana:rw
    - ./zbx_env/data/plugins:/var/lib/grafana/plugins:rw
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - grafana-server
      - grafana
-   zbx_net_frontend:
+   frontend:
 
  loki:
-  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG}
+  image: grafana/loki:${GRAFANA_LOKI_IMAGE_TAG:-null}
   container_name: zbx-loki
   restart: unless-stopped
   user: '0'
@@ -244,14 +231,14 @@ services:
   volumes:
    - ./zbx_env/loki/config:/mnt/config:rw
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - loki-server
      - loki
-   zbx_net_frontend:
+   frontend:
    
  promtail:
-  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG}
+  image: grafana/promtail:${GRAFANA_PROMTAIL_IMAGE_TAG:-null}
   container_name: zbx-promtail
   restart: unless-stopped
   user: '0'
@@ -267,11 +254,11 @@ services:
    - /var/log/loki:/var/log/loki:rw
   command: -config.file=/mnt/config/promtail-config.yaml
   networks:
-   zbx_net_backend:
+   backend:
     aliases:
      - promtail-server
      - promtail
-   zbx_net_frontend:
+   frontend:
 # elasticsearch:
 #  image: elasticsearch
 #  profiles:
@@ -281,12 +268,12 @@ services:
 #   - transport.host=0.0.0.0
 #   - discovery.zen.minimum_master_nodes=1
 #  networks:
-#   zbx_net_backend:
+#   backend:
 #    aliases:
 #     - elasticsearch
 
 networks:
-  zbx_net_frontend:
+  frontend:
     driver: bridge
     driver_opts:
       com.docker.network.enable_ipv6: "${FRONTEND_ENABLE_IPV6}"
@@ -294,7 +281,7 @@ networks:
       driver: "${FRONTEND_NETWORK_DRIVER}"
       config:
       - subnet: "${FRONTEND_SUBNET}"
-  zbx_net_backend:
+  backend:
     driver: bridge
     driver_opts:
       com.docker.network.enable_ipv6: "${BACKEND_ENABLE_IPV6}"
@@ -303,7 +290,7 @@ networks:
       driver: ${FRONTEND_NETWORK_DRIVER}
       config:
       - subnet: "${BACKEND_SUBNET}"
-  zbx_net_database:
+  database:
     driver: bridge
     driver_opts:
       com.docker.network.enable_ipv6: "${DATABASE_NETWORK_ENABLE_IPV6}"

@@ -94,14 +94,13 @@ service docker start
 mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{
-  "registry-mirrors": ["https://xb10bnbv.mirror.aliyuncs.com"]
-}
+{"registry-mirrors": ["https://dockerpull.com"]}
 EOF
 service docker restart
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
     # curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    cat ./patch/docker-compose-linux-x86_64_* > ./patch/docker-compose-linux-x86_64
     \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
@@ -122,6 +121,7 @@ zabbix_build_pgsql() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_PGSQL
 update_config_var $ZABBIX_BUILD_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
+#tar -zxf ./patch/zabbix-${GV_VERSION}.tar.gz -C ./Dockerfiles/build-pgsql/centos/src/ --strip-components 1
 \cp ./patch/zabbix-${GV_VERSION}.tar.gz ./Dockerfiles/build-pgsql/centos/
 \cp ./patch/mongodb-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-pgsql/centos/
 \cp ./patch/postgresql-plugin-${GV_VERSION}.tar.gz ./Dockerfiles/build-pgsql/centos/
@@ -133,6 +133,8 @@ sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
 \cp ./patch/timescaledb.sql ./Dockerfiles/build-pgsql/centos/
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_PGSQL"
+sed -i -e "/\/tmp\/src\/bootstrap.sh/,+4d" "$ZABBIX_BUILD_PGSQL"
+sed -i -e "/patch -p1/,+4d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^COPY create.sql.gz/d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^    git -c/d" "$ZABBIX_BUILD_PGSQL"
 sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb-plugin-${GV_VERSION}.tar.gz /tmp/\nADD postgresql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD mssql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD ember-plugin-${GV_VERSION}.tar.gz /tmp/\n" $ZABBIX_BUILD_PGSQL
@@ -145,8 +147,9 @@ sed -i '/RUN/i ADD NotoSansCJKjp-hinted.zip /tmp/fonts/\n' $ZABBIX_BUILD_PGSQL
 sed -i '/RUN/i ADD timescaledb.sql /tmp/\n' $ZABBIX_BUILD_PGSQL
 #sed -i '/    strip \/tmp\/zabbix-\${ZBX_VERSION}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    cp /tmp/create.sql.gz database/postgresql/create.sql.gz && \\' $ZABBIX_BUILD_PGSQL
 sed -i '/    strip \${ZBX_SOURCES_DIR}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    \\cp /tmp/create.sql.gz ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/create.sql.gz && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/timescaledb.sql && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/proxy/database/${DB_TYPE}/timescaledb.sql && \\' $ZABBIX_BUILD_PGSQL
-sed -i '/.\/configure \\/i\    go env -w GOPROXY=https://goproxy.cn && \\' $ZABBIX_BUILD_PGSQL
+sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn,direct && \\\n    go env -w GO111MODULE=on && \\\n    go env -w GOPROXY=https://goproxy.cn,direct && \\' $ZABBIX_BUILD_PGSQL
 sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_PGSQL
+sed -i '/            --enable-agent2 \\/i \            --enable-java \\' $ZABBIX_BUILD_PGSQL
 }
 
 zabbix_server_pgsql() {
@@ -298,6 +301,7 @@ update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=do
 
 zabbix_java_gateway() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
+sed -i -e "/zabbix-build-mysql/s/zabbix-build-mysql/zabbix-build-pgsql/" $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
@@ -547,18 +551,18 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "start_agent2" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start_agent2 up -d
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start_agent2 up -d
 
         exit 1
     fi
 
     if [[ "$1" == "stop" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
+        docker-compose -f compose_zabbix_components.yaml stop
         exit 1
     fi
     
     if [[ "$1" == "restart" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml stop
+        docker-compose -f compose_zabbix_components.yaml stop
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml start
         exit 1
     fi
@@ -579,7 +583,7 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "rm" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml rm
+        docker-compose -f compose_zabbix_components.yaml rm
         exit 1
     fi
 	
