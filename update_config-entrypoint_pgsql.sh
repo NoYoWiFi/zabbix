@@ -210,7 +210,7 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "start_agent2" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start_agent2 up -d
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start_agent2 up -d
 
         exit 1
     fi

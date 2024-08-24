@@ -124,7 +124,6 @@ services:
     BUILD_BASE_IMAGE: ${BUILD_BASE_PGSQL_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   image: ${ZABBIX_JAVA_GATEWAY_IMAGE}:${ZABBIX_CENTOS_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}
   container_name: zbx-java-gateway
-  restart: always
   profiles:
    - make5
    - make6
