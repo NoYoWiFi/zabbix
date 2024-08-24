@@ -148,6 +148,7 @@ sed -i '/RUN/i ADD timescaledb.sql /tmp/\n' $ZABBIX_BUILD_PGSQL
 sed -i '/    strip \${ZBX_SOURCES_DIR}\/src\/zabbix_agent\/zabbix_agentd \&\& \\/i\    \\cp /tmp/create.sql.gz ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/create.sql.gz && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/server/database/${DB_TYPE}/timescaledb.sql && \\\n    \\cp /tmp/timescaledb.sql ${ZBX_OUTPUT_DIR}/proxy/database/${DB_TYPE}/timescaledb.sql && \\' $ZABBIX_BUILD_PGSQL
 sed -i '/.\/configure \\/i\    export GOPROXY=https://goproxy.cn,direct && \\\n    go env -w GO111MODULE=on && \\\n    go env -w GOPROXY=https://goproxy.cn,direct && \\' $ZABBIX_BUILD_PGSQL
 sed -i -e "/curl --tlsv1/d" $ZABBIX_BUILD_PGSQL
+sed -i '/            --enable-agent2 \\/i \            --enable-java \\' $ZABBIX_BUILD_PGSQL
 }
 
 zabbix_server_pgsql() {
@@ -556,7 +557,7 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "start_agent2" ]]; then
-        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start_agent2 up -d
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start_agent2 up -d
 
         exit 1
     fi
