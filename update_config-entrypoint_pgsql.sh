@@ -39,6 +39,12 @@ fi
 if [[ "." == "${option}" ]]; then
 	option=$(cat /etc/redhat-release | cut -c 21)
 fi
+if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+    echo "Successfully processed the file."
+    option=7
+else
+    echo "An error occurred: No such file or directory."
+fi
 case ${option} in
     8)
     echo "Centos 8 catch!"
@@ -61,6 +67,12 @@ case ${option} in
         yum-config-manager \
             --add-repo \
             https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo
+        if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+            echo "Successfully processed the file."
+            sed -i "/\$releasever/s/\$releasever/7/" /etc/yum.repos.d/docker-ce.repo
+        else
+            echo "An error occurred: No such file or directory."
+        fi
         yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git rsyslog
     ;;

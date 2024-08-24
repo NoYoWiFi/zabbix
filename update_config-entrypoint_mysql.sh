@@ -39,6 +39,12 @@ fi
 if [[ "." == "${option}" ]]; then
 	option=$(cat /etc/redhat-release | cut -c 21)
 fi
+if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+    echo "Successfully processed the file."
+    option=7
+else
+    echo "An error occurred: No such file or directory."
+fi
 case ${option} in
     8)
     echo "Centos 8 catch!"
@@ -67,6 +73,12 @@ case ${option} in
         yum-config-manager \
             --add-repo \
             https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+            echo "Successfully processed the file."
+            sed -i "/\$releasever/s/\$releasever/7/" /etc/yum.repos.d/docker-ce.repo
+        else
+            echo "An error occurred: No such file or directory."
+        fi
         yum -y install docker-ce docker-ce-cli containerd.io
         if [ $? -ne '0' ]; then
          rpm -qa | grep docker | xargs rpm -e --nodeps
@@ -86,9 +98,7 @@ fi
 service docker start
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{
-  "registry-mirrors": ["https://xb10bnbv.mirror.aliyuncs.com"]
-}
+{"registry-mirrors": ["https://dockerpull.com"]}
 EOF
 service docker restart
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
