@@ -84,9 +84,7 @@ service docker start
 mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{
-  "registry-mirrors": ["https://xb10bnbv.mirror.aliyuncs.com"]
-}
+{"registry-mirrors": ["https://dockerpull.com"]}
 EOF
 service docker restart
 if [ ! -f "/usr/local/bin/docker-compose" ]; then
