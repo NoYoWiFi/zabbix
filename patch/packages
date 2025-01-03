@@ -14,8 +14,3 @@ zabbix-web
 zabbix-web-deps
 zabbix-web-mysql
 zabbix-web-service
-MariaDB-client-compat
-MariaDB-common
-MariaDB-server
-MariaDB-server-compat
-MariaDB-shared
