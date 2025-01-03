@@ -9,9 +9,20 @@ set +e
 set -o xtrace
 #zabbix数据库密码
 GV_ENV_SHELL="./patch/.env_shell"
+GV_ARCH=$(uname -m)
+GV_PACKAGES_DIR_NAME="packages"
 source ./patch/getEnv.sh
 DPassword=${GV_ARR_ENV[GV_ZABBIX_DPASSWORD]}
 shellFolder=$(dirname $(readlink -f "$0"))
+if [ "${GV_ARCH}" = "x86_64" ]; then
+    echo "系统架构为 x86_64。"
+    GV_PACKAGES_DIR_NAME="packages"
+elif [ "${GV_ARCH}" = "aarch64" ]; then
+    echo "系统架构为 aarch64。"
+    GV_PACKAGES_DIR_NAME="aarch64"
+else
+    echo "未知架构。"
+fi
 case ${1} in
     "trans")
         echo "trans"
@@ -79,7 +90,7 @@ fi
 dnf module reset php -y
 dnf module enable php:${GV_ARR_ENV[GV_PHP_VERSION]} -y
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
+yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.${GV_ARCH} langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
 #![配置时区]
 timedatectl set-timezone Asia/Shanghai
 systemctl start chronyd
@@ -94,16 +105,16 @@ chown grafana:grafana -R /var/lib/grafana/plugins/*
 case ${1} in
     "proxy")
         echo "proxy"
-        yum -y install packages/zabbix-agent2* packages/MariaDB* packages/tcping* packages/zabbix-get* packages/zabbix-java-gateway* \
-        packages/zabbix-proxy-mysql* packages/zabbix-release* packages/zabbix-selinux-policy* \
-        packages/zabbix-sender* packages/zabbix-sql-scripts* packages/fping*
+        yum -y install ${GV_PACKAGES_DIR_NAME}/zabbix-agent2* ${GV_PACKAGES_DIR_NAME}/MariaDB* ${GV_PACKAGES_DIR_NAME}/tcping* ${GV_PACKAGES_DIR_NAME}/zabbix-get* ${GV_PACKAGES_DIR_NAME}/zabbix-java-gateway* \
+        ${GV_PACKAGES_DIR_NAME}/zabbix-proxy-mysql* ${GV_PACKAGES_DIR_NAME}/zabbix-release* ${GV_PACKAGES_DIR_NAME}/zabbix-selinux-policy* \
+        ${GV_PACKAGES_DIR_NAME}/zabbix-sender* ${GV_PACKAGES_DIR_NAME}/zabbix-sql-scripts* ${GV_PACKAGES_DIR_NAME}/fping*
         if [ $? -ne '0' ]; then
          echo "ERROR!"
          exit 1
         fi
         ;;
     *)
-        yum -y install packages/*
+        yum -y install ${GV_PACKAGES_DIR_NAME}/*
         if [ $? -ne '0' ]; then
          echo "ERROR!"
          exit 1
