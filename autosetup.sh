@@ -40,6 +40,7 @@ if [ -d "/etc/yum.repos.d/bak/" ];then
     rm -f /etc/yum.repos.d/CentOS-Media.repo
     mv -vf /etc/yum.repos.d/bak/* /etc/yum.repos.d/
     rm -rf /etc/yum.repos.d/bak/
+    \cp CentOS-Base.repo /etc/yum.repos.d/
 fi
 check_ip_status www.baidu.com
 if [ $? -ne 0 ];then
@@ -51,6 +52,7 @@ if [ $? -ne 0 ];then
     mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
     \cp CentOS-Media.repo /etc/yum.repos.d/
 else
+    \cp CentOS-Base.repo /etc/yum.repos.d/
     touch /etc/yum.repos.d/MariaDB.repo
     cat > /etc/yum.repos.d/MariaDB.repo << EOF
 # MariaDB 10.6 CentOS repository list - created 2022-10-27 14:24 UTC
