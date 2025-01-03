@@ -9,6 +9,7 @@ set +e
 set -o xtrace
 #zabbix数据库密码
 GV_ENV_SHELL="./patch/.env_shell"
+GV_ARCH=$(uname -m)
 source ./patch/getEnv.sh
 DPassword=${GV_ARR_ENV[GV_ZABBIX_DPASSWORD]}
 shellFolder=$(dirname $(readlink -f "$0"))
@@ -55,13 +56,14 @@ if [ $? -ne 0 ];then
     mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
     \cp Rocky-Media.repo /etc/yum.repos.d/
 else
+    # https://packagecloud.io/timescale/timescaledb/el/8
     curl -s https://packagecloud.io/install/repositories/timescale/timescaledb/script.rpm.sh | sudo bash
     if [ $? -ne 0 ];then
         sh patch/script.rpm.sh
     fi
 	\cp Rocky-AppStream.repo /etc/yum.repos.d/
 	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
-    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-43PGDG.noarch.rpm
+    rpm -ivhU --force ./packages/pgdg-redhat-repo-42.0-45PGDG.noarch.rpm
 #    https://mirrors.aliyun.com/postgresql/repos/yum/common/redhat/rhel-8-x86_64/pgdg-redhat-repo-42.0-43PGDG.noarch.rpm
 #    sed -i -e "/rhel-\$releasever-\$basearch/s/rhel-\$releasever-\$basearch/rhel-8-x86_64/" /etc/yum.repos.d/pgdg-redhat-all.repo
     escape_spec_char() {
@@ -93,7 +95,7 @@ fi
 dnf module reset php -y
 dnf module enable php:${GV_ARR_ENV[GV_PHP_VERSION]} -y
 #![安装snmp及部分插件]
-yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.x86_64 langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
+yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.${GV_ARCH} langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
 #![配置时区]
 timedatectl set-timezone Asia/Shanghai
 systemctl start chronyd

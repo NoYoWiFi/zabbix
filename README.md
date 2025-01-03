@@ -1,7 +1,44 @@
+
 ==持续更新最新版本...==
+
+**zabbix 版本**
+
+`6.0.x`
+
+`7.0.x`
+
+
 # 全自动安装方法
-1. 下载一键安装脚本
-[一键安装脚本](https://gitcode.net/1284524409/zabbix/-/archive/rocky_8_zabbix_6.0.x_pgsql/zabbix-rocky_8_zabbix_6.0.x_pgsql.tar.gz)
+1. 下载一键安装包
+
+### 项目地址
+
+|标题|链接  |
+|--|--|
+| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
+| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
+| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
+| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
+| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
+| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_docker) |
+| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_dockerfile) |
+| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_docker) |
+| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_dockerfile) |
+| zabbix_api | [zabbix_api](https://github.com/NoYoWiFi/zabbix/tree/zabbix_api) |
+| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_build) |
+
+### 克隆项目文件
+```
+# **执行如下命令克隆 NoYoWiFi 编排好的 zabbix 项目**
+ZBX_SOURCES=https://'zabbix':'k_LC6VHmJzNyB_3SBgtz'@gitcode.net/1284524409/zabbix.git
+ZBX_BRANCH=rocky_8_zabbix_7.0.x_pgsql
+ZBX_TODIR=/opt/${ZBX_BRANCH}
+cd ${ZBX_TODIR}
+git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_BRANCH} --depth 1 --single-branch ${ZBX_TODIR}/
+chmod 755 -R ${ZBX_TODIR}/
+cd ${ZBX_TODIR}/
+```
+
 2. 执行命令全自动安装zabbix-server
 ```
 tar -zxvf zabbix-rocky_8_zabbix_6.0.x_pgsql.tar.gz
@@ -501,23 +538,23 @@ https://IP:3000
 密码: admin
 
 **将grafana界面设置成中文**
-![](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/2cc17fdd154217656975030bc6636523.png)
+![](https://i-blog.csdnimg.cn/blog_migrate/ed8698106a878f5f618e790fab415288.png)
 
 **启用zabbix插件
-![](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/844a584f0789fc28205b2b5a8302938c.png)
+![](https://i-blog.csdnimg.cn/blog_migrate/89fe0842e5c2b14b5d5ca3ec71d6e434.png)
 
 **连接zabbix数据库插件**
-![](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/c87b39af3050dac2ecb62c7365bc7a7b.png)
+![](https://i-blog.csdnimg.cn/blog_migrate/9bceb2bef7ba6af49bdce0e268a4979c.png)
 
 **新建zabbix数据库连接**
 `https://zabbix-web-nginx-mysql:8443/api_jsonrpc.php`
 
-![](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/c68d9dbf98134214aa759dd25bbfbb2e.png)
+![](https://i-blog.csdnimg.cn/blog_migrate/ae0be43b233a187e2b15ca7390143333.png)
 
 **输入正确的用户名密码**
 `Admin/zabbix`
 
-![](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/aa5fd658ee04a9dd7687e459b3064dbe.png)
+![](https://i-blog.csdnimg.cn/blog_migrate/1ef8a914686e563a47330fc58c192572.png)
 
 
 **zabbix-server服务器同时优化成了rsyslog日志服务器，rsyslog日志端口为514**
@@ -526,14 +563,16 @@ https://IP:3000
 **grafana优化集成了zabbix与Loki插件**
 请将任意.log后缀日志存入 /var/log/loki/即可连接到loki
 URL为http://IP:3100
-![在这里插入图片描述](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/c469826e35f6d0735418cbb9ca008b22.png)
+![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/99947bee12ddfc79be7aae12398cc4df.png)
+
 
 
 `交流群`  
   
 | zabbix-答疑群                                                                                                | zabbix-汉化群                                                                                                  |  
 |---------------------------|---|  
-|  ![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/zabbix-dayi.png) |![微信打赏](https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_pgsql/vx_images/zabbix-hanhua.png)|  
+|  ![微信打赏](https://i-blog.csdnimg.cn/blog_migrate/d8ab65906eddc317b7aa193588aadc8b.png) |![微信打赏](https://i-blog.csdnimg.cn/blog_migrate/88d84eb6e35cc956c02592964dcf7006.png)|  
+  
   
   
 **全文完结**
