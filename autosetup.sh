@@ -377,6 +377,7 @@ sed -i -e "/^\# Timeout/s/^# //" ${ZABBIX_CONFIG}
 sed -i -e "/^\# UnreachableDelay/s/^# //" ${ZABBIX_CONFIG}
 sed -i -e "/^\# UnreachablePeriod/s/^# //" ${ZABBIX_CONFIG}
 sed -i -e "/^\# UnavailableDelay/s/^# //" ${ZABBIX_CONFIG}
+sed -i -e "/^\# AlertScriptsPath/s/^# //" ${ZABBIX_CONFIG}
 #![配置日志服务rsyslog]
 systemctl start rsyslog
 \cp ./patch/loki.conf /etc/rsyslog.d/
@@ -404,6 +405,7 @@ case ${1} in
         #![安装grafana loki日志分析服务]
         mkdir -p /var/log/loki
         chmod 755 /var/log/loki
+        mkdir -p /usr/lib/zabbix/alertscripts
         \cp ./patch/echo.sh /usr/lib/zabbix/alertscripts/
         chmod +x /usr/lib/zabbix/alertscripts/echo.sh
         chown zabbix:zabbix /usr/lib/zabbix/alertscripts/echo.sh
@@ -464,7 +466,4 @@ case ${1} in
 esac
 netstat -nltp | grep '10050\|10051\|10052\|5432\|80\|3000'
 # rm -rf ${shellFolder}*
-
-
-
 
