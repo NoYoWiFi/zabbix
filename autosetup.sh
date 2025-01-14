@@ -130,6 +130,8 @@ fi
 mariadb -e "create database zabbix character set utf8mb4 collate utf8mb4_bin;"
 mariadb -e "grant all privileges on zabbix.* to'zabbix'@'localhost' identified by '$DPassword';"
 mariadb -e "grant all privileges on zabbix.* to'zabbix'@'%' identified by '$DPassword';"
+mariadb -e "GRANT SET USER ON *.* TO 'zabbix'@'localhost';"
+mariadb -e "GRANT SET USER ON *.* TO 'zabbix'@'%';"
 mariadb -e "set character_set_server=utf8mb4;"
 mariadb -e "flush privileges;"
 # chmod 766 /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
@@ -205,7 +207,7 @@ echo "perl do \"/usr/bin/zabbix_trap_receiver.pl\"" >> /etc/snmp/snmptrapd.conf
 #![创建SNMP V3用户]
 sed -i -e "/rouser/d" /etc/snmp/snmpd.conf
 sed -i -e "/zabbix/d" /var/lib/net-snmp/snmpd.conf
-net-snmp-create-v3-user -ro -A Admin@zabbix -a MD5 -X Admin@zabbix -x DES zabbix
+/usr/bin/net-snmp-create-v3-user -ro -A Admin@zabbix -a MD5 -X Admin@zabbix -x DES zabbix
 case ${1} in
     "proxy")
         echo "proxy"
