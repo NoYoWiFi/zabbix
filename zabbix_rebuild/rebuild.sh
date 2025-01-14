@@ -74,6 +74,7 @@ if [ ! -d "/tmp/zabbix-${ZBX_VERSION}" ]; then
     if [ $? -ne '0' ]; then
      exit 1
     fi
+    cat /tmp/zabbix-${ZBX_VERSION}/create/src/templates-a* > /tmp/zabbix-${ZBX_VERSION}/create/src/templates.tmpl
     tar -zcf zabbix-${ZBX_VERSION}.tar.gz zabbix-${ZBX_VERSION}/
     cd /tmp
     \cp zabbix-${ZBX_VERSION}.tar.gz ${shellFolder}/
@@ -81,7 +82,7 @@ fi
 if [ ! -d "/tmp/zabbix-docker-${ZBX_VERSION}" ]; then
     # ZBX_SOURCES=https://gitcode.net/mirrors/zabbix/zabbix-docker.git
     ZBX_SOURCES=https://github.com/zabbix/zabbix-docker.git
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION:0:3} --depth 1 --single-branch /tmp/zabbix-docker-${ZBX_VERSION}
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-docker-${ZBX_VERSION}
     if [ $? -ne '0' ]; then
      exit 1
     fi

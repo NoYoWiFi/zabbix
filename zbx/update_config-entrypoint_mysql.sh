@@ -105,7 +105,7 @@ service docker start
 mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{"registry-mirrors": ["https://dockerpull.com"]}
+{"registry-mirrors": ["https://cjie.eu.org"]}
 EOF
 PS_DOCKER=$(ps -ef | grep docker | grep -vE grep | grep -oE '.sock')
 if [${PS_DOCKER} = ""]; then
@@ -132,6 +132,7 @@ sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
 zabbix_build_mysql() {
+docker tag zabbix-build-base:rocky-7.0-latest sources:latest
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_MYSQL
 update_config_var $ZABBIX_BUILD_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
@@ -146,8 +147,9 @@ sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/\/tmp\/src\/bootstrap.sh/,+4d" "$ZABBIX_BUILD_MYSQL"
-sed -i -e "/patch -p1/,+4d" "$ZABBIX_BUILD_MYSQL"
+sed -i -e "/for patch_filename/,+4d" "$ZABBIX_BUILD_MYSQL"
 sed -i -e "/^    git -c/d" "$ZABBIX_BUILD_MYSQL"
+sed -i -e "/dbschema/s/dbschema.*/dbschema \&>\/dev\/null \&\& make -j\"\$(nproc)\" -s dbschema || echo 0 \&\&\\\/" ${ZABBIX_BUILD_MYSQL}
 sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb-plugin-${GV_VERSION}.tar.gz /tmp/\nADD postgresql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD mssql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD ember-plugin-${GV_VERSION}.tar.gz /tmp/\n" $ZABBIX_BUILD_MYSQL
 sed -i '/RUN/i ADD create.sql.gz /tmp/\n' $ZABBIX_BUILD_MYSQL
 sed -i -e "/^ADD NotoSansCJKjp-hinted.zip/,+1d" "$ZABBIX_BUILD_MYSQL"
@@ -176,7 +178,9 @@ sed -i '/reinstall/,+6d' $ZABBIX_SERVER_PGSQL
 sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_SERVER_MYSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_SERVER_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_MYSQL"
-sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_MYSQL
+#sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
+sed -i '/^    \/usr\/sbin\/zabbix_server/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh && \\\n' $ZABBIX_SERVER_MYSQL
+sed -i -e "/microdnf -y reinstall/s/reinstall/install/" $ZABBIX_SERVER_MYSQL
 sed -i -e "/microdnf download libcurl/s/^/#/" $ZABBIX_SERVER_MYSQL
 sed -i -e "/rpm -Uvh --nodeps --replacefiles/s/^/#/" $ZABBIX_SERVER_MYSQL
 sed -i -e "/microdnf remove -y libcurl-minimal/s/^/#/" $ZABBIX_SERVER_MYSQL
@@ -259,11 +263,13 @@ sed -i '/reinstall/,+6d' $ZABBIX_PROXY_MYSQL
 sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /opt/\n' $ZABBIX_PROXY_MYSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_PROXY_MYSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_MYSQL"
-sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
-sed -i -e "/microdnf download libcurl/s/^/#/" $ZABBIX_SERVER_MYSQL
-sed -i -e "/rpm -Uvh --nodeps --replacefiles/s/^/#/" $ZABBIX_SERVER_MYSQL
-sed -i -e "/microdnf remove -y libcurl-minimal/s/^/#/" $ZABBIX_SERVER_MYSQL
-sed -i -e "/rm -rf \"\*curl/s/^/#/" $ZABBIX_SERVER_MYSQL
+#sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_MYSQL
+sed -i '/^    \/usr\/sbin\/zabbix_server/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh && \\\n' $ZABBIX_PROXY_MYSQL
+sed -i -e "/microdnf -y reinstall/s/reinstall/install/" $ZABBIX_PROXY_MYSQL
+sed -i -e "/microdnf download libcurl/s/^/#/" $ZABBIX_PROXY_MYSQL
+sed -i -e "/rpm -Uvh --nodeps --replacefiles/s/^/#/" $ZABBIX_PROXY_MYSQL
+sed -i -e "/microdnf remove -y libcurl-minimal/s/^/#/" $ZABBIX_PROXY_MYSQL
+sed -i -e "/rm -rf \"\*curl/s/^/#/" $ZABBIX_PROXY_MYSQL
 # exec_sql_file
 sed -i -e "275,301{/^    mysql --silent/,+16d}" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 var_value_01="    mysql --silent --skip-column-names \\"
@@ -536,6 +542,11 @@ elif [ $# -ge 1 ]; then
         esac
         exit 1
     fi
+
+    if [[ "${1:0:5}" == "make-" ]]; then
+        docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=$1 build
+        exit 1
+    fi    
     
     if [[ "$1" == "zabbix-web-nginx-mysql" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=zabbix-web-nginx-mysql build

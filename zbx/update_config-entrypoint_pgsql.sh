@@ -105,7 +105,7 @@ service docker start
 mkdir /etc/docker
 touch /etc/docker/daemon.json
 cat > /etc/docker/daemon.json << EOF
-{"registry-mirrors": ["https://dockerpull.com"]}
+{"registry-mirrors": ["https://cjie.eu.org"]}
 EOF
 service docker restart
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
@@ -129,6 +129,7 @@ sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 }
 
 zabbix_build_pgsql() {
+docker tag zabbix-build-base:rocky-7.0-latest sources:latest
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_PGSQL
 update_config_var $ZABBIX_BUILD_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
@@ -145,9 +146,10 @@ sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^    go/d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^ADD/,+4d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/\/tmp\/src\/bootstrap.sh/,+4d" "$ZABBIX_BUILD_PGSQL"
-sed -i -e "/patch -p1/,+4d" "$ZABBIX_BUILD_PGSQL"
+sed -i -e "/for patch_filename/,+4d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^COPY create.sql.gz/d" "$ZABBIX_BUILD_PGSQL"
 sed -i -e "/^    git -c/d" "$ZABBIX_BUILD_PGSQL"
+sed -i -e "/dbschema/s/dbschema.*/dbschema \&>\/dev\/null \&\& make -j\"\$(nproc)\" -s dbschema || echo 0 \&\& \\\/" ${ZABBIX_BUILD_PGSQL}
 sed -i "/RUN/i ADD zabbix-${GV_VERSION}.tar.gz /tmp/\nADD mongodb-plugin-${GV_VERSION}.tar.gz /tmp/\nADD postgresql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD mssql-plugin-${GV_VERSION}.tar.gz /tmp/\nADD ember-plugin-${GV_VERSION}.tar.gz /tmp/\n" $ZABBIX_BUILD_PGSQL
 #sed -i '/RUN/i COPY create.sql.gz /tmp/\n' $ZABBIX_BUILD_PGSQL
 sed -i '/RUN/i COPY create.sql.gz /tmp/\n' $ZABBIX_BUILD_PGSQL
@@ -180,7 +182,9 @@ sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3
 #sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_SERVER_PGSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_SERVER_PGSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_SERVER_PGSQL"
-sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
+#sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
+sed -i '/^    \/usr\/sbin\/zabbix_server/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh && \\\n' $ZABBIX_SERVER_PGSQL
+sed -i -e "/microdnf -y reinstall/s/reinstall/install/" $ZABBIX_SERVER_PGSQL
 sed -i -e "/microdnf download libcurl/s/^/#/" $ZABBIX_SERVER_PGSQL
 sed -i -e "/rpm -Uvh --nodeps --replacefiles/s/^/#/" $ZABBIX_SERVER_PGSQL
 sed -i -e "/microdnf remove -y libcurl-minimal/s/^/#/" $ZABBIX_SERVER_PGSQL
@@ -236,8 +240,9 @@ sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3
 #sed -i '/STOPSIGNAL SIGTERM/i ADD tcping-1.3.5-19.el8.x86_64.rpm /tmp/tcping-1.3.5-19.el8.x86_64.rpm\nADD pip.sh /tmp/pip.sh\nADD zbx_db_partitiong.sql /tmp/\n' $ZABBIX_PROXY_PGSQL
 sed -i -e "/    microdnf -y clean all/d" "$ZABBIX_PROXY_PGSQL"
 sed -i -e "/    sh \/tmp\/pip.sh/,+1d" "$ZABBIX_PROXY_PGSQL"
-sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_PROXY_PGSQL
-
+#sed -i '/EXPOSE 10051/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh\n' $ZABBIX_SERVER_PGSQL
+sed -i '/^    \/usr\/sbin\/zabbix_server/i\    microdnf -y clean all && \\\n    sh /tmp/pip.sh && \\\n' $ZABBIX_PROXY_PGSQL
+sed -i -e "/microdnf -y reinstall/s/reinstall/install/" $ZABBIX_PROXY_PGSQL
 }
 
 zabbix_web_nginx_pgsql() {
@@ -451,7 +456,12 @@ elif [ $# -ge 1 ]; then
         esac
         exit 1
     fi
-    
+
+    if [[ "${1:0:5}" == "make-" ]]; then
+        docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=$1 build
+        exit 1
+    fi  
+ 
     if [[ "$1" == "zabbix-web-nginx-pgsql" ]]; then
         docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=zabbix-web-nginx-pgsql build
         exit 1
