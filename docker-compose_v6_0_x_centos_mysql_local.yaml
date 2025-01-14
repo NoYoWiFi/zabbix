@@ -159,6 +159,7 @@ services:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
  zabbix-web-service:
+  privileged: true
   extends:
    file: compose_zabbix_components.yaml
    service: web-service
