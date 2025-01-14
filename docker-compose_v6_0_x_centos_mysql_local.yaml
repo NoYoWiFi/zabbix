@@ -34,10 +34,11 @@ services:
   profiles:
    - make5
    - make6
+   - make-server
    - start5
    - start6
-  depends_on:
-   - mysql-server
+#  depends_on:
+#   - mysql-server
   labels:
    com.zabbix.description: "Zabbix server with MySQL database support"
    com.zabbix.os: "${CENTOS_OS_TAG}"
@@ -57,12 +58,13 @@ services:
   profiles:
    - make5
    - make6
+   - make-proxy
    - prxstart5
    - prxstart6
-  depends_on:
-   - mysql-server
-   - zabbix-java-gateway
-   - zabbix-snmptraps
+#  depends_on:
+#   - mysql-server
+#   - zabbix-java-gateway
+#   - zabbix-snmptraps
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -82,11 +84,12 @@ services:
    - zabbix-web-nginx-mysql
    - make5
    - make6
+   - make-nginx
    - start5
    - start6
-  depends_on:
-   - mysql-server
-   - zabbix-server
+#  depends_on:
+#   - mysql-server
+#   - zabbix-server
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
 
@@ -105,6 +108,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-agent2
    - start5
    - start6
    - start_agent2
@@ -127,6 +131,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-java
    - start5
    - start6
    - prxstart5
@@ -147,6 +152,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-snmp
    - start5
    - start6
   labels:
@@ -166,6 +172,7 @@ services:
   container_name: zbx-web-service
   profiles:
    - make6
+   - make-web
    - start6
   labels:
    com.zabbix.os: "${CENTOS_OS_TAG}"
@@ -178,6 +185,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-db
    - start5
    - start6
    - prxstart5
@@ -194,6 +202,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-grafana
    - start5
    - start6
   ports:
@@ -221,6 +230,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-loki
    - start5
    - start6
   ports:
@@ -247,6 +257,7 @@ services:
   profiles:
    - make5
    - make6
+   - make-promtail
    - start5
    - start6
   volumes:

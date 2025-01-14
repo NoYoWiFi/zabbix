@@ -3,24 +3,41 @@
 
 **zabbix 版本**
 
-`6.0.30`
+`6.0.x`
 
-`7.0.0`
+`7.0.x`
+# 全自动安装方法
+1. 下载一键安装包
 
-
-**项目地址**  
-# 项目地址
+### 项目地址
 
 |标题|链接  |
 |--|--|
-|zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_6.0.x_docker) |
-| zabbix_7.0.x_docker| [zabbix_7.0.x_docker](https://gitcode.net/1284524409/zabbix/-/tree/zabbix_7.0.x_docker) |
-# 一键安装包
-|标题|链接  |
-|--|--|
-| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_6.0.x_docker/zabbix-zabbix_6.0.x_docker.tar.gz) |
-| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://gitcode.net/1284524409/zabbix/-/archive/zabbix_7.0.x_docker/zabbix-zabbix_7.0.x_docker.tar.gz) |
+| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
+| centos_7_zabbix_7.0.x_mysql | [centos_7_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_mysql) |
+| centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
+| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
+| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
+| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
+| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
+| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_docker) |
+| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_dockerfile) |
+| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_docker) |
+| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_dockerfile) |
+| zabbix_api | [zabbix_api](https://github.com/NoYoWiFi/zabbix/tree/zabbix_api) |
+| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_build) |
 
+### 克隆项目文件
+```
+# **执行如下命令克隆 NoYoWiFi 编排好的 zabbix 项目**
+ZBX_SOURCES=https://'zabbix':'k_LC6VHmJzNyB_3SBgtz'@gitcode.net/1284524409/zabbix.git
+ZBX_BRANCH=zabbix_7.0.x_docker
+ZBX_TODIR=/opt/${ZBX_BRANCH}
+cd ${ZBX_TODIR}
+git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_BRANCH} --depth 1 --single-branch ${ZBX_TODIR}/
+chmod 755 -R ${ZBX_TODIR}/
+cd ${ZBX_TODIR}/
+```
 **效果图**
 ```
 [root@localhost zabbix_docker]# docker images  
