@@ -43,8 +43,6 @@ if [ -d "/etc/yum.repos.d/bak/" ];then
     rm -f /etc/yum.repos.d/Rocky-Media.repo
     mv -vf /etc/yum.repos.d/bak/* /etc/yum.repos.d/
     rm -rf /etc/yum.repos.d/bak/
-	\cp Rocky-AppStream.repo /etc/yum.repos.d/
-	\cp Rocky-BaseOS.repo /etc/yum.repos.d/
 fi
 check_ip_status www.baidu.com
 if [ $? -ne 0 ];then
