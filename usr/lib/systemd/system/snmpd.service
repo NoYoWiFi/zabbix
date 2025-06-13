@@ -1,0 +1,14 @@
+[Unit]
+Description=Simple Network Management Protocol (SNMP) Daemon.
+After=syslog.target network-online.target
+
+[Service]
+Environment="LD_LIBRARY_PATH=/usr/local/src/perl5-5.26.3:/usr/local/lib:/usr/local/lib64"
+Type=simple
+Environment=OPTIONS="-LS0-6d"
+EnvironmentFile=-/etc/sysconfig/snmpd
+ExecStart=/usr/local/sbin/snmpd $OPTIONS -f
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
