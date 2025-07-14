@@ -11,9 +11,9 @@
 | centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
 | rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
 | rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
-| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](<br/>https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
+| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
 | rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
-| kylin_v10_zabbix_7.0.x_mysql | [kylin_v10_zabbix_7.0.x_mysql](<br/>https://github.com/NoYoWiFi/zabbix/tree/kylin_v10_zabbix_7.0.x_mysql) |
+| kylin_v10_zabbix_7.0.x_mysql | [kylin_v10_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/kylin_v10_zabbix_7.0.x_mysql) |
 | kylin_v10_zabbix_7.0.x_pgsql | [kylin_v10_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/kylin_v10_zabbix_7.0.x_pgsql) |
 | zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_docker) |
 | zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_dockerfile) |
