@@ -119,6 +119,8 @@ fi
 
 zabbix_build_base() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_BUILD_BASE
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 if [ ! -f "./Dockerfiles/build-base/centos/go1.22.4.linux-amd64.tar.gz" ]; then
     \cp ./patch/go1.22.4.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
@@ -131,6 +133,8 @@ sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 zabbix_build_pgsql() {
 docker tag zabbix-build-base:rocky-7.0-latest sources:latest
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_PGSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_PGSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_BUILD_PGSQL
 update_config_var $ZABBIX_BUILD_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_PGSQL"
 #tar -zxf ./patch/zabbix-${GV_VERSION}.tar.gz -C ./Dockerfiles/build-pgsql/centos/src/ --strip-components 1
@@ -173,6 +177,8 @@ if [ ! -f "./Dockerfiles/server-pgsql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; 
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/server-pgsql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_PGSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_PGSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_SERVER_PGSQL
 update_config_var $ZABBIX_SERVER_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i '/reinstall/,+6d' $ZABBIX_SERVER_PGSQL
 sed -i -e "/^ADD/,+2d" "$ZABBIX_SERVER_PGSQL"
@@ -206,7 +212,8 @@ sed -i -e 's|create.sql.gz|create_proxy.sql.gz|g' $ZABBIX_PROXY_PGSQL
 sed -i -e 's|zabbix-server-postgresql|zabbix-proxy-postgresql|g' $ZABBIX_PROXY_PGSQL
 sed -i -e 's|, "/var/lib/zabbix/export"||g' $ZABBIX_PROXY_PGSQL
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_PGSQL
-
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_PGSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_PROXY_PGSQL
 sed -i -e 's|zabbix-server-postgresql|zabbix-proxy-postgresql|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
 sed -i -e 's|Zabbix server|Zabbix proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
 sed -i -e 's|zabbix_server|zabbix_proxy|g' $ZABBIX_PROXY_PGSQL_ENTRYPOINT
@@ -256,6 +263,8 @@ if [ ! -f "./Dockerfiles/web-nginx-pgsql/centos/nginx.sh" ]; then
     \cp ./patch/nginx.sh ./Dockerfiles/web-nginx-pgsql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_PGSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_PGSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $WEB_NGINX_PGSQL
 update_config_var $WEB_NGINX_PGSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" $WEB_NGINX_PGSQL
 sed -i '/reinstall/,+6d' $WEB_NGINX_PGSQL
@@ -312,6 +321,8 @@ update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docke
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
 sed -i '/reinstall/,+6d' $ZABBIX_AGENT2
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_AGENT2
 sed -i -e "/libcurl-minimal/s/^/#/" $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\""
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\""
@@ -319,17 +330,23 @@ update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_C
 
 zabbix_snmptraps() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_SNMPTRAPS
 sed -i '/reinstall/,+6d' $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
 zabbix_java_gateway() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
 zabbix_web_service() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_WEB_SERVICE
 sed -i '/reinstall/,+6d' $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
@@ -480,6 +497,8 @@ elif [ $# -ge 1 ]; then
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+            mkdir -p ./zbx_env/usr/share/doc/zabbix-server-postgresql/
+            \cp -f ./trans/${GV_ARR_ENV[GV_SQL_PGSQL_FILE_NAME]} ./zbx_env/usr/share/doc/zabbix-server-postgresql/create.sql.gz
             mkdir -p ./zbx_env/etc/ssl/nginx
             \cp -rf ./patch/server.pem ./zbx_env/etc/ssl/nginx/
             \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose

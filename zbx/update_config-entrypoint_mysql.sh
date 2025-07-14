@@ -122,6 +122,8 @@ fi
 
 zabbix_build_base() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_BASE
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_BUILD_BASE
 update_config_var $ZABBIX_BUILD_BASE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 if [ ! -f "./Dockerfiles/build-base/centos/go1.22.4.linux-amd64.tar.gz" ]; then
     \cp ./patch/go1.22.4.linux-amd64.tar.gz ./Dockerfiles/build-base/centos/
@@ -134,6 +136,8 @@ sed -i -e "/^    case/,+24d" "$ZABBIX_BUILD_BASE"
 zabbix_build_mysql() {
 docker tag zabbix-build-base:rocky-7.0-latest sources:latest
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_MYSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_BUILD_MYSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_BUILD_MYSQL
 update_config_var $ZABBIX_BUILD_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" "$ZABBIX_BUILD_MYSQL"
 #tar -zxf ./patch/zabbix-${GV_VERSION}.tar.gz -C ./Dockerfiles/build-mysql/centos/src/ --strip-components 1
@@ -172,6 +176,8 @@ if [ ! -f "./Dockerfiles/server-mysql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; 
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/server-mysql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_MYSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SERVER_MYSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_SERVER_MYSQL
 update_config_var $ZABBIX_SERVER_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+3d" "$ZABBIX_SERVER_MYSQL"
 sed -i '/reinstall/,+6d' $ZABBIX_SERVER_PGSQL
@@ -225,7 +231,9 @@ var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
 var_value_10=$(escape_spec_char "$var_value_10")
 # exec_sql_file
-NUMINDEX=$(sed -n -e '257,301{/unset MYSQL_PWD/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_START=$(sed -n -e '{/^exec_sql_file/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_END=$[$NUMINDEX_START + 50]
+NUMINDEX=$(sed -n -e "$NUMINDEX_START,$NUMINDEX_END{/unset MYSQL_PWD/=}" $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
 sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
@@ -257,6 +265,8 @@ if [ ! -f "./Dockerfiles/proxy-mysql/centos/tcping-1.3.5-19.el8.x86_64.rpm" ]; t
     \cp ./patch/tcping-1.3.5-19.el8.x86_64.rpm ./Dockerfiles/proxy-mysql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_MYSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_PROXY_MYSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_PROXY_MYSQL
 update_config_var $ZABBIX_PROXY_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+3d" "$ZABBIX_PROXY_MYSQL"
 sed -i '/reinstall/,+6d' $ZABBIX_PROXY_MYSQL
@@ -310,7 +320,9 @@ var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
 var_value_10=$(escape_spec_char "$var_value_10")
 # exec_sql_file
-NUMINDEX=$(sed -n -e '264,301{/unset MYSQL_PWD/=}' $ZABBIX_PROXY_MYSQL_ENTRYPOINT)
+NUMINDEX_START=$(sed -n -e '{/^exec_sql_file/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_END=$[$NUMINDEX_START + 50]
+NUMINDEX=$(sed -n -e "$NUMINDEX_START,$NUMINDEX_END{/unset MYSQL_PWD/=}" $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
 sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
@@ -342,6 +354,8 @@ if [ ! -f "./Dockerfiles/web-nginx-mysql/centos/nginx.sh" ]; then
     \cp ./patch/nginx.sh ./Dockerfiles/web-nginx-mysql/centos/
 fi
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_MYSQL
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $WEB_NGINX_MYSQL
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $WEB_NGINX_MYSQL
 update_config_var $WEB_NGINX_MYSQL "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 sed -i -e "/^ADD/,+1d" $WEB_NGINX_MYSQL
 sed -i '/reinstall/,+6d' $WEB_NGINX_MYSQL
@@ -398,6 +412,8 @@ update_config_var $ZABBIX_AGENT2 "# syntax=docker/dockerfile:1" "## syntax=docke
 sed -i '/allowerasing/d' $ZABBIX_AGENT2
 sed -i '/reinstall/,+6d' $ZABBIX_AGENT2
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_AGENT2
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_AGENT2
 sed -i -e "/libcurl-minimal/s/^/#/" $ZABBIX_AGENT2
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf\""
 update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\"" "#    update_config_var \$ZBX_AGENT_CONFIG \"Include\" \"/etc/zabbix/zabbix_agentd.d/*.conf\" \"true\""
@@ -405,17 +421,23 @@ update_config_var $ZABBIX_AGENT2_ENTRYPOINT "    update_config_var \$ZBX_AGENT_C
 
 zabbix_snmptraps() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_SNMPTRAPS
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_SNMPTRAPS
 sed -i '/reinstall/,+6d' $ZABBIX_SNMPTRAPS
 update_config_var $ZABBIX_SNMPTRAPS "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
 zabbix_java_gateway() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_JAVA_GATEWAY
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_JAVA_GATEWAY
 update_config_var $ZABBIX_JAVA_GATEWAY "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
 
 zabbix_web_service() {
 sed -i -e "/^FROM quay/s/FROM .*/FROM ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
+sed -i -e "/^ARG OS_BASE_IMAGE=quay\.io/s/=.*/=${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}/" $ZABBIX_WEB_SERVICE
+sed -i -e '/^ARG BUILD_BASE_IMAGE=/s/centos/rocky/' $ZABBIX_WEB_SERVICE
 sed -i '/reinstall/,+6d' $ZABBIX_WEB_SERVICE
 update_config_var $ZABBIX_WEB_SERVICE "# syntax=docker/dockerfile:1" "## syntax=docker/dockerfile:1"
 }
@@ -565,6 +587,8 @@ elif [ $# -ge 1 ]; then
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
 #            mkdir -p ./zbx_env/etc/mysql/conf.d
+            mkdir -p ./zbx_env/usr/share/doc/zabbix-server-mysql/
+            \cp -f ./trans/${GV_ARR_ENV[GV_SQL_MYSQL_FILE_NAME]} ./zbx_env/usr/share/doc/zabbix-server-mysql/create.sql.gz
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
             mkdir -p ./zbx_env/etc/ssl/nginx
