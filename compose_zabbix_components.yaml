@@ -52,6 +52,8 @@ services:
  server-mysql:
   extends:
    service: server
+  volumes:
+   - ${DATA_DIRECTORY}/usr/share/doc/zabbix-server-mysql/create.sql.gz:/usr/share/doc/zabbix-server-mysql/create.sql.gz:ro
   secrets:
    - MYSQL_USER
    - MYSQL_PASSWORD
@@ -76,7 +78,8 @@ services:
  server-pgsql:
   extends:
    service: server
-#  volumes:
+  volumes:
+   - ${DATA_DIRECTORY}/usr/share/doc/zabbix-server-postgresql/create.sql.gz:/usr/share/doc/zabbix-server-postgresql/create.sql.gz:ro
 #   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CA_FILE:/run/secrets/root-ca.pem:ro
 #   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_CERT_FILE:/run/secrets/client-cert.pem:ro
 #   - ${ENV_VARS_DIRECTORY}/.ZBX_DB_KEY_FILE:/run/secrets/client-key.pem:ro

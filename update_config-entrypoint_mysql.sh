@@ -133,6 +133,8 @@ elif [ $# -ge 1 ]; then
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
 #            mkdir -p ./zbx_env/etc/mysql/conf.d
+            mkdir -p ./zbx_env/usr/share/doc/zabbix-server-mysql/
+            \cp -f ./trans/${GV_ARR_ENV[GV_SQL_MYSQL_FILE_NAME]} ./zbx_env/usr/share/doc/zabbix-server-mysql/create.sql.gz
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
             mkdir -p ./zbx_env/etc/ssl/nginx

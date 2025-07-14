@@ -121,6 +121,8 @@ elif [ $# -ge 1 ]; then
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
+            mkdir -p ./zbx_env/usr/share/doc/zabbix-server-postgresql/
+            \cp -f ./trans/${GV_ARR_ENV[GV_SQL_PGSQL_FILE_NAME]} ./zbx_env/usr/share/doc/zabbix-server-postgresql/create.sql.gz
             mkdir -p ./zbx_env/etc/ssl/nginx
             \cp -rf ./patch/server.pem ./zbx_env/etc/ssl/nginx/
             \cp ./patch/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
