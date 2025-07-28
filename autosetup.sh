@@ -104,9 +104,12 @@ mkdir -p /var/lib/mysql
 chown mysql:mysql /var/lib/mysql
 chmod 755 /var/lib/mysql
 chmod +x /usr/libexec/mysql*
-mkdir -p /var/log/mariadb
+mkdir -p /var/log/mysql
+chmod 755 /var/log/mysql
+chown mysql:mysql /var/log/mysql
 chmod +x /usr/local/bin/mysql_install_db
 chmod +x /usr/local/bin/mariadb-install-db
+chmod 755 -R /usr/local/share/mariadb-10.11.11/scripts/
 systemctl daemon-reload
 systemctl start mariadb
 if [ $? -ne '0' ]; then
