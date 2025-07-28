@@ -1,13 +1,23 @@
 #/bin/bash
-mariadb zabbix -e "DROP PROCEDURE partition_maintenance_all;" > /dev/null 2>&1
-mariadb zabbix -e "DROP PROCEDURE partition_create;" > /dev/null 2>&1
-mariadb zabbix -e "DROP PROCEDURE partition_drop;" > /dev/null 2>&1
-mariadb zabbix -e "DROP PROCEDURE partition_drop_gt;" > /dev/null 2>&1
-mariadb zabbix -e "DROP PROCEDURE partition_maintenance;" > /dev/null 2>&1
-mariadb zabbix -e "DROP PROCEDURE partition_verify;" > /dev/null 2>&1
-mariadb zabbix -e "DROP EVENT zbx_partitioning;" > /dev/null 2>&1
+declare -x LD_LIBRARY_PATH="/usr/local/src/perl5-5.26.3:/usr/local/lib:/usr/local/lib64"
+declare -x PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin"
+mariadb zabbix -e  "DROP PROCEDURE partition_maintenance_all;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP PROCEDURE partition_create;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP PROCEDURE partition_drop;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP PROCEDURE partition_drop_gt;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP PROCEDURE partition_maintenance;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP PROCEDURE partition_verify;" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "DROP EVENT zbx_partitioning;" > /dev/null 2>&1
+sleep 0.5
 mariadb zabbix < ./zbx_db_partitiong.sql
-# mariadb zabbix -e "CALL partition_maintenance_all('zabbix');"
+sleep 0.5
+# mariadb zabbix -e  "CALL partition_maintenance_all('zabbix');"
 # lv_on=$(cat /etc/my.cnf |grep 'event_scheduler = ON')
 # echo $lv_on
 # if [[ x"$lv_on" != x ]]
@@ -20,32 +30,56 @@ mariadb zabbix < ./zbx_db_partitiong.sql
 # echo "event_scheduler = ON" >> /etc/my.cnf
 # echo "max_connections = 2000" >> /etc/my.cnf
 systemctl restart mariadb
-mariadb zabbix -e "ALTER TABLE zabbix.history ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_log ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_str ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_text ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_uint ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.trends ADD primary key (itemid,clock);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.trends_uint ADD primary key (itemid,clock);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.proxy_history ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.auditlog ADD primary key (auditid, clock);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_text DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.history_uint DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
-mariadb zabbix -e "ALTER TABLE zabbix.auditlog DROP PRIMARY KEY,ADD primary key (auditid, clock);" > /dev/null 2>&1
+mariadb zabbix -e  "ALTER TABLE zabbix.history ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_log ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_str ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_text ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_uint ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.trends ADD primary key (itemid,clock);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.trends_uint ADD primary key (itemid,clock);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.proxy_history ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.auditlog ADD primary key (auditid, clock);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_log DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_str DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_text DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.history_uint DROP PRIMARY KEY,ADD primary key (itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.trends DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.trends_uint DROP PRIMARY KEY,ADD primary key (itemid,clock);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.proxy_history DROP PRIMARY KEY,ADD primary key (id,itemid,clock,ns);" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "ALTER TABLE zabbix.auditlog DROP PRIMARY KEY,ADD primary key (auditid, clock);" > /dev/null 2>&1
+sleep 0.5
 
-mariadb zabbix -e "SHOW VARIABLES LIKE 'event_scheduler'";
-mariadb zabbix -e "CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix');"
-mariadb zabbix -e "SELECT * FROM INFORMATION_SCHEMA.events\G"
-mariadb zabbix -e "CALL partition_maintenance_all('zabbix');" > /dev/null 2>&1
-mariadb zabbix -e "CALL partition_maintenance_all('zabbix');"
-mariadb zabbix -e "show create table history\G"
-mariadb zabbix -e "desc history"
+mariadb zabbix -e  "SHOW VARIABLES LIKE 'event_scheduler'";
+sleep 0.5
+mariadb zabbix -e  "CREATE EVENT zbx_partitioning ON SCHEDULE EVERY 12 HOUR DO CALL partition_maintenance_all('zabbix');"
+sleep 0.5
+mariadb zabbix -e  "SELECT * FROM INFORMATION_SCHEMA.events\G"
+sleep 0.5
+mariadb zabbix -e  "CALL partition_maintenance_all('zabbix');" > /dev/null 2>&1
+sleep 0.5
+mariadb zabbix -e  "CALL partition_maintenance_all('zabbix');"
+sleep 0.5
+mariadb zabbix -e  "show create table history\G"
+sleep 0.5
+mariadb zabbix -e  "desc history"
 #管理-一般-管家
 # 历史记录
 #  开启内部管家
@@ -69,15 +103,15 @@ mariadb zabbix -e "desc history"
 # CALL partition_maintenance('zabbix', 'history', 28, 24, 14);  --对zabbix数据库的history表创建分区，数据保留28天，每隔24小时创建一个分区，每次创建14个分区
 #--保留3天历史数据
 # 000000可能需要换具体看 ll /var/lib/mysql/zabbix/history*后6位
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history', $(date -d "-4 day" +%Y%m%d)000000);" 
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_log', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_str', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_text', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'history_uint', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'trends_uint', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'proxy_history', $(date -d "-4 day" +%Y%m%d)000000);"
-# mariadb zabbix -e "CALL partition_drop('zabbix', 'auditlog', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'history', $(date -d "-4 day" +%Y%m%d)000000);" 
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'history_log', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'history_str', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'history_text', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'history_uint', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'trends', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'trends_uint', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'proxy_history', $(date -d "-4 day" +%Y%m%d)000000);"
+# mariadb zabbix -e  "CALL partition_drop('zabbix', 'auditlog', $(date -d "-4 day" +%Y%m%d)000000);"
 # 
 # --调用维护预定义的表创建、删除、增加分区的存储过程
 # CALL partition_maintenance_all('zabbix');

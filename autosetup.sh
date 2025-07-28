@@ -112,6 +112,12 @@ chmod +x /usr/local/bin/mariadb-install-db
 chmod 755 -R /usr/local/share/mariadb-10.11.11/scripts/
 systemctl daemon-reload
 systemctl start mariadb
+# 等待服务进入 "active" 状态
+until netstat -ntlp | grep -q '3306.*LISTEN'; do
+    echo "Waiting for MySQL/MariaDB to start..."
+    sleep 1
+done
+echo "MySQL/MariaDB is now running and listening on port 3306."
 if [ $? -ne '0' ]; then
  cat $shellFolder/error
  exit 1
@@ -159,6 +165,7 @@ case ${1} in
         ;;
     "install")
         #![配置nginx]
+        chown nginx:nginx /var/log/nginx
         groupadd -r nginx
         useradd -g nginx -r -s /sbin/nologin nginx -d /usr/share/zabbix
         touch /usr/local/var/log/php-fpm.log
