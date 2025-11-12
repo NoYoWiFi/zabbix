@@ -23,7 +23,7 @@
 2. 版本：window
 3. 摘要：实现了绘制拓扑图并且支持双击Switch图标打开SSH连接目标服务器，双击Web图标打开浏览器访问目标网址。
 
-![](https://github.com/NoYoWiFi/zabbix/raw/diagramscene/vx_images/3284e89c80754a12a9dbcf7d26cd7526.jpg)
+![](https://github.com/NoYoWiFi/zabbix/raw/diagramscene/vx_images/3284e89c80754a12a9dbcf7d26cd7526.png)
 
 `感谢打赏`  
   
