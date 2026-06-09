@@ -32,18 +32,53 @@ help() {
 init() {
 sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_pgsql_local.yaml
 chmod 755 -R ./
-option=$(cat /etc/redhat-release | cut -c 22)
-if [[ " " == "${option}" ]]; then
-	option=$(cat /etc/redhat-release | cut -c 23)
+# 初始化option变量
+option=""
+
+# 首先尝试从os-release获取信息
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    
+    case "$ID" in
+        centos|rhel|rocky|almalinux)
+            # RHEL系列，获取主版本号
+            option=$(echo "$VERSION_ID" | cut -d. -f1)
+            ;;
+        ubuntu|debian)
+            # Debian/Ubuntu系列
+            option=$(echo "$VERSION_ID" | cut -d. -f1)
+            ;;
+        fedora)
+            option="$VERSION_ID"
+            ;;
+        *)
+            # 其他发行版，尝试提取数字
+            option=$(echo "$VERSION_ID" | grep -oE '^[0-9]+')
+            ;;
+    esac
 fi
-if [[ "." == "${option}" ]]; then
-	option=$(cat /etc/redhat-release | cut -c 21)
+
+# 如果os-release没获取到，尝试其他方法
+if [ -z "$option" ]; then
+    # 尝试redhat-release
+    if [ -f /etc/redhat-release ]; then
+        option=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -1)
+    fi
+    
+    # 尝试lsb-release
+    if [ -z "$option" ] && command -v lsb_release >/dev/null 2>&1; then
+        option=$(lsb_release -rs | cut -d. -f1)
+    fi
 fi
-if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+
+# 最终判断
+if [ -n "$option" ]; then
+    echo "Detected system version: $option"
     echo "Successfully processed the file."
-    option=7
+    # 执行你的后续操作
 else
-    echo "An error occurred: No such file or directory."
+    echo "An error occurred: Unable to detect system version"
+    exit 1
 fi
 case ${option} in
     8)
@@ -75,6 +110,59 @@ case ${option} in
         fi
         yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git rsyslog
+    ;;
+    20)
+    echo "UOS Server 20 catch!"
+    if [ ! -d "/etc/yum.repos.d/bak/" ]; then
+        yum install -y yum-utils \
+            device-mapper-persistent-data \
+            lvm2 --allowerasing
+        yum-config-manager \
+            --add-repo \
+            https://repo.huaweicloud.com/docker-ce/linux/centos/docker-ce.repo
+		# 编码函数
+		encode_to_base64() {
+			echo -n "$1" | base64 -w 0
+		}
+
+		# 解码并执行 sed
+		apply_sed() {
+			local pattern="$1"
+			local replacement="$2"
+			local file="$3"
+			
+			# 编码模式和替换文本
+			encoded_pattern=$(encode_to_base64 "$pattern")
+			encoded_replacement=$(encode_to_base64 "$replacement")
+			
+			# 解码后执行 sed
+			decoded_pattern=$(echo "$encoded_pattern" | base64 -d)
+			decoded_replacement=$(echo "$encoded_replacement" | base64 -d)
+			
+			sed -i "s/${decoded_pattern}/${decoded_replacement}/g" "$file"
+		}
+
+		# 使用示例
+		config_path='/etc/yum.repos.d/'
+
+		# 1. 替换域名（完全不用担心特殊字符）
+		apply_sed 'download.docker.com' 'repo.huaweicloud.com\/docker-ce' "${config_path}"/*.repo
+
+		# 2. 修改 gpgcheck
+		apply_sed 'gpgcheck=1' 'gpgcheck=0' "${config_path}"/*.repo
+
+		# 3. 替换 $releasever（$ 符号不再需要转义）
+		apply_sed '$releasever' '8' "${config_path}"/*.repo
+		
+        yum -y install docker-ce docker-ce-cli containerd.io --allowerasing
+        if [ $? -ne '0' ]; then
+         rpm -qa | grep docker | xargs rpm -e --nodeps
+         echo "YUM配置异常请重新执行，如继续报错请联系作者QQ1284524409"
+         echo "YUM配置异常请联系作者QQ1284524409"
+         exit 1
+        fi
+        yum -y install git rsyslog --allowerasing
+    fi
     ;;
     *)
     echo "Nothing to do"
