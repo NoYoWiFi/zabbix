@@ -217,7 +217,7 @@ elif [ $# -ge 1 ]; then
             mkdir -p ./zbx_env/data/ssl
             \cp -rf ./patch/server.pem ./zbx_env/data/ssl/
             mkdir -p ./zbx_env/data/plugins
-            tar -zxf ./patch/alexanderzobnin-zabbix-app-*.tar.gz --strip-components=1-C ./zbx_env/data/plugins
+            tar -zxf ./patch/alexanderzobnin-zabbix-app-*.tar.gz -C ./zbx_env/data/plugins
             mkdir -p ./zbx_env/loki/config
             \cp -rf ./patch/loki-config.yaml ./zbx_env/loki/config
             mkdir -p ./zbx_env/promtail/config
