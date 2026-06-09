@@ -25,13 +25,6 @@ source ./patch/getEnv.sh
 GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
 GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 
-help() {
-	awk -F'### ' '/^###/ { print $2 }' "$0"
-}
-
-init() {
-sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_pgsql_local.yaml
-chmod 755 -R ./
 # 初始化option变量
 option=""
 
@@ -57,6 +50,14 @@ if [ -f /etc/os-release ]; then
             ;;
     esac
 fi
+
+help() {
+	awk -F'### ' '/^###/ { print $2 }' "$0"
+}
+
+init() {
+sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_pgsql_local.yaml
+chmod 755 -R ./
 
 # 如果os-release没获取到，尝试其他方法
 if [ -z "$option" ]; then
@@ -197,13 +198,12 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "cp" ]]; then
-        option=$(echo ${GV_VERSION} | cut -c 1)
         case ${option} in
             5)
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start5 up -d
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/var/lib/postgresql/data
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
@@ -254,7 +254,7 @@ elif [ $# -ge 1 ]; then
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/var/lib/postgresql/data
             chown -R 1000:1000 ./zbx_env/var/lib/postgresql/data
@@ -280,7 +280,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start5 up -d
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=start6 up -d
             ;;
@@ -298,7 +298,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart5 up -d
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_pgsql_local.yaml --profile=prxstart6 up -d
             ;;

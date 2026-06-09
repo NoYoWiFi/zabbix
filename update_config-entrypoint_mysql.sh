@@ -25,14 +25,6 @@ source ./patch/getEnv.sh
 GV_VERSION=${GV_ARR_ENV[GV_ZABBIX_VERSION]}
 GV_VERSION_DOCKER=${GV_ARR_ENV[GV_ZABBIX_POSTFIX]}
 
-help() {
-	awk -F'### ' '/^###/ { print $2 }' "$0"
-}
-
-init() {
-sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_mysql_local.yaml
-chmod 755 -R ./
-#!/bin/bash
 
 # 初始化option变量
 option=""
@@ -59,6 +51,15 @@ if [ -f /etc/os-release ]; then
             ;;
     esac
 fi
+
+help() {
+	awk -F'### ' '/^###/ { print $2 }' "$0"
+}
+
+init() {
+sed -i -e "/:centos-/s/:centos-.*/:centos-${GV_VERSION_DOCKER}/" docker-compose_v6_0_x_centos_mysql_local.yaml
+chmod 755 -R ./
+#!/bin/bash
 
 # 如果os-release没获取到，尝试其他方法
 if [ -z "$option" ]; then
@@ -214,12 +215,11 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "cp" ]]; then
-        option=$(echo ${GV_VERSION} | cut -c 1)
         case ${option} in
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
@@ -273,7 +273,7 @@ elif [ $# -ge 1 ]; then
             5)
             echo "zabbix 5 LTSC!"
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
@@ -299,7 +299,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start5 up -d
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=start6 up -d
             ;;
@@ -317,7 +317,7 @@ elif [ $# -ge 1 ]; then
             echo "zabbix 5 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=prxstart5 up -d
             ;;
-            6|7)
+            6|7|20)
             echo "zabbix 6 LTSC!"
             docker-compose -f docker-compose_v6_0_x_centos_mysql_local.yaml --profile=prxstart6 up -d
             ;;
