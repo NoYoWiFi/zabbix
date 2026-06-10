@@ -1,0 +1,815 @@
+#!/bin/bash
+#
+# postgresql-setup - Initialization and upgrade operations for PostgreSQL
+
+declare -x LD_LIBRARY_PATH="/usr/local/src/perl5-5.26.3​:/usr/local/lib:/usr/local/lib64"
+
+if test "$(id -u)" -eq 0; then
+    cmd=
+    for v in PGSETUP_DEBUG PGSETUP_INITDB_OPTIONS PGSETUP_PGUPGRADE_OPTIONS; do
+        eval var_content=\$$v
+        test -z "$var_content" && continue
+        cmd+=$v="$(printf %q "$var_content") "
+    done
+    cmd+=$(printf %q "$(readlink -f "$0")")
+    for arg; do cmd+=" $(printf %q "$arg")" ; done
+    # Drop root privileges asap.  It's not recommended to run postgresql-setup
+    # script under root nowadays; so we take the liberty to switch to the
+    # PostgreSQL admin user (by default 'postgres') without any other option.
+    exec /usr/sbin/runuser -s /bin/sh -l postgres -c "$cmd"
+fi
+
+# ensure privacy
+umask 0077
+
+: ${RESTORECON=/sbin/restorecon}
+test -x $RESTORECON || RESTORECON=:
+
+test -z "$PATH" && export PATH="/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin"
+
+test x"$PGSETUP_DEBUG" != x && set -x && PS4='${LINENO}: '
+
+# The current user name.
+USER=$(id -u -n)
+
+# Directory containing the postgres executable
+PGENGINE=/usr/local/bin
+
+# Distribution README file
+README_DIST=/usr/share/doc/postgresql/README.rpm-dist
+
+# Home directory of postgres user
+POSTGRES_HOMEDIR=/var/lib/pgsql
+
+# The where PostgreSQL server listens by default
+PGPORT_DEF=5432
+
+
+. "/usr/local/share/postgresql-setup/library.sh"
+
+:
+
+# We upgrade by default from system's default PostgreSQL installation
+option_upgradefrom="postgresql"
+
+srvsuff=
+test 0 -eq 0 && srvsuff=".service"
+
+USAGE_STRING=$"\
+Usage: $0 MODE_OPTION [--unit=UNIT_NAME] [OPTION...]
+
+Script is aimed to help sysadmin with basic database cluster administration.
+Usually, \"postgresql-setup --initdb\" and \"postgresql-setup --upgrade\" is
+enough, however there are other options described below.
+
+For more info and howto/when use this script please look at the documentation
+file $README_DIST.
+
+Available operation mode:
+  --initdb      Initialize new PostgreSQL database cluster.  This is usually the
+                first action you perform after PostgreSQL server installation.
+  --upgrade     Upgrade database cluster for new major version of PostgreSQL
+                server.  See the --upgrade-from option for more info.
+
+Options:
+  --unit=UNIT_NAME           The UNIT_NAME is used to select proper unit
+                             configuration (unit == service or initscript name
+                             on non-systemd systems).  For example, if you want
+                             to work with unit called
+                             'postgresql@com_example.service', you should use
+                             'postgresql@com_example' (without trailing .service
+                             string).  When no UNIT_NAME is explicitly passed,
+                             the 'postgresql' string is used by default.
+  --port=PORT                port where the initialized server will listen for
+                             connections"
+
+test 0 -eq 0 && \
+USAGE_STRING+="
+  --new-systemd-unit         We dropped this option for security reasons.
+                             Nowadays, please use the root-only script
+                             /usr/sbin/postgresql-new-systemd-unit.
+  --datadir                  Dropped with --new-systemd-unit."
+
+USAGE_STRING+="
+  --upgrade-from-unit=UNIT   Select proper unit name to upgrade from.  This
+                             has similar semantics as --unit option.
+  --upgrade-ids              Print list of available IDs of upgrade scenarios to
+                             standard output.
+  --upgrade-from=ID          Specify id \"old\" postgresql stack to upgrade
+                             from.  List of available IDs can be listed by
+                             --upgrade-ids.  Default is '$option_upgradefrom'.
+
+Other options:
+  --help                     show this help
+  --version                  show version of this package
+  --debug                    show basic debugging information
+
+Environment:
+  PGSETUP_INITDB_OPTIONS     Options carried by this variable are passed to
+                             subsequent call of \`initdb\` binary (see man
+                             initdb(1)).  This variable is used also during
+                             'upgrade' mode because the new cluster is actually
+                             re-initialized from the old one.
+  PGSETUP_PGUPGRADE_OPTIONS  Options in this variable are passed next to the
+                             subsequent call of \`pg_upgrade\`.  For more info
+                             about possible options please look at man
+                             pg_upgrade(1).
+  PGSETUP_DEBUG              Set to '1' if you want to see very verbose shell
+                             debugging output."
+
+# Warning about possible glibc collation changes BZ#1668301
+GLIBC_COLLATION_WARN_STRING="\
+If you've just upgraded your database from a previous major version of
+Fedora or RHEL, please run reindexdb against your databases.  Core library
+collation data may have changed and this will invalidate database indexes.  For
+example, in Fedora 28 and RHEL 8 there have been extensive changes in glibc
+collations to support ISO 14651:2016 (Unicode 9.0.0 data) and your indexes may
+be affected: https://sourceware.org/ml/libc-announce/2018/msg00002.html"
+
+print_version()
+{
+    echo "postgresql-setup 8.9~dev"
+    echo $"Built against PostgreSQL version 16.1."
+}
+
+
+check_not_initialized()
+{
+    if test -f "$pgdata/PG_VERSION"; then
+        error $"Data directory $pgdata is not empty!"
+        return 1
+    fi
+    return 0
+}
+
+
+# code shared between initdb and upgrade actions
+perform_initdb()
+{
+    if [ ! -e "$pgdata" ]; then
+        mkdir "$pgdata" || return 1
+    fi
+    $RESTORECON "$pgdata"
+    test -w "$pgdata" || die "$pgdata is not writeable by $USER"
+
+    # Clean up SELinux tagging for pgdata
+    [ -x /sbin/restorecon ] && /sbin/restorecon "$pgdata"
+
+    # Create the initdb log file if needed
+    if [ ! -e "$initdb_log" ]; then
+        touch "$initdb_log" || return 1
+    fi
+    $RESTORECON "$initdb_log"
+    test -w "$initdb_log" || echo "$initdb_log is not writeable by $USER"
+
+    # Initialize the database
+    initdbcmd+=( "$PGENGINE"/initdb --pgdata="$pgdata" --auth=ident )
+    eval "initdbcmd+=( $PGSETUP_INITDB_OPTIONS )"
+    "${initdbcmd[@]}" >> "$initdb_log" 2>&1 < /dev/null
+
+    # Create directory for postgres log files
+    mkdir "$pgdata/log"
+    $RESTORECON "$pgdata/log"
+
+    # This if-fork is just to not unnecessarily overwrite what upstream
+    # generates by initdb (upstream implicitly uses PGPORT_DEF).
+    if test "$pgport" != "$PGPORT_DEF"; then
+        local pgconf="$pgdata/postgresql.conf"
+        sed -i "s|^[[:space:]#]*port[[:space:]]=[^#]*|port = $pgport |g" \
+                "$pgconf" \
+            && grep "^port = " "$pgconf" >/dev/null
+
+        if test $? -ne 0; then
+            error "can not change port in $pgdata/postgresql.conf"
+            return 1
+        fi
+    fi
+
+    test -f "$pgdata/PG_VERSION"
+}
+
+
+initdb()
+{
+    port_info=
+    test "$pgport" != "$PGPORT_DEF" \
+        && port_info=$", listening on port '$pgport'"
+
+    info $"Initializing database in '$pgdata'$port_info"
+    if check_not_initialized && perform_initdb; then
+        info $"Initialized, logs are in ${initdb_log}"
+    else
+        error $"Initializing database failed, possibly see $initdb_log"
+        script_result=1
+    fi
+}
+
+
+old_data_in_use()
+{
+    local pidfile="$pgdataold/postmaster.pid"
+    test -f "$pidfile" || return 1
+    error   $"The pidfile '$pidfile' exists.  Verify that there is no postmaster"
+    error_q $"running the $pgdataold directory."
+}
+
+
+upgrade()
+{
+    local inplace=false
+    test "$pgdata" = "$upgradefrom_data" && inplace=true
+
+    debug "running inplace upgrade: $inplace"
+
+    # must see previous version in PG_VERSION
+    local old_data_version="`cat "$upgradefrom_data/PG_VERSION"`"
+    if [ ! -f "$upgradefrom_data/PG_VERSION" -o \
+         x"$old_data_version" != x"$upgradefrom_major" ]
+    then
+        error $"Cannot upgrade because the database in $upgradefrom_data is of"
+        error_q $"version $old_data_version but it should be $upgradefrom_major"
+        exit 1
+    fi
+    if [ ! -x "$upgradefrom_engine/postgres" ]; then
+        error $"Please install the $upgradefrom_package package."
+        exit 5
+    fi
+    if [ ! -x "$PGENGINE/pg_upgrade" ]; then
+        # The "$PGENGINE/postgres" depends transitively on
+        # pg_upgrade binary in rather newer packaging, but SCL with PostgreSQL
+        # 9.4 provides '*-upgrade' package having `pg_upgrade` inside.  We need
+        # to have this installed, too.  Keep till {rh,sclo}-postgresql94 is
+        # still a thing.
+        error $"Please install the postgresql-upgrade package."
+        exit 5
+    fi
+
+    # Set up log file for pg_upgrade
+    rm -f "$upgrade_log"
+    touch "$upgrade_log" || die "can't write into $upgrade_log file"
+    $RESTORECON "$upgrade_log"
+
+    # Move old DB to pgdataold
+
+    if $inplace; then
+        pgdataold="${pgdata}-old"
+        rm -rf "$pgdataold"
+        mv "$pgdata" "$pgdataold" || exit 1
+    else
+        pgdataold="$upgradefrom_data"
+    fi
+
+    # Create configuration file for upgrade process
+    HBA_CONF_BACKUP="$pgdataold/pg_hba.conf.postgresql-setup.`date +%s`"
+    HBA_CONF_BACKUP_EXISTS=0
+
+    if [ ! -f $HBA_CONF_BACKUP ]; then
+        mv "$pgdataold/pg_hba.conf" "$HBA_CONF_BACKUP"
+        HBA_CONF_BACKUP_EXISTS=1
+
+        # For fluent upgrade 'postgres' user should be able to connect
+        # to any database without password.  Temporarily, no other type
+        # of connection is needed.
+        echo "local all postgres ident" > "$pgdataold/pg_hba.conf"
+        $RESTORECON "$pgdataold"
+    fi
+
+    info $"Upgrading database."
+
+    scls_upgrade_hacks=
+    test -n "$upgradefrom_scls" && {
+        debug "scls [$upgradefrom_scls] will be enabled"
+        scls_upgrade_hacks="source scl_source enable $upgradefrom_scls"
+    }
+
+    test x"$upgradefrom_redhat_sockets_hack" = xyes && {
+        debug "upgrading from redhat server"
+        socket_hacks="export REDHAT_PGUPGRADE_FROM_RHEL=yes"
+    }
+
+    test -n "$upgradefrom_pghost_override" && {
+        pghost_override="export PGHOST='$upgradefrom_pghost_override'"
+    }
+
+    local failure_cleanup=true
+    if old_data_in_use; then
+        script_result=1
+        # Cleanup makes sense once perform_initdb gets called.
+        failure_cleanup=false
+    elif ! check_not_initialized; then
+        # Don't try to re-init initialized data directory and also do not
+        # remove it after this unsuccessful upgrade.
+        script_result=1
+        failure_cleanup=false
+    elif perform_initdb; then
+        $inplace && link_option=--link
+
+        # After creating the empty new-format database, do the upgrade
+        (
+        cd # pg_upgrade writes to $PWD
+        eval "
+            $scls_upgrade_hacks
+            $socket_hacks
+            $pghost_override
+        "
+        eval "add_options=( $PGSETUP_PGUPGRADE_OPTIONS )"
+
+        "$PGENGINE"/pg_upgrade \
+            --old-bindir="$upgradefrom_engine" \
+            --new-bindir="$PGENGINE" \
+            --old-datadir="$pgdataold" \
+            --new-datadir="$pgdata" \
+            $link_option \
+            --old-port="$PGPORT" \
+            --new-port="$PGPORT" \
+            --username=postgres \
+            "${add_options[@]}" \
+            >>"$upgrade_log" 2>>"$upgrade_log"
+        )
+
+        if [ $? -ne 0 ]; then
+            # pg_upgrade failed
+            error $"pg_upgrade tool failed"
+            script_result=1
+        fi
+    else
+        error $"initdb failed"
+        script_result=1
+    fi
+
+    # Move back the backed-up pg_hba.conf regardless of the script_result.
+    if [ x$HBA_CONF_BACKUP_EXISTS = x1 ]; then
+        mv -f "$HBA_CONF_BACKUP" "$pgdataold/pg_hba.conf"
+    fi
+
+    if [ $script_result -eq 0 ]; then
+        info $"Upgraded OK."
+        warn $"The configuration files were replaced by default configuration."
+        warn $"The previous configuration and data are stored in folder"
+        warn $pgdataold.
+        # Warn about possible glibc collation changes on success BZ#1668301
+        warn "$GLIBC_COLLATION_WARN_STRING"
+    else
+        # Clean up after failure.
+        $failure_cleanup && rm -rf "$pgdata"
+        $inplace && mv "$pgdataold" "$pgdata"
+        error $"Upgrade failed."
+    fi
+    info $"See $upgrade_log for details."
+}
+
+
+check_daemon_reload()
+{
+    local nr_option=NeedDaemonReload
+
+    test 0 = 1 && return 0
+
+    local nr_out="`systemctl show -p $nr_option $option_service.service 2>/dev/null`"
+    if [[ "$nr_out" != "$nr_option=no" ]]; then
+        error   $"Note that systemd configuration for '$option_service' changed."
+        error_q $"You need to perform 'systemctl daemon-reload' otherwise the"
+        error_q $"results of this script can be inadequate."
+        exit 1
+    fi
+}
+
+
+handle_service_env()
+{
+    local service="$1"
+
+    local systemd_env="$(systemctl show -p Environment "${service}.service")" \
+        || { return; }
+
+    for env_var in `echo "$systemd_env" | sed 's/^Environment=//'`; do
+        # If one variable name is defined multiple times the last definition wins.
+        case "$env_var" in
+            PGDATA=*)
+                unit_pgdata="${env_var##PGDATA=}"
+                debug "unit's datadir: '$unit_pgdata'"
+                ;;
+            PGPORT=*)
+                unit_pgport="${env_var##PGPORT=}"
+                debug "unit's pgport: $unit_pgport"
+                ;;
+        esac
+    done
+}
+
+
+handle_envfile()
+{
+    local file="$1"
+
+    debug "trying to read '$file' env file"
+    if test ! -r "$file"; then
+        if test 0 = 1; then
+            return
+        fi
+        error   "Can not read EnvironmentFile '$file' specified"
+        error_q "in ${service}.service"
+    fi
+
+    # Note that the env file parser in systemd does not perform exactly the
+    # same job.
+    unset PGPORT PGDATA
+    . "$file"
+    envfile_pgdata="$PGDATA"
+    envfile_pgport="$PGPORT"
+    unset PGPORT PGDATA
+}
+
+
+handle_service_envfiles()
+{
+    local mode="$1"
+    local service="$2"
+
+    local envfiles="$(systemctl show -p EnvironmentFiles "${service}.service")"\
+        || return
+
+    test -z "$envfiles" && return
+
+    envfiles=$(echo $envfiles | \
+        sed -e 's/^EnvironmentFile=//' \
+            -e 's| ([^)]*)$||'
+    )
+
+    # Read the file names line-by-line (spaces may be inside)
+    while read line; do
+        handle_envfile "$line"
+    done <<<"$envfiles"
+}
+
+
+handle_pgconf()
+{
+    local datadir="$1"
+    local conffile="$datadir/postgresql.conf"
+
+    debug "postgresql.conf: $conffile"
+
+    test -r "$conffile" || {
+        error "config file $conffile is not readable or does not exist"
+        die "Old cluster in '$data' does not seem to be initialized"
+    }
+
+    local sp='[[:space:]]'
+    local sed_expr_port="s/^$sp*port$sp*=$sp*\([0-9]\+\).*/\1/p"
+    local sed_expr_pgdata="s/^$sp*data_directory$sp*=\(.*\)/\1/p"
+
+    conf_pgport=`sed -n "$sed_expr_port" $conffile | tail -1`
+    conf_pgdata=`sed -n "$sed_expr_pgdata" $conffile | tail -1`
+    test -n "$conf_pgport" && debug "postgresql.conf pgport: $conf_pgport"
+    test -n "$conf_pgdata" && debug "postgresql.conf pgdata (data_directory): $conf_pgdata"
+}
+
+
+service_configuration()
+{
+    local data=
+    local port=
+    local unit_pgport=
+    local unit_pgdata=
+    local envfile_pgport=
+    local envfile_pgdata=
+
+    # 'mode' is 'initdb' or 'upgrade'.  Basically, if called with mode=initdb, we
+    # parse configuration of the current (maybe already configured) service.
+    # When run with mode=upgrade, we try to parse the configuration of the old
+    # PostgreSQL configuration that we try to upgrade from.
+
+    local mode="$1" datavar="$2" portvar="$3" service="$4"
+
+    debug "running service_configuration() for $service, mode: $mode"
+
+    if test "0" = 1; then
+        # Sysvinit has the default PGDATA (for default unit name only)
+        # configured directly in the initscript, so no additional configuration
+        # must exist.  Set the default value of pgdata here to match whats in
+        # initscript for the cases when no additional configuration file exists.
+        # This is done to avoid parsing of whole initscript (for the real value)
+        # and mainly to not fail in the logic following 'service_configuration'
+        # call, where we usually want to error that pgdata is not defined..
+        # Don't set the default pgdata for upgrade case, however, as we must
+        # upgrade only from already properly configured & working stack (missing
+        # pgdata here is a good reason to die later).
+        test initdb = "$mode" && test "$service" = "postgresql" \
+            && set_var "$datavar" "/var/lib/pgsql/data"
+        handle_envfile "/etc/sysconfig/pgsql/$service"
+    else
+        # We ship two service files, postgresql.service and
+        # postgresql@.service.  The former has PGDATA set by default
+        # similarly to sysvinit case.
+        handle_service_env "$service"
+        handle_service_envfiles "$option_mode" "$service"
+    fi
+
+    # EnvironmentFile beats Environment configuration in systemd.  In sysvinit
+    # there is no "unit_pgdata".  So make sure the envfile_gpdata is used later
+    # than unit_pgdata.
+    test -n "$unit_pgdata"      && set_var "$datavar" "$unit_pgdata"
+    test -n "$envfile_pgdata"   && set_var "$datavar" "$envfile_pgdata"
+
+    # skip for the first run
+    test initdb = "$mode" && return
+
+    set_var data "\$$datavar"
+    handle_pgconf "$data"
+
+    test -n "$conf_pgport"    && set_var "$portvar" "$conf_pgport"
+    test -n "$unit_pgport"    && set_var "$portvar" "$unit_pgport"
+    test -n "$envfile_pgport" && set_var "$portvar" "$envfile_pgport"
+}
+
+# <Compat>
+# Alow users to use the old style arguments like
+# 'postgresql-setup initdb $SERVICE_NAME'.
+case "$1" in initdb|upgrade)
+    action="--$1"
+    shift
+
+    warn "using obsoleted argument syntax, try --help"
+    old_long_args="help,usage,version,debug"
+    oldargs=`getopt -o "" -l "$old_long_args" -n "old-options" -- "$@"` \
+        || die "can't parse old arguments"
+    eval set -- "$oldargs"
+    additional_opts=
+    while true; do
+        case "$1" in
+            --version|--help|--usage|--debug)
+                additional_opts="$additional_opts $1"
+                shift
+                ;;
+            --)
+                shift
+                break
+                ;;
+        esac
+    done
+
+    service="postgresql"
+    if test -n "$1"; then
+        service=$1
+        shift
+    fi
+
+    set -- $additional_opts "$action" --unit "$service" "$@"
+    warn "arguments transformed to: ${0##*/} $*"
+esac
+# </Compat>
+
+
+# postgresql-setup arguments are parsed into those variables
+option_mode=none
+option_service="postgresql"
+option_port=
+option_debug=0
+option_upgradefrom_unit=
+
+# Content of EnvironmentFile= files fills those:
+envfile_pgdata=
+envfile_pgport=
+
+# Configuration from (/etc/systemd/system/$option_service.service) fills those
+# variables.
+unit_pgdata=
+unit_pgport=
+
+# Configuration from postgresql.conf:
+conf_pgport=
+
+# Key variables.  Try to fill them by postgresql.conf, Environment= statement in
+# service file or EnvironmentFile= content (the later mentioned has more
+# priority).
+pgdata=default
+pgport=default
+
+## PARSE SCRIPT ARGUMENTS ##
+
+short_opts=""
+long_opts="\
+initdb,upgrade,\
+new-systemd-unit,upgrade-ids,\
+unit:,service:,port:,datadir:,upgrade-from:,upgrade-from-unit:,\
+debug,\
+version,help,usage"
+
+args=`getopt -o "$short_opts" -l "$long_opts" -n "postgresql-setup" -- "$@"` \
+    || die "can't parse arguments"
+eval set -- "$args"
+parse_fail=0
+while true; do
+    case "$1" in
+        --initdb|--upgrade)
+            if test "$option_mode" != none; then
+                error "bad argument $1, mode already specified: --$option_mode"
+                parse_fail=1
+            else
+                option_mode=${1##--}
+            fi
+            shift
+            ;;
+
+        --unit|--service)
+            option_service=$2
+            shift 2
+            ;;
+
+        --port)
+            option_port=$2
+            shift 2
+            ;;
+
+        --datadir|--new-systemd-unit)
+            error   $"Removed option --new-systemd-unit/--datadir, please use"
+            error_q $"/usr/sbin/postgresql-new-systemd-unit script"
+            exit 1
+            ;;
+
+        --debug)
+            option_debug=1
+            shift
+            ;;
+
+        --help|--usage)
+            echo "$USAGE_STRING"
+            exit 0
+            ;;
+
+        --upgrade-from)
+            option_upgradefrom="$2"
+            shift 2
+            ;;
+
+        --upgrade-from-unit)
+            option_upgradefrom_unit="$2"
+            shift 2
+            ;;
+
+        --upgrade-ids)
+            parse_upgrade_setup help
+            exit 0
+            ;;
+
+        --version)
+            print_version
+            exit 0
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            die "author's fault: option $1 not handled"
+            break
+            ;;
+    esac
+done
+
+test $parse_fail -ne 0 && die "can't parse arguments"
+
+test "$option_mode" = none \
+    && die "no mode specified, use --initdb or --upgrade, or --help"
+
+if ! parse_upgrade_setup config "$option_upgradefrom"; then
+    if test upgrade = "$option_mode"; then
+        die $"bad --upgrade-from parameter '$option_upgradefrom'," \
+            $"try --upgrade-ids"
+    fi
+fi
+
+## GATHER THE SETUP FIRST ##
+
+initdb_log="$POSTGRES_HOMEDIR/initdb_${option_service}.log"
+upgrade_log="$POSTGRES_HOMEDIR/upgrade_${option_service}.log"
+
+debug "mode used: $option_mode"
+debug "service name: $option_service"
+
+# load service's pgdata
+service_configuration initdb pgdata UNUSED "$option_service"
+
+test "$pgdata" = default \
+    && die $"no db datadir (PGDATA) configured for '$option_service$srvsuff' unit"
+
+[[ "$pgdata" =~ ^/.* ]] \
+    || die $"the PostgreSQL datadir not absolute path: '$pgdata', try --debug"
+
+## GATHER DATA FROM INITIALIZED DATADIR ##
+
+test -n "$option_port" && pgport=$option_port
+
+if test upgrade = "$option_mode"; then
+    upgradefrom_data="$upgradefrom_data_default"
+
+    if test -z "$option_upgradefrom_unit"; then
+        if test "postgresql" = "postgresql"; then
+            # Fedora usecase -> upgrade while keeping the same name of
+            # service/unit.
+            option_upgradefrom_unit=$option_service
+        else
+            # PGRPMs/RHSCL usecase -> we upgrade from one service/unit name to
+            # a different one, e.g. from postgresql92 to postgresql93, or from
+            # postgresql (system version) to postgresql94 (scl).
+            option_upgradefrom_unit=$upgradefrom_id
+
+            # Try to predict situations: postgresql93@second -> postgresql94@second
+            if [[ "$option_service" =~ ^postgresql@(.*)$ ]]; then
+                option_upgradefrom_unit="$upgradefrom_id@${BASH_REMATCH[1]}"
+            fi
+        fi
+    fi
+
+    test "$option_service" = "$option_upgradefrom_unit" \
+        || info "upgrading from '$option_upgradefrom_unit$srvsuff'" \
+                "to '$option_service$srvsuff'"
+
+    service_configuration upgrade upgradefrom_data pgport \
+                          "$option_upgradefrom_unit"
+    test -n "$option_port" -a "$option_port" != "$pgport" \
+        && warn "Old pgport $pgport has bigger priority than --pgport value."
+fi
+
+# Check for data_directory entry in config file
+# valid entry means that custom PGDATA path is present which is not supported
+# BZ (#1935301)
+if test -n "$conf_pgdata"; then
+    error   $"data_directory field in configuration file is not supported."
+    error_q $"db datadir (PGDATA) needs to be specified exclusively in service/unit"
+    error_q $"file as an Environment variable."
+    error_q $"In order to use this script, please remove data_directory entry from"
+    error_q $"configuration file and make sure that the default location"
+    error_q $"(PGDATA) in .service file is valid."
+    exit 1
+fi
+
+# We expect that for upgrade - the previous stack was in working state (thus
+# running on the default port).
+test "$option_mode" = upgrade -a "$pgport" = default \
+    && pgport=$PGPORT_DEF
+
+# This is mostly for 'initdb'.  We assume that the default port is $PGPORT_DEF
+# if not set explicitly for default service name 'postgresql'.
+if test "$pgport" = default -a "$option_service" = "postgresql"; then
+    debug $"Using the default port '$PGPORT_DEF'"
+    pgport=$PGPORT_DEF
+fi
+
+if test "$pgport" = default; then
+    # initdb case..  Note that this may be called by initscripts.  If this gets
+    # called by legacy script, we can't help too much because systemd does not
+    # allow passing additional arguments to 'service XX initdb' command.
+    die $"For non-default unit names you must specify port by --port option."
+fi
+
+[[ "$option_port" =~ ^[0-9]*$ ]] \
+    || die $"port set to '$option_port', must be integer number"
+
+## LAST CHECK THE SETUP ##
+
+check_daemon_reload
+
+# These variables are read by underlying utilites, rather export them.
+export PGDATA=$pgdata
+export PGPORT=$pgport
+
+debug "final pgdata: $pgdata"
+debug "final pgport: $pgport"
+
+script_result=0
+
+test -w "/var/lib/pgsql" || {
+    # pg_upgrade binary needs to have write-able $PWD (and we use 'su -')
+    error   $"The /var/lib/pgsql directory has wrong permissions."
+    error_q $"Please make sure the directory is writable by $USER."
+    exit 1
+}
+
+if /usr/bin/mountpoint -q "$pgdata" || /usr/bin/mountpoint -q "$(dirname "$pgdata")"; then
+    warn   $"Note that either your data directory '$pgdata' or"
+    warn_q $"the parent directory '$(dirname "$pgdata")'"
+    warn_q $"is a direct mountpoint.  This is usually a bad idea and your"
+    warn_q $"filesystem layout should ideally look like:"
+    warn_q $"/ROOT_OWNED_MOUNTPOINT/POSTGRES_OWNED_DIRECTORY/DATADIR."
+    warn_q $"See the upstream documentation for more info:"
+    warn_q $"http://www.postgresql.org/docs/16/static/creating-cluster.html"
+fi
+
+# See how we were called.
+case "$option_mode" in
+    initdb)
+        initdb
+        ;;
+    upgrade)
+        upgrade
+        ;;
+    *)
+        echo >&2 "$USAGE_STRING"
+        exit 2
+esac
+
+exit $script_result

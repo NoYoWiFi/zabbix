@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/usr/local/src/mariadb-10.11.11/scripts/comp_sql.c
+my_config.h
+-
+stdarg.h
+-
+stdlib.h
+-
+stdio.h
+-
+../sql/sql_bootstrap.h
+/usr/local/src/mariadb-10.11.11/sql/sql_bootstrap.h
+
+/usr/local/src/mariadb-10.11.11/sql/sql_bootstrap.h
+
+include/my_config.h
+

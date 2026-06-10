@@ -1,0 +1,12 @@
+/var/log/loki/*.log {
+        weekly
+        rotate 90
+        dateext
+        missingok
+        notifempty
+        create 0666 root root
+        sharedscripts
+        postrotate
+            /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
+}

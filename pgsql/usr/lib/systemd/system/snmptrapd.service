@@ -1,0 +1,14 @@
+[Unit]
+Description=Simple Network Management Protocol (SNMP) Trap Daemon.
+After=syslog.target network-online.target
+
+[Service]
+Environment="LD_LIBRARY_PATH=/usr/local/src/perl5-5.26.3:/usr/local/lib:/usr/local/lib64"
+Type=simple
+Environment=OPTIONS="-Lsd"
+EnvironmentFile=-/etc/sysconfig/snmptrapd
+ExecStart=/usr/local/sbin/snmptrapd $OPTIONS -f
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
