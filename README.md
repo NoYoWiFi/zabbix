@@ -13,24 +13,27 @@
 
 |标题|链接  |
 |--|--|
-| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
-| centos_7_zabbix_7.0.x_mysql | [centos_7_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_mysql) |
-| centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
-| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
-| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
-| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
-| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
-| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_docker) |
-| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_dockerfile) |
-| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_docker) |
-| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_dockerfile) |
-| zabbix_api | [zabbix_api](https://github.com/NoYoWiFi/zabbix/tree/zabbix_api) |
-| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_build) |
+| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
+| centos_7_zabbix_7.0.x_mysql | [centos_7_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_7.0.x_mysql) |
+| centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
+| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
+| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
+| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
+| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
+| rocky_9_zabbix_7.0.x_pgsql | [rocky_9_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_9_zabbix_7.0.x_pgsql) |
+| kylin_v10_zabbix_7.0.x_mysql | [kylin_v10_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/kylin_v10_zabbix_7.0.x_mysql) |
+| kylin_v10_zabbix_7.0.x_pgsql | [kylin_v10_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/kylin_v10_zabbix_7.0.x_pgsql) |
+| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.com/fantasywith/zabbix/tree/zabbix_6.0.x_docker) |
+| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://gitcode.com/fantasywith/zabbix/tree/zabbix_6.0.x_dockerfile) |
+| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_docker) |
+| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_dockerfile) |
+| zabbix_api | [zabbix_api](https://gitcode.com/fantasywith/zabbix/tree/zabbix_api) |
+| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_build) |
 
 ### 克隆项目文件
 ```
 # **执行如下命令克隆 NoYoWiFi 编排好的 zabbix 项目**
-ZBX_SOURCES=https://'zabbix':'k_LC6VHmJzNyB_3SBgtz'@gitcode.net/1284524409/zabbix.git
+ZBX_SOURCES=https://'public':'EnSy68rd-72hN-Lnn_zYVpFQ'@gitcode.com/fantasywith/zabbix.git
 ZBX_BRANCH=rocky_8_zabbix_7.0.x_mysql
 ZBX_TODIR=/opt/${ZBX_BRANCH}
 cd ${ZBX_TODIR}
@@ -157,11 +160,11 @@ mariadb -e "grant all privileges on zabbix.* to'zabbix'@'%' identified by '$DPas
 mariadb -e "set character_set_server=utf8mb4;"
 mariadb -e "flush privileges;"
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/my.cnf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/my.cnf
 \cp /tmp/my.cnf /etc/
 touch /var/log/mariadb.log
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/create_server_6.0-latest.sql.gz
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/create_server_6.0-latest.sql.gz
 \cp /tmp/create_server_6.0-latest.sql.gz /usr/share/zabbix-sql-scripts/mysql/
 chmod 766 /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest.sql.gz
 zcat /usr/share/zabbix-sql-scripts/mysql/create_server_6.0-latest.sql.gz | mariadb -h 127.0.0.1 -uzabbix -p$DPassword zabbix;
@@ -176,14 +179,14 @@ sed -i "/SELINUX=enforcing/s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/c
 10. 配置nginx
 ```shell
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/nginx.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/nginx.conf
 \cp /tmp/nginx.conf /etc/nginx/nginx.conf
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/zabbix.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/zabbix.conf
 \cp /tmp/zabbix.conf /etc/nginx/conf.d
 DPassword="123.com"
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/zabbix.conf.php
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/zabbix.conf.php
 \cp /tmp/zabbix.conf.php /etc/zabbix/web/
 sed -i "/123.com/s/123.com/$DPassword/" /etc/zabbix/web/zabbix.conf.php
 ```
@@ -191,7 +194,7 @@ sed -i "/123.com/s/123.com/$DPassword/" /etc/zabbix/web/zabbix.conf.php
 ```shell
 mkdir -p /etc/pki/nginx
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/server.pem
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/server.pem
 \cp /tmp/server.pem /etc/pki/nginx/
 sed -i -e "/listen/d" /etc/nginx/conf.d/zabbix.conf
 sed -i -e "/server {/a\ \tlisten 8080;\n\tlisten 8443 ssl;" /etc/nginx/conf.d/zabbix.conf
@@ -211,13 +214,13 @@ sed -i -e "/8443 ssl/a\ \tssl_certificate \"/etc/pki/nginx/server.pem\";\n\
 12. 配置php-fpm
 ```shell
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/php-fpm.d/zabbix.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/php-fpm.d/zabbix.conf
 \cp /tmp/zabbix.conf /etc/php-fpm.d/
 ```
 13. 配置snmptrap
 ```shell
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/snmptrap/zabbix_trap_receiver.pl
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/snmptrap/zabbix_trap_receiver.pl
 \cp /tmp/zabbix_trap_receiver.pl /usr/bin/
 chmod a+x /usr/bin/zabbix_trap_receiver.pl
 sed -i "/# authCommunity   log,execute,net public/s/# authCommunity   log,execute,net public/authCommunity   log,execute,net public/" /etc/snmp/snmptrapd.conf
@@ -235,10 +238,10 @@ net-snmp-create-v3-user -ro -A Admin@zabbix -a MD5 -X Admin@zabbix -x DES zabbix
 15. 汉化web ui图形界面并解决web乱码问题
 ```shell
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/frontend_6.0.mo
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/frontend_6.0.mo
 \cp /tmp/frontend_6.0.mo /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/simkai.ttf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/simkai.ttf
 \cp /tmp/simkai.ttf /usr/share/zabbix/assets/fonts
 sed -i "/ZBX_GRAPH_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
 sed -i "/ZBX_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
@@ -246,9 +249,9 @@ sed -i "/ZBX_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.in
 16. 解除打开文件数限制
 ```shell
 cd /tmp
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/limits.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/limits.conf
 \cp /tmp/limits.conf /etc/security/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/sysctl.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/sysctl.conf
 \cp /tmp/sysctl.conf /etc/
 
 sed -i -e "/^DefaultLimitCORE=/s/=.*/=infinity/" /etc/systemd/system.conf
@@ -390,16 +393,16 @@ sed -i -e "/^\# UnavailableDelay/s/^# //" /etc/zabbix/zabbix_server.conf
 ```shell
 # wget -P /tmp/ https://mirrors.huaweicloud.com/grafana/10.2.3/grafana-enterprise-10.2.3-1.x86_64.rpm
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_00.rpm
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_01.rpm
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_02.rpm
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_03.rpm
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_04.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_00.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_01.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_02.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_03.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/grafana-enterprise-10.1.0-1.x86_64_04.rpm
 cat ./grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana-enterprise-10.1.0-1.x86_64.rpm
 yum -y install /tmp/grafana-enterprise-10.1.0-1.x86_64.rpm
 # wget -P /tmp/ https://github.com/grafana/grafana-zabbix/releases/download/v4.4.4/alexanderzobnin-zabbix-app-4.4.4.linux_amd64.zip
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/alexanderzobnin-zabbix-app-4.4.1.linux_amd64.zip
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/alexanderzobnin-zabbix-app-4.4.1.linux_amd64.zip
 unzip -qo /tmp/alexanderzobnin-zabbix-app-*.zip -d /var/lib/grafana/plugins
 chown grafana:grafana -R /var/lib/grafana/plugins/*
 ```
@@ -414,15 +417,15 @@ sed -i -e "/^;cert_file =/s/^;//" /etc/grafana/grafana.ini
 sed -i -e "/^;cert_key =/s/^;//" /etc/grafana/grafana.ini
 mkdir -p /etc/grafana/ssl
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/server.pem
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/server.pem
 \cp /tmp/server.pem /etc/grafana/ssl
 ```
 21. 配置日志服务rsyslog
 ```shell
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/loki.conf
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/loki.conf
 \cp /tmp/loki.conf /etc/rsyslog.d/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/loki
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/loki
 \cp /tmp/loki /etc/logrotate.d/loki
 sed -i -e "/^\# module(load=\"imudp\")/s/^# //" /etc/rsyslog.conf
 sed -i -e "/^\# input(type=\"imudp\"/s/^# //" /etc/rsyslog.conf
@@ -434,14 +437,14 @@ systemctl restart rsyslog
 22. 安装grafana loki日志分析服务
 ```shell
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/loki-2.8.4.x86_64.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/loki-2.8.4.x86_64.rpm
 yum -y install /tmp/loki-2.8.4.x86_64.rpm
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/promtail-2.8.4.x86_64.rpm
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/grafana/promtail-2.8.4.x86_64.rpm
 yum -y install /tmp/promtail-2.8.4.x86_64.rpm
 mkdir -p /var/log/loki
 chmod 755 /var/log/loki
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/echo.sh
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/patch/echo.sh
 \cp /tmp/echo.sh /usr/lib/zabbix/alertscripts/
 chmod +x /usr/lib/zabbix/alertscripts/echo.sh
 chown zabbix:zabbix /usr/lib/zabbix/alertscripts/echo.sh
@@ -454,8 +457,8 @@ sed -i -e "/^\      __path__:/s/:.*/: \/var\/log\/loki\/\*log/" /etc/promtail/co
 23. 为mysql分区
 ```shell
 cd /tmp/
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/mysql.sh
-curl -# -O https://gitcode.net/1284524409/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/zbx_db_partitiong.sql
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/mysql.sh
+curl -# -O https://gitcode.com/fantasywith/zabbix/-/raw/rocky_8_zabbix_6.0.x_mysql/mysql/zbx_db_partitiong.sql
 sh mysql.sh
 ```
 24. 配置开机启动服务
