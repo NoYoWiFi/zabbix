@@ -60,12 +60,6 @@ else
 fi
 #![安装snmp及部分插件]
 yum -y install nano net-tools unzip sysstat iotop rsyslog iperf3
-#![安装grafana zabbix图形界面]
-cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
-yum -y install grafana/*.rpm
-#![安装grafana zabbix插件]
-unzip -qo ./grafana/alexanderzobnin-zabbix-app-*.zip -d /var/lib/grafana/plugins
-chown grafana:grafana -R /var/lib/grafana/plugins/*
 #![安装zabbix]
 case ${1} in
     "proxy")
@@ -80,7 +74,13 @@ case ${1} in
          exit 1
         fi
         ;;
-    *)
+    "install")
+        #![安装grafana zabbix图形界面]
+        cat ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm_0* > ./grafana/grafana-enterprise-10.1.0-1.x86_64.rpm
+        yum -y install grafana/*.rpm
+        #![安装grafana zabbix插件]
+        unzip -qo ./grafana/alexanderzobnin-zabbix-app-*.zip -d /var/lib/grafana/plugins
+        chown grafana:grafana -R /var/lib/grafana/plugins/*
         /usr/bin/rpm -ivhU --force --nodeps packages/*
         cat patch/usr.local.tar.gz_* > patch/usr.local.tar.gz
         tar -zxvf patch/usr.local.tar.gz -C /
@@ -88,6 +88,9 @@ case ${1} in
          echo "ERROR!"
          exit 1
         fi
+        ;;
+    *)
+        echo "Nothing to do"
         ;;
 esac
 \cp -vrf etc /
@@ -101,11 +104,20 @@ mkdir -p /var/lib/mysql
 chown mysql:mysql /var/lib/mysql
 chmod 755 /var/lib/mysql
 chmod +x /usr/libexec/mysql*
-mkdir -p /var/log/mariadb
+mkdir -p /var/log/mysql
+chmod 755 /var/log/mysql
+chown mysql:mysql /var/log/mysql
 chmod +x /usr/local/bin/mysql_install_db
 chmod +x /usr/local/bin/mariadb-install-db
+chmod 755 -R /usr/local/share/mariadb-10.11.11/scripts/
 systemctl daemon-reload
 systemctl start mariadb
+# 等待服务进入 "active" 状态
+until netstat -ntlp | grep -q '3306.*LISTEN'; do
+    echo "Waiting for MySQL/MariaDB to start..."
+    sleep 1
+done
+echo "MySQL/MariaDB is now running and listening on port 3306."
 if [ $? -ne '0' ]; then
  cat $shellFolder/error
  exit 1
@@ -151,8 +163,9 @@ case ${1} in
     "proxy")
         echo "proxy"
         ;;
-    *)
+    "install")
         #![配置nginx]
+        chown nginx:nginx /var/log/nginx
         groupadd -r nginx
         useradd -g nginx -r -s /sbin/nologin nginx -d /usr/share/zabbix
         touch /usr/local/var/log/php-fpm.log
@@ -192,6 +205,9 @@ case ${1} in
         sed -i -e "/^\;date.timezone/s/=.*/= Asia\/Shanghai/" /etc/php.ini
         sed -i -e "/^\;date.timezone/s/^;//" /etc/php.ini
         ;;
+    *)
+        echo "Nothing to do"
+        ;;
 esac
 #![配置snmptrap]
 \cp ./snmptrap/zabbix_trap_receiver.pl /usr/bin/
@@ -199,6 +215,7 @@ chmod a+x /usr/bin/zabbix_trap_receiver.pl
 sed -i "/# authCommunity   log,execute,net public/s/# authCommunity   log,execute,net public/authCommunity   log,execute,net public/" /usr/local/etc/snmp/snmptrapd.conf
 sed -i "/zabbix_trap_receiver.pl/d" /usr/local/etc/snmp/snmptrapd.conf
 echo "perl do \"/usr/bin/zabbix_trap_receiver.pl\"" >> /usr/local/etc/snmp/snmptrapd.conf
+\cp ./snmptrap/snmptrapd.conf /etc/snmp/
 #![创建SNMP V3用户]
 sed -i -e "/rouser/d" /usr/local/etc/snmp/snmpd.conf
 sed -i -e "/zabbix/d" /var/net-snmp/snmpd.conf
@@ -207,12 +224,15 @@ case ${1} in
     "proxy")
         echo "proxy"
         ;;
-    *)
+    "install")
         #![汉化web ui图形界面并解决web乱码问题]
         \cp patch/frontend_7.0.mo /usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
         \cp ./patch/simkai.ttf /usr/share/zabbix/assets/fonts
         sed -i "/ZBX_GRAPH_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
         sed -i "/ZBX_FONT_NAME/s/graphfont/simkai/" /usr/share/zabbix/include/defines.inc.php
+        ;;
+    *)
+        echo "Nothing to do"
         ;;
 esac
 #![解除打开文件数限制]
@@ -237,7 +257,7 @@ case ${1} in
         ZABBIX_CONFIG="/etc/zabbix/zabbix_proxy.conf"
         sed -i "/DBName=zabbix_proxy/s/DBName=.*/DBName=zabbix/" ${ZABBIX_CONFIG}
         ;;
-    *)
+    "install")
         #![为grafana配置https访问]
         sed -i -e "/^;protocol =/s/=.*/= https/" /etc/grafana/grafana.ini
         sed -i -e "/^;cert_file =/s/=.*/= \/etc\/grafana\/ssl\/server.pem/" /etc/grafana/grafana.ini
@@ -248,6 +268,9 @@ case ${1} in
         mkdir -p /etc/grafana/ssl
         \cp ./patch/server.pem /etc/grafana/ssl
         ZABBIX_CONFIG="/etc/zabbix/zabbix_server.conf"
+        ;;
+    *)
+        echo "Nothing to do"
         ;;
 esac
 
@@ -264,7 +287,7 @@ sed -i "/# ListenIP=0.0.0.0/s/# ListenIP=0.0.0.0/ListenIP=0.0.0.0/" ${ZABBIX_CON
 sed -i "/# JavaGateway=/s/# JavaGateway=/JavaGateway=127.0.0.1/" ${ZABBIX_CONFIG}
 sed -i "/# JavaGatewayPort=10052/s/# JavaGatewayPort=10052/JavaGatewayPort=10052/" ${ZABBIX_CONFIG}
 sed -i "/# StartJavaPollers=0/s/# StartJavaPollers=0/StartJavaPollers=5/" ${ZABBIX_CONFIG}
-sed -i "/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/s/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/" ${ZABBIX_CONFIG}
+sed -i "/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/s/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/SNMPTrapperFile=\/var\/log\/loki\/zabbix_traps.log/" ${ZABBIX_CONFIG}
 sed -i "/^SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/s/SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/# SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/" ${ZABBIX_CONFIG}
 sed -i "/# AllowUnsupportedDBVersions=0/s/# AllowUnsupportedDBVersions=0/AllowUnsupportedDBVersions=1/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# DebugLevel/s/=.*/=1/" ${ZABBIX_CONFIG}
@@ -383,7 +406,7 @@ case ${1} in
         chmod 666 /var/log/loki/alert.log
         sed -i -e "/^\      __path__:/s/:.*/: \/var\/log\/loki\/\*log/" /etc/promtail/config.yml
         ;;
-    *)
+    "install")
         #![安装grafana loki日志分析服务]
         mkdir -p /var/log/loki
         chmod 755 /var/log/loki
@@ -394,6 +417,9 @@ case ${1} in
         touch /var/log/loki/alert.log
         chmod 666 /var/log/loki/alert.log
         sed -i -e "/^\      __path__:/s/:.*/: \/var\/log\/loki\/\*log/" /etc/promtail/config.yml
+        ;;
+    *)
+        echo "Nothing to do"
         ;;
 esac
 #![配置开机启动服务]
@@ -411,12 +437,6 @@ systemctl enable zabbix-java-gateway
 systemctl enable mariadb
 systemctl restart mariadb
 systemctl daemon-reload
-systemctl restart grafana-server
-systemctl enable grafana-server.service
-systemctl restart loki
-systemctl enable loki.service
-systemctl restart promtail
-systemctl enable promtail.service
 systemctl start snmptrapd
 systemctl enable snmptrapd
 systemctl start snmpd
@@ -425,6 +445,12 @@ systemctl daemon-reload
 cd ${shellFolder}/mysql
 case ${1} in
     "install")
+        systemctl restart grafana-server
+        systemctl enable grafana-server.service
+        systemctl restart loki
+        systemctl enable loki.service
+        systemctl restart promtail
+        systemctl enable promtail.service
         chmod a+rw -R /var/log/loki/
         systemctl start php-fpm
         systemctl enable php-fpm
@@ -452,4 +478,3 @@ case ${1} in
 esac
 netstat -nltp | grep '10050\|10051\|10052\|3306\|80\|3000'
 # rm -rf ${shellFolder}*
-

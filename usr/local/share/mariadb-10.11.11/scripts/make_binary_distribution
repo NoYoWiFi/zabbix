@@ -1,0 +1,1 @@
+cd /usr/local/src/mariadb-10.11.11/cmake-build && '/usr/local/bin/cpack' -G TGZ --config CPackConfig.cmake

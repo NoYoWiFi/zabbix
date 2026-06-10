@@ -36,23 +36,25 @@ Alias=mysql.service
 Alias=mysqld.service
 
 [Service]
-Type=forking
+Type=simple
 User=mysql
 Group=mysql
 
 LimitNOFILE=655350
 Environment="LD_LIBRARY_PATH=/usr/local/src/perl5-5.26.3:/usr/local/lib:/usr/local/lib64"
 
-ExecStartPre=/usr/libexec/mysql-check-socket
+#ExecStartPre=/usr/libexec/mysql-check-socket
 # '%n' expands to 'Full unit name'; man systemd.unit
-ExecStartPre=/usr/libexec/mysql-prepare-db-dir %n
+#ExecStartPre=/usr/libexec/mysql-prepare-db-dir %n
+ExecStartPre=/usr/local/share/mariadb-10.11.11/scripts/mysql_install_db --user=mysql --basedir=/usr/local --ldata=/var/lib/mysql
 # MYSQLD_OPTS here is for users to set in /etc/systemd/system/mariadb@.service.d/MY_SPECIAL.conf
 # Note: we set --basedir to prevent probes that might trigger SELinux alarms,
 # per bug #547485
-# ExecStart=/usr/local/bin/mariadbd-safe --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/log/mysql/mysql.log --pid-file=mysql.pid
-ExecStart=/usr/libexec/mysqld start --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/lib/mysql/mysql.err --pid-file=mysql.pid
-ExecStop=/usr/libexec/mysqld stop --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/lib/mysql/mysql.err --pid-file=mysql.pid
-ExecStartPost=/usr/libexec/mysql-check-upgrade
+ExecStart=/usr/local/share/mariadb-10.11.11/scripts/mariadbd-safe --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/log/mysql/mysql.log --pid-file=mysql.pid
+# ExecStart=/usr/libexec/mysqld start --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/lib/mysql/mysql.err --pid-file=mysql.pid
+# ExecStop=/usr/libexec/mysqld stop --basedir=/usr/local --datadir=/var/lib/mysql --plugin-dir=/usr/local/lib/plugin --log-error=/var/lib/mysql/mysql.err --pid-file=mysql.pid
+ExecStop=/bin/kill -9 $MAINPID
+# ExecStartPost=/usr/libexec/mysql-check-upgrade
 # Setting this to true can break replication and the Type=notify settings
 # See also bind-address mysqld option.
 PrivateNetwork=false
