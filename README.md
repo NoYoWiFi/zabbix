@@ -13,24 +13,27 @@
 
 |标题|链接  |
 |--|--|
-| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
-| centos_7_zabbix_7.0.x_mysql | [centos_7_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_mysql) |
-| centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
-| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
-| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
-| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
-| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://github.com/NoYoWiFi/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
-| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_docker) |
-| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_6.0.x_dockerfile) |
-| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_docker) |
-| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_dockerfile) |
-| zabbix_api | [zabbix_api](https://github.com/NoYoWiFi/zabbix/tree/zabbix_api) |
-| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://github.com/NoYoWiFi/zabbix/tree/zabbix_7.0.x_build) |
+| centos_7_zabbix_5.0.x_mysql | [centos_7_zabbix_5.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_5.0.x_mysql) |
+| centos_7_zabbix_7.0.x_mysql | [centos_7_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_7.0.x_mysql) |
+| centos_7_zabbix_7.0.x_pgsql | [centos_7_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/centos_7_zabbix_7.0.x_pgsql) |
+| rocky_8_zabbix_6.0.x_mysql | [rocky_8_zabbix_6.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_6.0.x_mysql) |
+| rocky_8_zabbix_6.0.x_pgsql | [rocky_8_zabbix_6.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_6.0.x_pgsql) |
+| rocky_8_zabbix_7.0.x_mysql | [rocky_8_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_7.0.x_mysql) |
+| rocky_8_zabbix_7.0.x_pgsql | [rocky_8_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_8_zabbix_7.0.x_pgsql) |
+| rocky_9_zabbix_7.0.x_pgsql | [rocky_9_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/rocky_9_zabbix_7.0.x_pgsql) |
+| kylin_v10_zabbix_7.0.x_mysql | [kylin_v10_zabbix_7.0.x_mysql](https://gitcode.com/fantasywith/zabbix/tree/kylin_v10_zabbix_7.0.x_mysql) |
+| kylin_v10_zabbix_7.0.x_pgsql | [kylin_v10_zabbix_7.0.x_pgsql](https://gitcode.com/fantasywith/zabbix/tree/kylin_v10_zabbix_7.0.x_pgsql) |
+| zabbix_6.0.x_docker | [zabbix_6.0.x_docker](https://gitcode.com/fantasywith/zabbix/tree/zabbix_6.0.x_docker) |
+| zabbix_6.0.x_dockerfile | [zabbix_6.0.x_dockerfile](https://gitcode.com/fantasywith/zabbix/tree/zabbix_6.0.x_dockerfile) |
+| zabbix_7.0.x_docker | [zabbix_7.0.x_docker](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_docker) |
+| zabbix_7.0.x_dockerfile | [zabbix_7.0.x_dockerfile](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_dockerfile) |
+| zabbix_api | [zabbix_api](https://gitcode.com/fantasywith/zabbix/tree/zabbix_api) |
+| zabbix_7.0.x_build | [zabbix_7.0.x_build](https://gitcode.com/fantasywith/zabbix/tree/zabbix_7.0.x_build) |
 
 ### 克隆项目文件
 ```
 # **执行如下命令克隆 NoYoWiFi 编排好的 zabbix 项目**
-ZBX_SOURCES=https://'zabbix':'k_LC6VHmJzNyB_3SBgtz'@gitcode.net/1284524409/zabbix.git
+ZBX_SOURCES=https://'public':'EnSy68rd-72hN-Lnn_zYVpFQ'@gitcode.com/fantasywith/zabbix.git
 ZBX_BRANCH=zabbix_7.0.x_docker
 ZBX_TODIR=/opt/${ZBX_BRANCH}
 cd ${ZBX_TODIR}
@@ -38,6 +41,7 @@ git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_BRANCH} --d
 chmod 755 -R ${ZBX_TODIR}/
 cd ${ZBX_TODIR}/
 ```
+
 **效果图**
 ```
 [root@localhost zabbix_docker]# docker images  
@@ -79,7 +83,7 @@ yum -y install git
 **执行如下命令克隆docker安装中文版zabbix项目**
 
 ```
-ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_SOURCES=https://gitcode.com/fantasywith/zabbix.git
 ZBX_VERSION=zabbix_7.0.x_docker
 ZBX_NAME=zabbix_docker-7.0-latest
 ZBX_DIR=/opt
@@ -146,7 +150,7 @@ root@ubuntu:/home/ubuntu# add-apt-repository "deb [arch=amd64] https://mirrors.a
 root@ubuntu:/home/ubuntu# apt-get -y install docker-ce
 root@ubuntu:/home/ubuntu# service docker start
 root@ubuntu:/home/ubuntu# apt install git
-root@ubuntu:/home/ubuntu# ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+root@ubuntu:/home/ubuntu# ZBX_SOURCES=https://gitcode.com/fantasywith/zabbix.git
 root@ubuntu:/home/ubuntu# ZBX_VERSION=zabbix_7.0.x_docker
 root@ubuntu:/home/ubuntu# ZBX_NAME=zabbix_docker-7.0-latest
 root@ubuntu:/home/ubuntu# ZBX_DIR=/opt
@@ -217,7 +221,7 @@ URL为http://IP:3100
 sh update_config-entrypoint_mysql.sh stop
 # sh update_config-entrypoint_pgsql.sh stop
 
-ZBX_SOURCES=https://gitcode.net/1284524409/zabbix.git
+ZBX_SOURCES=https://gitcode.com/fantasywith/zabbix.git
 ZBX_VERSION=zabbix_7.0.x_docker
 ZBX_NAME=zabbix_docker-7.0-latest
 ZBX_DIR=/opt
