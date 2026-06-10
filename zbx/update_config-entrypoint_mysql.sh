@@ -54,6 +54,12 @@ fi
 if [[ "." == "${option}" ]]; then
 	option=$(cat /etc/redhat-release | cut -c 21)
 fi
+if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+    echo "Successfully processed the file."
+    option=7
+else
+    echo "An error occurred: No such file or directory."
+fi
 case ${option} in
     8)
     echo "Centos 8 catch!"
@@ -80,6 +86,12 @@ case ${option} in
         yum-config-manager \
             --add-repo \
             https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        if [[ "22.03" == "$(cat /etc/os-release 2>/dev/null | grep -Eo 'VERSION_ID="([^"]*)"' | cut -d'"' -f2)" ]]; then
+            echo "Successfully processed the file."
+            sed -i "/\$releasever/s/\$releasever/7/" /etc/yum.repos.d/docker-ce.repo
+        else
+            echo "An error occurred: No such file or directory."
+        fi
         yum -y install docker-ce docker-ce-cli containerd.io
         yum -y install git rsyslog
         \cp ./trans/create_server_${GV_VERSION_DOCKER}_mysql.sql.gz ./patch/create.sql.gz
@@ -204,7 +216,9 @@ var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
 var_value_10=$(escape_spec_char "$var_value_10")
 # exec_sql_file
-NUMINDEX=$(sed -n -e '257,301{/unset MYSQL_PWD/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_START=$(sed -n -e '{/^exec_sql_file/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_END=$[$NUMINDEX_START + 50]
+NUMINDEX=$(sed -n -e "$NUMINDEX_START,$NUMINDEX_END{/unset MYSQL_PWD/=}" $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
 sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_SERVER_MYSQL_ENTRYPOINT
@@ -366,7 +380,9 @@ var_value_08=$(escape_spec_char "$var_value_08")
 var_value_09=$(escape_spec_char "$var_value_09")
 var_value_10=$(escape_spec_char "$var_value_10")
 # exec_sql_file
-NUMINDEX=$(sed -n -e '264,301{/unset MYSQL_PWD/=}' $ZABBIX_PROXY_MYSQL_ENTRYPOINT)
+NUMINDEX_START=$(sed -n -e '{/^exec_sql_file/=}' $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
+NUMINDEX_END=$[$NUMINDEX_START + 50]
+NUMINDEX=$(sed -n -e "$NUMINDEX_START,$NUMINDEX_END{/unset MYSQL_PWD/=}" $ZABBIX_SERVER_MYSQL_ENTRYPOINT)
 sed -i "${NUMINDEX}i\\$var_value_10" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_09" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
 sed -i "${NUMINDEX}i\\$var_value_08" $ZABBIX_PROXY_MYSQL_ENTRYPOINT
