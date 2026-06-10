@@ -81,6 +81,17 @@ dnf module reset php -y
 dnf module enable php:${GV_ARR_ENV[GV_PHP_VERSION]} -y
 #![安装snmp及部分插件]
 yum -y install nano net-snmp* net-tools unzip glibc-langpack-zh.${GV_ARCH} langpacks-zh_CN.noarch sysstat iotop rsyslog iperf3 chrony
+SCRIPT_NAME=$(cat /etc/chrony.conf | grep '^port ' | wc -l)
+
+# 检查是否已有相同进程在运行
+check_process() {
+    # 排除当前进程的PID，查找其他相同脚本的进程
+    if [ ${SCRIPT_NAME} -eq 0 ]; then
+        echo "port 123" >> /etc/chrony.conf
+    fi
+}
+check_process
+sed -i -e "/^\port /s/ .*/ 123/" /etc/chrony.conf
 #![配置时区]
 timedatectl set-timezone Asia/Shanghai
 systemctl start chronyd
@@ -192,6 +203,7 @@ chmod a+x /usr/bin/zabbix_trap_receiver.pl
 sed -i "/# authCommunity   log,execute,net public/s/# authCommunity   log,execute,net public/authCommunity   log,execute,net public/" /etc/snmp/snmptrapd.conf
 sed -i "/zabbix_trap_receiver.pl/d" /etc/snmp/snmptrapd.conf
 echo "perl do \"/usr/bin/zabbix_trap_receiver.pl\"" >> /etc/snmp/snmptrapd.conf
+\cp ./snmptrap/snmptrapd.conf /etc/snmp/
 #![创建SNMP V3用户]
 sed -i -e "/rouser/d" /etc/snmp/snmpd.conf
 sed -i -e "/zabbix/d" /var/lib/net-snmp/snmpd.conf
@@ -256,7 +268,7 @@ sed -i "/# ListenIP=0.0.0.0/s/# ListenIP=0.0.0.0/ListenIP=0.0.0.0/" ${ZABBIX_CON
 sed -i "/# JavaGateway=/s/# JavaGateway=/JavaGateway=127.0.0.1/" ${ZABBIX_CONFIG}
 sed -i "/# JavaGatewayPort=10052/s/# JavaGatewayPort=10052/JavaGatewayPort=10052/" ${ZABBIX_CONFIG}
 sed -i "/# StartJavaPollers=0/s/# StartJavaPollers=0/StartJavaPollers=5/" ${ZABBIX_CONFIG}
-sed -i "/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/s/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/" ${ZABBIX_CONFIG}
+sed -i "/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/s/# SNMPTrapperFile=\/tmp\/zabbix_traps.tmp/SNMPTrapperFile=\/var\/log\/loki\/zabbix_traps.log/" ${ZABBIX_CONFIG}
 sed -i "/^SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/s/SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/# SNMPTrapperFile=\/var\/log\/snmptrap\/snmptrap.log/" ${ZABBIX_CONFIG}
 sed -i "/# AllowUnsupportedDBVersions=0/s/# AllowUnsupportedDBVersions=0/AllowUnsupportedDBVersions=1/" ${ZABBIX_CONFIG}
 sed -i -e "/^\# DebugLevel/s/=.*/=1/" ${ZABBIX_CONFIG}
