@@ -1,0 +1,16 @@
+
+# Added by git_batch_ops
+.idea/
+
+# Added by git_batch_ops
+builddir/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+test.py
+zabbix_sender.zip
+output/
+2026-4-13v1/
+.venv.zip
