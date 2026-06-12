@@ -549,6 +549,8 @@ elif [ $# -ge 1 ]; then
             mkdir -p ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/
             \cp -rf ./patch/${GV_ARR_ENV[GV_WEB_UI_FILE_NAME]} ./zbx_env/usr/share/zabbix/locale/zh_CN/LC_MESSAGES/frontend.mo
 #            mkdir -p ./zbx_env/etc/mysql/conf.d
+            mkdir -p ./zbx_env/usr/share/doc/zabbix-server-mysql/
+            \cp -f ./trans/${GV_ARR_ENV[GV_SQL_MYSQL_FILE_NAME]} ./zbx_env/usr/share/doc/zabbix-server-mysql/create.sql.gz
             mkdir -p ./zbx_env/etc/mysql
             \cp -rf ./patch/my.cnf ./zbx_env/etc/mysql/my.cnf
             mkdir -p ./zbx_env/etc/ssl/nginx
@@ -614,6 +616,16 @@ elif [ $# -ge 1 ]; then
     fi
 
     if [[ "$1" == "start" ]]; then
+		# 检查文件是否存在
+		FILE_PATH="./zbx_env/usr/share/doc/zabbix-server-mysql/create.sql.gz"
+
+		if [ ! -f "$FILE_PATH" ]; then
+			echo "ERROR: File not found: $FILE_PATH"
+			echo "Please ensure the file exists before starting the container"
+			exit 1
+		fi
+
+		echo "File exists: $FILE_PATH"
         option=$(echo ${GV_VERSION} | cut -c 1)
         case ${option} in
             5)
