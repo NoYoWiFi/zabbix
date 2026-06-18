@@ -705,6 +705,11 @@ if __name__ == "__main__":
                                 interface = host_info.get('interfaces', [])
                                 proxyid = host_info.get('proxyid', '')
                                 proxy_groupid = host_info.get('proxy_groupid', '')
+                                # 添加 IPMI 相关字段
+                                ipmi_authtype = host_info.get('ipmi_authtype', '')
+                                ipmi_privilege = host_info.get('ipmi_privilege', '')
+                                ipmi_username = host_info.get('ipmi_username', '')
+                                ipmi_password = host_info.get('ipmi_password', '')
 
                                 # 添加到结果列表
                                 host_info_list.append({
@@ -714,7 +719,12 @@ if __name__ == "__main__":
                                     'parentTemplates': template,
                                     'interfaces': interface,
                                     'proxyid': proxyid,
-                                    'proxy_groupid': proxy_groupid
+                                    'proxy_groupid': proxy_groupid,
+                                    # IPMI 字段
+                                    'ipmi_authtype': ipmi_authtype,
+                                    'ipmi_privilege': ipmi_privilege,
+                                    'ipmi_username': ipmi_username,
+                                    'ipmi_password': ipmi_password
                                 })
 
                     except (KeyError, IndexError, TypeError):
@@ -727,6 +737,10 @@ if __name__ == "__main__":
                             'interfaces': [],
                             'proxyid': "",
                             'proxy_groupid': "",
+                            'ipmi_authtype': "",
+                            'ipmi_privilege': "",
+                            'ipmi_username': "",
+                            'ipmi_password': ""
                         })
                     # 将整个列表存入结果（或根据需求选择第一个元素）
                     lv_list_get_all_host_name[index] = host_info_list
@@ -797,15 +811,33 @@ if __name__ == "__main__":
             # 统一配置所有表的结构和数据映射
             sheet_configs = {
                 "主机": {
-                    "headers": ['主机名', '主机组', '可见名'],
-                    "columns": {'主机名': 1, '主机组': 3, '可见名': 15},
+                    "headers": ['主机名', '主机组', '可见名', 'IPMI认证类型', 'IPMI权限级别', 'IPMI用户名', 'IPMI密码'],
+                    "columns": {
+                        '主机名': 1, 
+                        '主机组': 3, 
+                        '可见名': 15,
+                        'IPMI认证类型': 16,
+                        'IPMI权限级别': 17,
+                        'IPMI用户名': 18,
+                        'IPMI密码': 19
+                    },
                     "data_mapping": {
                         "主机名": lambda data: data.get("host", ""),
                         "主机组": lambda data: data.get("hostgroups", [{}])[0].get("name", ""),
-                        "可见名": lambda data: data.get("name", "")
+                        "可见名": lambda data: data.get("name", ""),
+                        "IPMI认证类型": lambda data: _convert_ipmi_authtype(data.get("ipmi_authtype", "")),
+                        "IPMI权限级别": lambda data: _convert_ipmi_privilege(data.get("ipmi_privilege", "")),
+                        "IPMI用户名": lambda data: data.get("ipmi_username", ""),
+                        "IPMI密码": lambda data: data.get("ipmi_password", "")
                     },
                     "data_source": deduplicated_list,
-                    "is_single_row": True  # 每个主机单行显示
+                    "is_single_row": True,
+                    "skip_condition": lambda data: not any([
+                        data.get("ipmi_authtype"), 
+                        data.get("ipmi_privilege"), 
+                        data.get("ipmi_username"), 
+                        data.get("ipmi_password")
+                    ])
                 },
                 "主机组": {
                     "headers": ['主机名', '主机组'],
@@ -871,8 +903,48 @@ if __name__ == "__main__":
                     },
                     "is_single_row": True,
                     "skip_condition": lambda data: not data.get("proxygroupname")  # 新增：proxygroupname为空时跳过
-                }
+                },
             }
+
+            # 辅助函数：转换 IPMI 认证类型数字为可读文本
+            def _convert_ipmi_authtype(value):
+                """转换 IPMI 认证类型"""
+                if not value:
+                    return ""
+                # 确保 value 是整数类型
+                try:
+                    auth_type = int(value)
+                except (ValueError, TypeError):
+                    return str(value)
+                
+                auth_map = {
+                    -1: "默认",
+                    0: "无认证",
+                    1: "MD2",
+                    2: "MD5",
+                    4: "Straight",
+                    5: "OEM",
+                    6: "RMCP+"
+                }
+                return auth_map.get(auth_type, str(auth_type))
+
+            def _convert_ipmi_privilege(value):
+                """转换 IPMI 权限级别"""
+                if not value:
+                    return ""
+                try:
+                    privilege = int(value)
+                except (ValueError, TypeError):
+                    return str(value)
+                
+                privilege_map = {
+                    1: "Callback",
+                    2: "User",
+                    3: "Operator",
+                    4: "Admin",
+                    5: "OEM"
+                }
+                return privilege_map.get(privilege, str(privilege))
 
             # 统一处理所有工作表
             for sheet_name in excel_info:
