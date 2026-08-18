@@ -1,0 +1,406 @@
+# 数据目录，用于存储缓冲区等
+data_dir: "/var/lib/vector"
+
+# -------------------------------------------
+# 1. Sources：定义数据来源
+# -------------------------------------------
+sources:
+  # 接收 Agent 转发的日志（Vector 协议）
+  agent_logs:
+    type: "vector"
+    version: "2"
+    address: "0.0.0.0:6000"
+
+  # 采集 Syslog (TCP 5144 端口，接收你的系统日志)
+  syslog_direct:
+    type: "syslog"
+    mode: "tcp"
+    address: "0.0.0.0:5144"
+
+  # 采集 Nginx 访问日志 (文件)
+  nginx_access_logs:
+    type: "file"
+    include:
+#      - "/var/log/nginx/access.log"  # 你的 Nginx 日志路径
+      - "/var/log/loki/*.log"
+    read_from: "beginning"           # 首次启动读取全部历史
+
+# ---------- Transforms：统一处理 ----------
+transforms:
+  parse_all:
+    type: remap
+    inputs: ["agent_logs", "syslog_direct", "nginx_access_logs"]
+    source: |
+    
+      if exists(.message) {
+        .msg_str = to_string!(.message)
+        ._table = "logs_no_pri"
+        .pri = null
+        .severity = null
+        .facility = null
+        
+        is_json = match(.msg_str, r'\{.*\".*\".*:.*\".*\".*\}')
+        
+        if is_json {
+          json_start = find(.msg_str, "{")
+          js = to_int!(json_start)
+          if js >= 0 {
+            json_str = slice!(.msg_str, start: js)
+            parsed_json, err = parse_json(json_str)
+            if err == null {
+              .full_log = parsed_json
+            } else {
+              # JSON 解析失败，用正则提取（兜底）
+              .full_log = {}
+              .err1 = err
+              
+              lv, _ = parse_regex(json_str, r'"告警级别":\s*"(?P<v>[^"]*)"')
+              if lv != null { .severity_cn = lv.v ; .full_log."告警级别" = lv.v }
+              
+              nm, _ = parse_regex(json_str, r'"告警名称":\s*"(?P<v>.*?)",\s*"告警主机"')
+              if nm != null { .alert_name = nm.v ; .full_log."告警名称" = nm.v }
+              
+              ho, _ = parse_regex(json_str, r'"告警主机":\s*"(?P<v>[^"]*)"')
+              if ho != null { .ip = ho.v ; .alert_host = ho.v ; .full_log."告警主机" = ho.v }
+              
+              tm, _ = parse_regex(json_str, r'"告警时间":\s*"(?P<v>[^"]*)"')
+              if tm != null { .alert_time = tm.v ; .full_log."告警时间" = tm.v }
+              
+              dt, _ = parse_regex(json_str, r'"告警日期":\s*"(?P<v>[^"]*)"')
+              if dt != null { .alert_date = dt.v ; .full_log."告警日期" = dt.v }
+              
+              id, _ = parse_regex(json_str, r'"告警ID":\s*"(?P<v>[^"]*)"')
+              if id != null { .alert_id = id.v ; .full_log."告警ID" = id.v }
+
+              vh, _ = parse_regex(json_str, r'"告警可见主机名":\s*"(?P<v>[^"]*)"')
+              if vh != null { .alert_visible_host = vh.v ; .full_log."告警可见主机名" = vh.v }
+              
+              vh, _ = parse_regex(json_str, r'"ip":\s*"(?P<v>[^"]*)"')
+              if vh != null { .ip = vh.v ; .full_log."ip" = vh.v }
+              #vh, _ = parse_regex(json_str, r'"数字":\s*(?P<v>\d+),')
+              #if vh != null { .数字 = vh.v ; .full_log."数字" = vh.v }
+              
+              #vh, _ = parse_regex(json_str, r'"告警可见主机名":\s*("(?P<v>[^"]*)"|(?P<v>\d+)|(?P<v>null))')
+              #if vh != null { .告警可见主机名 = vh.v ; .full_log."告警可见主机名" = vh.v }
+            }
+          }
+          .source_format = "is_json"
+        }
+
+        if !is_json {
+          .clean_msg = replace(.msg_str, r'#015#012', " ")
+          .clean_msg = replace(.clean_msg, r'#015', " ")
+          .clean_msg = replace(.clean_msg, r'\n', " ")
+          .clean_msg = replace(.clean_msg, r'\r', " ")
+          
+          p_match, _ = parse_regex(.clean_msg, r'^(?P<pre>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+[^\s]+\s+[^\s]+(?:\s+[^\s:]*:)?)\s+(?P<kv>.+)$')
+          
+          pre_str = ""
+          kv_str = .clean_msg
+          
+          if p_match != null {
+            pre_str = p_match.pre
+            kv_str = p_match.kv
+          }
+          
+          pre_parts, err = split(pre_str, " ")
+            if err == null {
+              if length(pre_parts) >= 3 {
+                .log_timestamp = to_string!(pre_parts[0]) + " " + to_string!(pre_parts[1])
+                .log_host = to_string!(pre_parts[2])
+                if length(pre_parts) >= 4 {
+                  .log_level = to_string!(pre_parts[3])
+                }
+                if length(pre_parts) >= 5 {
+                  .log_process = replace(to_string!(pre_parts[4]), ":", "")
+                }
+              }
+              
+              kv_normalized = kv_str
+              
+              dm, _ = parse_regex(kv_normalized, r'date="(?P<v>[^"]*)"')
+              if dm != null {
+                clean_val = replace!(to_string!(dm.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'date="[^"]*"', "date=" + clean_val)
+              }
+              
+              tm, _ = parse_regex(kv_normalized, r'time="(?P<v>[^"]*)"')
+              if tm != null {
+                clean_val = replace!(to_string!(tm.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'time="[^"]*"', "time=" + clean_val)
+              }
+              
+              mm, _ = parse_regex(kv_normalized, r'msg="(?P<v>[^"]*)"')
+              if mm != null {
+                clean_val = replace!(to_string!(mm.v), ":", "_")
+                clean_val = replace!(clean_val, " ", "_")
+                kv_normalized = replace!(kv_normalized, r'msg="[^"]*"', "msg=" + clean_val)
+              }
+              
+              dsm, _ = parse_regex(kv_normalized, r'dsp_msg="(?P<v>[^"]*)"')
+              if dsm != null {
+                clean_val = replace!(to_string!(dsm.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'dsp_msg="[^"]*"', "dsp_msg=" + clean_val)
+              }
+              
+              tym, _ = parse_regex(kv_normalized, r'type="(?P<v>[^"]*)"')
+              if tym != null {
+                clean_val = replace!(to_string!(tym.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'type="[^"]*"', "type=" + clean_val)
+              }
+              
+              um, _ = parse_regex(kv_normalized, r'user="(?P<v>[^"]*)"')
+              if um != null {
+                clean_val = replace!(to_string!(um.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'user="[^"]*"', "user=" + clean_val)
+              }
+              
+              am, _ = parse_regex(kv_normalized, r'addr="(?P<v>[^"]*)"')
+              if am != null {
+                clean_val = replace!(to_string!(am.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'addr="[^"]*"', "addr=" + clean_val)
+              }
+              
+              rm, _ = parse_regex(kv_normalized, r'resourcename="(?P<v>[^"]*)"')
+              if rm != null {
+                clean_val = replace!(to_string!(rm.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'resourcename="[^"]*"', "resourcename=" + clean_val)
+              }
+              
+              rnm, _ = parse_regex(kv_normalized, r'rule_name="(?P<v>[^"]*)"')
+              if rnm != null {
+                clean_val = replace!(to_string!(rnm.v), " ", "_")
+                kv_normalized = replace!(kv_normalized, r'rule_name="[^"]*"', "rule_name=" + clean_val)
+              }
+              
+              parsed, err = parse_key_value(kv_normalized, key_value_delimiter: "=", field_delimiter: " ")
+              if err == null {
+                .full_log = parsed
+              } else {
+                .full_log = {}
+              }
+          }
+
+          .source_format = "not_json"
+        }
+        
+        if exists(.full_log."数字") { ."数字" = .full_log."数字" }
+        if exists(.full_log."告警级别") { .severity_cn = .full_log."告警级别" }
+        if exists(.full_log."告警名称") { .alert_name = .full_log."告警名称" }
+        if exists(.full_log."告警主机") { .alert_host = .full_log."告警主机" }
+        if exists(.full_log."告警时间") { .alert_time = .full_log."告警时间" }
+        if exists(.full_log."告警日期") { .alert_date = .full_log."告警日期" }
+        if exists(.full_log."告警ID") { .alert_id = .full_log."告警ID" }
+        if exists(.full_log."告警可见主机名") { .alert_visible_host = .full_log."告警可见主机名" }
+        if exists(.full_log."触发器状态") { .trigger_status = .full_log."触发器状态" }
+        if exists(.full_log."运营数据") { .operation_data = .full_log."运营数据" }
+        if exists(.full_log.pri) { .pri = .full_log.pri }
+        if exists(.full_log.severity) { .severity = .full_log.severity }
+        if exists(.full_log.facility) { .facility = .full_log.facility }
+        if exists(.full_log.host) { .host = .full_log.host }
+        if exists(.full_log.ip) { .ip = .full_log.ip }        
+
+        if exists(.full_log.sa) && !exists(.full_log.srcaddr) {
+          .full_log.srcaddr = .full_log.sa
+        }
+        if exists(.full_log.sip) && !exists(.full_log.srcaddr) {
+          .full_log.srcaddr = .full_log.sip
+        }
+        if exists(.full_log.da) && !exists(.full_log.destaddr) {
+          .full_log.destaddr = .full_log.da
+        }
+        if exists(.full_log.dip) && !exists(.full_log.destaddr) {
+          .full_log.destaddr = .full_log.dip
+        }
+        if exists(.full_log.proto) && !exists(.full_log.protocol) {
+          .full_log.protocol = .full_log.proto
+        }
+        if exists(.full_log.act) && !exists(.full_log.action) {
+          .full_log.action = .full_log.act
+        }
+        if exists(.full_log.devid) && !exists(.full_log.id) {
+          .full_log.id = .full_log.devid
+        }
+        
+        if exists(.ip) && .ip == "172.16.10.11" {
+          if exists(.message) {
+            # GBK → UTF-8
+            .message = decode_charset!(.message, "gbk")
+          }
+        }
+        if exists(.ip) && .ip == "172.16.201.254" {
+          if exists(.message) {
+            # GBK → UTF-8
+            .message = decode_charset!(.message, "gbk")
+          }
+        }
+        if exists(.ip) && .ip == "172.16.11.29" {
+          if exists(.message) {
+            # GBK → UTF-8
+            .message = decode_charset!(.message, "gbk")
+          }
+        }
+        
+        if exists(.full_log.id) { .id = .full_log.id }
+        if exists(.full_log.type) { .type = .full_log.type }
+        if exists(.full_log.action) { .action = .full_log.action }
+        if exists(.full_log.policy) { .policy = .full_log.policy }
+        if exists(.full_log.mod) { .mod = .full_log.mod }
+        if exists(.full_log.dname) { .dname = .full_log.dname }
+        if exists(.full_log.srcaddr) { .srcaddr = .full_log.srcaddr }
+        if exists(.full_log.destaddr) { .destaddr = .full_log.destaddr }
+        if exists(.full_log.sport) { .sport = .full_log.sport }
+        if exists(.full_log.dport) { .dport = .full_log.dport }
+        if exists(.full_log.protocol) { .protocol = .full_log.protocol }
+        if exists(.full_log.user) { .user = .full_log.user }
+        if exists(.full_log.addr) { .addr = .full_log.addr }
+        if exists(.full_log.dsp_msg) { .dsp_msg = .full_log.dsp_msg }
+        if exists(.full_log.msg) && !exists(.dsp_msg) { .dsp_msg = .full_log.msg }
+        
+        if exists(.full_log.policy) && !exists(.action) {
+          .action = .full_log.policy
+        }
+
+        if exists(.full_log."告警级别") {
+          .severity_cn = .full_log."告警级别"
+          
+          if .severity_cn == "灾难" {
+            .severity = "emerg"
+            .pri = 0
+          } else if .severity_cn == "严重" {
+            .severity = "crit"
+            .pri = 2
+          } else if .severity_cn == "一般严重" {
+            .severity = "error"
+            .pri = 3
+          } else if .severity_cn == "告警" {
+            .severity = "warning"
+            .pri = 4
+          } else if .severity_cn == "信息" {
+            .severity = "info"
+            .pri = 6
+          } else {
+            .severity = "notice"
+            .pri = 5
+          }
+        }
+        
+        # =============================================
+        # 非 JSON：severity 和 facility 统一计算（合并原有两个 if）
+        # =============================================
+        if exists(.full_log.pri) {
+          pv, _ = to_int(.full_log.pri)
+          if pv != null {
+            .pri = pv
+          }
+        }
+
+        if exists(.pri) && is_integer(.pri) {
+          pv = to_int!(.pri)
+          sv = mod!(pv, 8)
+          fv = pv / 8
+          fv = to_int(fv)
+          
+          # severity
+          if sv == 0 { .severity = "emerg" }
+          else if sv == 1 { .severity = "alert" }
+          else if sv == 2 { .severity = "crit" }
+          else if sv == 3 { .severity = "error" }
+          else if sv == 4 { .severity = "warning" }
+          else if sv == 5 { .severity = "notice" }
+          else if sv == 6 { .severity = "info" }
+          else { .severity = "debug" }
+          
+          # facility = pri / 8
+          if fv == 0 { .facility = "kern" }
+          else if fv == 1 { .facility = "user" }
+          else if fv == 2 { .facility = "mail" }
+          else if fv == 3 { .facility = "daemon" }
+          else if fv == 4 { .facility = "auth" }
+          else if fv == 5 { .facility = "syslog" }
+          else if fv == 6 { .facility = "lpr" }
+          else if fv == 7 { .facility = "news" }
+          else if fv == 8 { .facility = "uucp" }
+          else if fv == 9 { .facility = "cron" }
+          else if fv == 10 { .facility = "authpriv" }
+          else if fv == 11 { .facility = "ftp" }
+          else if fv == 16 { .facility = "local0" }
+          else if fv == 17 { .facility = "local1" }
+          else if fv == 18 { .facility = "local2" }
+          else if fv == 19 { .facility = "local3" }
+          else if fv == 20 { .facility = "local4" }
+          else if fv == 21 { .facility = "local5" }
+          else if fv == 22 { .facility = "local6" }
+          else if fv == 23 { .facility = "local7" }
+          else { .facility = "unknown" }
+        } else {
+          .severity = null
+          .facility = null
+        }
+
+        if exists(.full_log."告警级别") && .full_log."告警级别" != null && .full_log."告警级别" != "" {
+          if exists(.pri) && .pri != null && .pri != "" {
+            ._table = "logs_with_pri_zabbix"
+          } else {
+            ._table = "logs_no_pri_zabbix"
+          }
+        } else {
+          if exists(.pri) && .pri != null && .pri != "" {
+            ._table = "logs_with_pri"
+          } else {
+            ._table = "logs_no_pri"
+          }
+        }
+      }
+
+
+  # 日志解析（按需添加）
+#  parse_nginx:
+#    type: "remap"
+#    inputs: ["parse_all"]
+#    source: |
+#      # 只处理 Nginx 日志
+#
+#      if .program == "nginx" {
+#        .nginx, err = parse_regex(.message, r'^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<request>[^"]*)" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)"')
+#        if err == null {
+#          . = merge(., .nginx)
+#          del(.nginx)
+#        }
+#      }
+
+# -------------------------------------------
+# 3. Sinks：定义数据输出目标
+# -------------------------------------------
+
+sinks:
+  # 输出到 ClickHouse (你的日志存储)
+  clickhouse_sink:
+    type: "clickhouse"
+    inputs: ["parse_all"]  # 接收所有解析后的数据
+    host: "http://localhost:8123"            # ClickHouse HTTP 接口
+    database: "default"
+    table: "{{ ._table }}"                   # 你创建的表名，动态表名
+    auth:
+      strategy: basic
+      user: "zabbix"
+      password: "Admin@zabbix.com"
+    dangerously_allow_unconfined_template_resolution: true
+    compression: "gzip"
+    batch:
+      max_events: 10000                      # 每 1 万条批量写入
+      timeout_secs: 5                        # 或每 5 秒写入一次
+    buffer:
+      type: "disk"                           # 使用磁盘缓冲区，防止数据丢失
+      max_size: 21474836480                    # 约 20 GB
+      when_full: "block"                     # 缓冲满时阻塞上游
+    request:
+      concurrency: 10
+      retry_max_duration_secs: 900
+
+#  可选：输出到控制台 (用于调试)
+#  console_sink:
+#    type: "console"
+#    inputs: ["parse_all"]                  # 仅调试 Nginx 解析
+#    encoding:
+#      codec: "json"

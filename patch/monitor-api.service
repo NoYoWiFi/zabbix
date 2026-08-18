@@ -1,0 +1,25 @@
+[Unit]
+Description=Monitor FastAPI Service
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/share/zabbix/monitor/backend
+#  使用环境文件
+EnvironmentFile=-/usr/share/zabbix/monitor/backend/.env
+Environment="PATH=/usr/share/zabbix/monitor/backend/venv_3_11_13_x86_64/bin"
+#ExecStart=/usr/share/zabbix/monitor/backend/venv_3_11_13_x86_64/bin/uvicorn app.main:app --host ${HOST} --port ${PORT} --root-path ${ROOT_PATH}
+ExecStart=/usr/share/zabbix/monitor/backend/monitor-api --host ${HOST} --port ${PORT} --root-path ${ROOT_PATH} -c ${MONITOR_TABLE_CONFIG}
+#  停止时先发 SIGTERM，5秒后强制 SIGKILL
+ExecStop=/bin/bash -c "pkill -9 -f 'uvicorn app.main:app'"
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=5
+FinalKillSignal=SIGKILL
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

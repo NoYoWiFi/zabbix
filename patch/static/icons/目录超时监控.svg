@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="caseGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8ECEF"/>
+      <stop offset="100%" style="stop-color:#C5CBD3"/>
+    </linearGradient>
+    <linearGradient id="folderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8C471"/>
+      <stop offset="100%" style="stop-color:#E59866"/>
+    </linearGradient>
+    <linearGradient id="clockRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E67E22"/>
+      <stop offset="100%" style="stop-color:#D35400"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 地面投影 -->
+  <ellipse cx="16" cy="28" rx="14" ry="3" fill="#000" opacity="0.08"/>
+
+  <!-- 文件夹背面（厚度） -->
+  <rect x="4" y="14" width="22" height="14" rx="1.5" fill="#D35400"/>
+  <rect x="4" y="14" width="22" height="14" rx="1.5" fill="#E59866" stroke="#C0392B" stroke-width="0.5"/>
+  
+  <!-- 文件夹正面 -->
+  <rect x="4" y="11" width="22" height="14" rx="1.5" fill="url(#folderGrad)" stroke="#C0392B" stroke-width="0.5"/>
+  
+  <!-- 文件夹折角 -->
+  <polyline points="4,11 14,11 16,13 26,13 26,25" fill="none" stroke="#C0392B" stroke-width="0.5"/>
+  <polygon points="14,11 14,13 16,13" fill="#F5CBA7"/>
+  
+  <!-- 文件夹标签 -->
+  <rect x="8" y="13" width="6" height="1.5" rx="0.3" fill="#C0392B" opacity="0.3"/>
+
+  <!-- 时钟外圈（3D厚度） -->
+  <circle cx="21" cy="15" r="7" fill="#A04000"/>
+  <circle cx="21" cy="13" r="7" fill="url(#clockRing)" stroke="#A04000" stroke-width="0.8"/>
+  
+  <!-- 时钟内圈 -->
+  <circle cx="21" cy="12.5" r="5.5" fill="#FDEBD0" stroke="#D35400" stroke-width="0.5"/>
+  
+  <!-- 时针 -->
+  <line x1="21" y1="12.5" x2="21" y2="9" stroke="#2C3E50" stroke-width="1.8" stroke-linecap="round"/>
+  
+  <!-- 分针 -->
+  <line x1="21" y1="12.5" x2="24" y2="12.5" stroke="#2C3E50" stroke-width="1.2" stroke-linecap="round"/>
+  
+  <!-- 中心点 -->
+  <circle cx="21" cy="12.5" r="1.2" fill="#D35400"/>
+
+  <!-- 超时警告角标 -->
+  <polygon points="27,5 30,11 24,11" fill="#E74C3C" stroke="#C0392B" stroke-width="0.5"/>
+  <polygon points="27,6.5 28.5,10 25.5,10" fill="#F1948A"/>
+  <text x="27" y="10.5" font-size="5" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold">!</text>
+
+  <!-- 高光 -->
+  <rect x="4" y="11" width="22" height="2" rx="1" fill="white" opacity="0.12"/>
+</svg>

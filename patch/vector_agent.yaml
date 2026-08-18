@@ -1,0 +1,53 @@
+# ============================================================
+# Client 端：采集日志 → 转发到 Server
+# ============================================================
+
+data_dir: "/var/lib/vector"
+
+# ---------- Sources：采集本地日志 ----------
+sources:
+  # 本地系统日志
+  syslog_file:
+    type: "file"
+    include:
+      - "/var/log/messages"
+      - "/var/log/syslog"
+      - "/var/log/*.log"
+    read_from: "beginning"
+
+  # 应用日志（Nginx、业务日志等）
+  app_logs:
+    type: "file"
+    include:
+      - "/var/log/nginx/*.log"
+      - "/opt/apps/*/logs/*.log"
+    read_from: "beginning"
+    ignore_older_secs: 600
+
+  # Syslog 协议（514端口，接收其他设备转发）
+#  syslog_protocol:
+#    type: "syslog"
+#    mode: "tcp"
+#    address: "0.0.0.0:514"
+#    max_length: 102400
+
+# ---------- Sinks：转发到 Server ----------
+sinks:
+  # 转发到 Gateway Server
+  forward_to_gateway:
+    type: "vector"
+    version: "2"
+#    inputs: ["syslog_file", "app_logs", "syslog_protocol"]
+    inputs: ["app_logs"]
+    address: "gateway-server:6000"        # 替换为实际 Gateway IP
+    compression: true
+    batch:
+      max_events: 1000
+      timeout_secs: 5
+    buffer:
+      type: "disk"
+      max_size: 21474836480                 # 20GB
+      when_full: "block"
+    request:
+      concurrency: 10
+      retry_max_duration_secs: 900
