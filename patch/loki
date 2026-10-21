@@ -1,9 +1,12 @@
 /var/log/loki/*.log {
-        weekly
+        daily
         rotate 90
         dateext
         missingok
         notifempty
+        maxsize 1G
+        compress
+        delaycompress
         create 0666 root root
         sharedscripts
         postrotate
