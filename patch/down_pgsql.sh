@@ -12,9 +12,9 @@ done
 docker pull ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]}
 docker tag ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]} ${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE]}
 docker rmi ${ADDRESS}:${GV_ARR_ENV[GV_ROCKY_LINUX_RELEASE_TAG]}
-docker pull ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
-docker tag ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]} timescale/timescaledb:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
-docker rmi ${ADDRESS}:${GV_ARR_ENV[GV_POSTGRESQL_VERSION]}
+docker pull ${ADDRESS}:${GV_ARR_ENV[GV_PGSQL_REPO]}-${GV_ARR_ENV[GV_PGSQL_VERSION]}
+docker tag ${ADDRESS}:${GV_ARR_ENV[GV_PGSQL_REPO]}-${GV_ARR_ENV[GV_PGSQL_VERSION]} timescale/timescaledb-${GV_ARR_ENV[GV_PGSQL_REPO]}:${GV_ARR_ENV[GV_PGSQL_VERSION]}
+docker rmi ${ADDRESS}:${GV_ARR_ENV[GV_PGSQL_REPO]}-${GV_ARR_ENV[GV_PGSQL_VERSION]}
 docker pull ${ADDRESS}:grafana_grafana-enterprise
 docker tag ${ADDRESS}:grafana_grafana-enterprise grafana/grafana-enterprise:${GV_ARR_ENV[GV_GRAFANA_VERSION]}
 docker rmi ${ADDRESS}:grafana_grafana-enterprise
