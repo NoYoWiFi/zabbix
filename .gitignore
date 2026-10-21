@@ -14,3 +14,4 @@ zabbix_sender.zip
 output/
 2026-4-13v1/
 .venv.zip
+builddir_Other/
