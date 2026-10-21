@@ -46,36 +46,46 @@ sub zabbix_receiver
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
+# 在 generate_trap_content 里改成 JSON 输出
+use JSON;
+$JSON::Blessed = 1;
+$JSON::ConvertBlessed = 1;
 sub generate_trap_content {
     my ($pdu_info, $varbinds, $ip_address) = @_;
     
-    my $content = '';
+    my %trap_data;
     
-    # print trap header
-    $content .= sprintf "%s ZBXTRAP %s\n", strftime($DateTimeFormat, localtime), $ip_address;
+    # 基本信息
+    $trap_data{timestamp} = strftime($DateTimeFormat, localtime);
+    $trap_data{source} = "ZBXTRAP";
+    $trap_data{ip_address} = $ip_address;
+    $trap_data{format} = "snmptrap";
     
-    # print the PDU info
-    $content .= "PDU INFO:\n";
-    foreach my $key(keys(%$pdu_info))
-    {
+    # PDU info
+    my %pdu;
+    foreach my $key (keys(%$pdu_info)) {
         my $value = $pdu_info->{$key};
-        if ($value !~ /^[[:print:]]*$/)
-        {
-            my $OctetAsHex = unpack('H*', $value);    # convert octet string to hex
-            $value = "0x$OctetAsHex";        # apply 0x prefix for consistency
+        if ($value !~ /^[[:print:]]*$/) {
+            my $OctetAsHex = unpack('H*', $value);
+            $value = "0x$OctetAsHex";
         }
-        $content .= sprintf "  %-30s %s\n", $key, $value;
+        $pdu{$key} = $value;
     }
+    $trap_data{pdu} = \%pdu;
     
-    # print the variable bindings:
-    $content .= "VARBINDS:\n";
-    foreach my $x (@$varbinds)
-    {
-        $content .= sprintf "  %-30s type=%-2d value=%s\n", $x->[0], $x->[2], $x->[1];
+    # VARBINDS
+    my @vbs;
+    foreach my $x (@$varbinds) {
+        push @vbs, {
+            oid => $x->[0],
+            value => $x->[1],
+            type => $x->[2]
+        };
     }
-    $content .= "\n";  # 添加空行分隔不同的trap
+    $trap_data{varbinds} = \@vbs;
     
-    return $content;
+    my $json = JSON->new->allow_blessed(1)->convert_blessed(1)->encode(\%trap_data);
+    return $json . "\n";
 }
 
 NetSNMP::TrapReceiver::register("all", \&zabbix_receiver) or
