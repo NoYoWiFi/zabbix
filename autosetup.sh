@@ -106,7 +106,8 @@ check_process() {
 }
 check_process
 sed -i -e "/^\port /s/ .*/ 123/" /etc/chrony.conf
-
+sed -i -e "/^\#local stratum /s/#local stratum/local stratum/" /etc/chrony.conf
+sed -i -e "/^\#allow /s/#allow .*/allow 0.0.0.0\/0/" /etc/chrony.conf
 #![安装grafana zabbix图形界面]
 cat ./grafana/grafana-enterprise-* > ./grafana/grafana-enterprise.x86_64.rpm
 yum -y install grafana/*.rpm
@@ -390,7 +391,24 @@ sed -i -e "/^\#\$UDPServerRun 514/s/^#//" /etc/rsyslog.conf
 sed -i -e "/^\#\$ModLoad imtcp/s/^#//" /etc/rsyslog.conf
 sed -i -e "/^\#\$InputTCPServerRun 514/s/^#//" /etc/rsyslog.conf
 sed -i -e "/^\module(load=\"builtin:omfile\"/s/^\(.*\)$/# \1/" /etc/rsyslog.conf
+cat > /etc/logrotate.d/loki << 'EOF'
+/var/log/loki/*.log {
+        daily
+        rotate 90
+        dateext
+        missingok
+        notifempty
+        create 0666 root root
+        su root root
+        sharedscripts
+        postrotate
+            /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
+}
+EOF
 systemctl restart rsyslog
+logrotate -d /etc/logrotate.d/loki
+logrotate -f /etc/logrotate.d/loki
 case ${1} in
     "proxy")
         #![安装grafana loki日志分析服务]
