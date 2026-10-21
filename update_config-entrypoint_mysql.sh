@@ -163,8 +163,24 @@ elif [ $# -ge 1 ]; then
             sed -i -e "/^\#\$ModLoad imtcp/s/^#//" /etc/rsyslog.conf
             sed -i -e "/^\#\$InputTCPServerRun 514/s/^#//" /etc/rsyslog.conf
             sed -i -e "/^\module(load=\"builtin:omfile\"/s/^\(.*\)$/# \1/" /etc/rsyslog.conf
-            systemctl restart rsyslog
-            \cp ./patch/loki /etc/logrotate.d/loki
+			cat > /etc/logrotate.d/loki << 'EOF'
+/var/log/loki/*.log {
+        daily
+        rotate 90
+        dateext
+        missingok
+        notifempty
+        create 0666 root root
+        su root root
+        sharedscripts
+        postrotate
+            /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
+}
+EOF
+			systemctl restart rsyslog
+			logrotate -d /etc/logrotate.d/loki
+			logrotate -f /etc/logrotate.d/loki
             # /usr/sbin/logrotate -f /etc/logrotate.d/loki
             ;;
             *)
