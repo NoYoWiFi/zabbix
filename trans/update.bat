@@ -57,3 +57,33 @@ copy /y .env_shell ..\..\zabbix_7.0.x_build\mariadb\patch
 ::copy /y zabbix_trap_receiver.pl ..\..\rocky_8_zabbix_7.0.x_mysql\snmptrap
 ::copy /y zabbix_trap_receiver.pl ..\..\rocky_8_zabbix_7.0.x_pgsql\snmptrap
 ::copy /y zabbix_trap_receiver.pl ..\..\rocky_9_zabbix_7.0.x_pgsql\snmptrap
+
+::copy /y loki ..\..\centos_7_zabbix_5.0.x_mysql\patch
+::copy /y loki ..\..\centos_7_zabbix_7.0.x_mysql\patch
+::copy /y loki ..\..\centos_7_zabbix_7.0.x_pgsql\patch
+::copy /y loki ..\..\kylin_v10_zabbix_7.0.x_mysql\patch
+::copy /y loki ..\..\kylin_v10_zabbix_7.0.x_pgsql\patch
+::copy /y loki ..\..\rocky_8_zabbix_6.0.x_mysql\patch
+::copy /y loki ..\..\rocky_8_zabbix_6.0.x_pgsql\patch
+::copy /y loki ..\..\rocky_8_zabbix_7.0.x_mysql\patch
+::copy /y loki ..\..\rocky_8_zabbix_7.0.x_pgsql\patch
+::copy /y loki ..\..\rocky_9_zabbix_7.0.x_pgsql\patch
+::copy /y loki ..\..\zabbix_7.0.x_docker\patch
+::copy /y loki ..\..\zabbix_7.0.x_dockerfile\zbx\patch
+::copy /y loki ..\..\zabbix_6.0.x_docker\patch
+::copy /y loki ..\..\zabbix_6.0.x_dockerfile\zbx\patch
+
+copy /y loki.conf ..\..\centos_7_zabbix_5.0.x_mysql\patch
+copy /y loki.conf ..\..\centos_7_zabbix_7.0.x_mysql\patch
+copy /y loki.conf ..\..\centos_7_zabbix_7.0.x_pgsql\patch
+copy /y loki.conf ..\..\kylin_v10_zabbix_7.0.x_mysql\patch
+copy /y loki.conf ..\..\kylin_v10_zabbix_7.0.x_pgsql\patch
+copy /y loki.conf ..\..\rocky_8_zabbix_6.0.x_mysql\patch
+copy /y loki.conf ..\..\rocky_8_zabbix_6.0.x_pgsql\patch
+copy /y loki.conf ..\..\rocky_8_zabbix_7.0.x_mysql\patch
+copy /y loki.conf ..\..\rocky_8_zabbix_7.0.x_pgsql\patch
+copy /y loki.conf ..\..\rocky_9_zabbix_7.0.x_pgsql\patch
+copy /y loki.conf ..\..\zabbix_7.0.x_docker\patch
+copy /y loki.conf ..\..\zabbix_7.0.x_dockerfile\zbx\patch
+copy /y loki.conf ..\..\zabbix_6.0.x_docker\patch
+copy /y loki.conf ..\..\zabbix_6.0.x_dockerfile\zbx\patch

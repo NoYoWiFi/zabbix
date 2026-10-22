@@ -1596,6 +1596,109 @@ class CusSSHClient(object):
         retry=retry_if_exception_type((paramiko.SSHException, TimeoutError, ConnectionRefusedError, ConnectionError, socket.timeout, EOFError)),
         reraise=True
     )
+    def def_connect_linux_stat(self, funcIp, attr, lvInt01):  # 修改函数签名使其接受attr参数
+        ssh_client = paramiko.SSHClient()
+        try:
+            # print(funcIp)
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            __timeout = 5
+            __sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            __sock.settimeout(__timeout)
+            __sock.connect((funcIp, self.lv_dic01[funcIp]['port']))
+            ssh_client = paramiko.Transport(__sock)
+            if os.path.isfile(self.lv_dic01[funcIp]['pwd']):
+                # print('rsa', funcIp, self.lv_dic01[funcIp]['usr'], self.lv_dic01[funcIp]['port'], self.lv_dic01[funcIp]['pwd'])
+                # print(self.lv_dic01[funcIp])
+                __pkey = paramiko.RSAKey.from_private_key_file(self.lv_dic01[funcIp]['pwd'])
+                ssh_client.connect(username=self.lv_dic01[funcIp]['usr'], pkey=__pkey)
+            else:
+                # 如果有需要，使用用户名和密码进行身份验证
+                # print('pwd', funcIp)
+                # print(self.lv_dic01[funcIp])
+                ssh_client.connect(username=self.lv_dic01[funcIp]['usr'], password=self.lv_dic01[funcIp]['pwd'])
+            # print(f"{lvInt01} check {funcIp} {attr[0]['statPath']} start")
+            max_attempts = 3
+            attempt = 0
+            stdout = ''
+            stderr = ''
+            while attempt < max_attempts:
+                ssh_channel = ssh_client.open_channel(kind='session')
+                ssh_channel.settimeout(60)
+                command = f"if stat {attr[0]['statPath']} > /dev/null 2>&1; then echo '正常'; else echo '异常'; fi"
+                ssh_channel.exec_command(command)
+                # 循环读取直到没有更多数据或通道关闭
+                stdout = b''
+                stderr = b''
+                while True:
+                    if ssh_channel.recv_ready():
+                        stdout += ssh_channel.recv(1024)
+                    if ssh_channel.recv_stderr_ready():
+                        stderr += ssh_channel.recv_stderr(1024)
+                    if not ssh_channel.recv_ready() and not ssh_channel.recv_stderr_ready() and ssh_channel.exit_status_ready():
+                        break
+                    time.sleep(0.1)  # 增加延迟，给命令执行的时间
+                attr[1]['statStatus'] = stdout.decode().replace('\n', '')
+                print(f"statStatus: {lvInt01} ({max_attempts}/{attempt}): [ {funcIp} | {attr[0]['statPath']} ] -> {attr[1]['statStatus']}")
+                # 如果状态为异常，等待10秒并重新尝试，否则跳出循环
+                if attr[1]['statStatus'] == '异常':
+                    attr[1]['statStatus'] = '异常'
+                    time.sleep(1)  # 等待10秒
+                    attempt += 1  # 增加尝试次数
+                    ssh_channel.close()
+                else:
+                    ssh_channel.close()
+                    break  # 如果状态为正常，跳出循环
+            # print(f"{lvInt01} check {funcIp} {attr[0]['statPath']} done")
+            if len(stderr.decode()) != 0 and len(stdout.decode().replace('\n', '')) == 0:
+                pattern = re.compile(r'.*No such attr.*')
+                result = re.findall(pattern, str(stderr.decode()))
+                if len(result) != 0:
+                    attr[1]['statStatus'] = '文件或文件夹不存在'  # [Errno 2] No such attr
+                pattern = re.compile(r'.*Permission denied')
+                result = re.findall(pattern, str(stderr.decode()))
+                if len(result) != 0:
+                    attr[1]['statStatus'] = '权限不足'  # Permission denied
+        except FileNotFoundError:
+            print(f"{lvInt01} 错误：[ {funcIp} | {attr[0]['statPath']} ] -> 私钥文件 {self.lv_dic01[funcIp]['pwd']} 不存在")
+        except paramiko.AuthenticationException:
+            print(f"{lvInt01} 错误：[ {funcIp} | {attr[0]['statPath']} ] -> 认证失败，请检查用户名和私钥")
+        except paramiko.SSHException as e:
+            print(f"SSH错误: {lvInt01} : [ {funcIp} | {attr[0]['mountPath']} ] -> {str(e)}")
+            raise  # 🔧 重试
+        except (TimeoutError, ConnectionRefusedError, ConnectionError, socket.timeout, EOFError) as e:
+            print(f"连接错误: {lvInt01} : [ {funcIp} | {attr[0]['mountPath']} ] -> {str(e)}")
+            raise  # 🔧 重试
+        except Exception as e:
+            # 获取当前异常的traceback对象
+            tb = traceback.extract_tb(e.__traceback__)
+            # 获取异常发生时的行号
+            line_number = tb[-1][1]
+            # 输出异常信息和行号
+            print(f"SSH未知错误在行号 {line_number}: {lvInt01} : [ {funcIp} | {attr[0]['statPath']} ] -> {str(e)}")
+            pattern = re.compile(r'Authentication failed.*')
+            result = re.findall(pattern, str(e))
+            if len(result) != 0:
+                attr[1]['statStatus'] = '验证失败'  # Authentication failed.
+            pattern = re.compile(r'.*Connection refused')
+            result = re.findall(pattern, str(e))
+            if len(result) != 0:
+                attr[1]['statStatus'] = '连接拒绝'  # [Errno 111] Connection refused
+            pattern = re.compile(r'timed out.*')
+            result = re.findall(pattern, str(e))
+            if 'timed out' in str(e).lower():
+                raise  # 🔧 重试
+            if len(result) != 0:
+                attr[1]['statStatus'] = '连接超时'  # timed out
+        finally:
+            ssh_client.close()
+        return attr[1]['statStatus']
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(2),
+        retry=retry_if_exception_type((paramiko.SSHException, TimeoutError, ConnectionRefusedError, ConnectionError, socket.timeout, EOFError)),
+        reraise=True
+    )
     def def_connect_linux_ps(self, funcIp, attr, lvInt01):  # 修改函数签名使其接受attr参数
         ssh_client = paramiko.SSHClient()
         try:
@@ -2034,6 +2137,61 @@ class CusSSHClient(object):
                 converted_resource = self.cus_zabbixSender.def_convert_to_zabbix_json(discovered_resource)
                 xer = []
                 id_name = 'linuxPs'
+                timestampnow = int(time.time())
+                TIMESTAMPNOW = timestampnow
+                xer.append("%s %s %s %s" % ("\"" + host + "\"", id_name, TIMESTAMPNOW, converted_resource))
+                print(xer)
+                self.cus_zabbixSender.def_send_data_to_zabbix(id_name, xer, host)
+
+            elif ['linuxStat'].count(resource) == 1:
+                self.cus_excel_op.load_excel('/etc/zabbix/scripts/checkLinuxStat.xlsx', 1)
+
+                column_1_list = self.cus_excel_op.get_column_values(1)
+                del column_1_list[0]
+                column_2_list = []
+                column_3_list = []
+                column_4_list = []
+                column_5_list = []
+                column_6_list = []
+                column_7_list = []
+                column_8_list = []
+                column_9_list = []
+                column_10_list = []
+                column_11_list = []
+                column_12_list = []
+                column_13_list = []
+
+                for i in range(len(column_1_list)):
+                    column_1_list.append(self.cus_excel_op.get_cell_value(i + 2, 1))  # 格式化IP
+                    column_2_list.append(self.cus_excel_op.get_cell_value(i + 2, 2))  # 任务名称
+                    column_3_list.append(self.cus_excel_op.get_cell_value(i + 2, 3))  # 机房位置
+                    column_4_list.append(self.cus_excel_op.get_cell_value(i + 2, 4))  # 所属业务
+                    column_5_list.append(self.cus_excel_op.get_cell_value(i + 2, 5))  # 所属应用
+                    column_6_list.append(self.cus_excel_op.get_cell_value(i + 2, 6))  # 数据来源
+                    column_7_list.append(self.cus_excel_op.get_cell_value(i + 2, 7))  # IP地址
+                    column_8_list.append(self.cus_excel_op.get_cell_value(i + 2, 8))  # 协议
+                    column_9_list.append(self.cus_excel_op.get_cell_value(i + 2, 9))  # 用户名
+                    column_10_list.append(self.cus_excel_op.get_cell_value(i + 2, 10))  # 密码
+                    column_11_list.append(self.cus_excel_op.get_cell_value(i + 2, 11))  # 端口
+                    column_12_list.append(self.cus_excel_op.get_cell_value(i + 2, 12))  # 告警文件数
+                    column_13_list.append(self.cus_excel_op.get_cell_value(i + 2, 13))  # 监控目录
+
+                discovered_resource = []
+                dic_replace = {".": "__", "/": "__", "%": "", "$": "", "\"": "", "+": "", "(": "", ")": "", " ": ""}
+                for col_01 in range(len(column_4_list)):
+                    one_object_list = {}
+                    IPLIST = [self.cus_localMethord.def_batch_replace(column_7_list[col_01], dic_replace),
+                              self.cus_localMethord.def_batch_replace(column_13_list[col_01], dic_replace)]
+                    one_object_list["{#IPLIST}"] = "__".join(IPLIST)
+                    ADDRESSLIST = [str(column_1_list[col_01]), str(column_2_list[col_01]), str(column_3_list[col_01]),
+                                   str(column_4_list[col_01]), str(column_5_list[col_01]), str(column_6_list[col_01]),
+                                   self.cus_localMethord.def_batch_replace(column_13_list[col_01], dic_replace)]
+                    one_object_list["{#ADDRESSLIST}"] = "__".join(ADDRESSLIST)
+                    discovered_resource.append(one_object_list)
+                converted_resource = self.cus_zabbixSender.def_convert_to_zabbix_json(discovered_resource)
+                xer = []
+
+                id_name = 'linuxStat'
                 timestampnow = int(time.time())
                 TIMESTAMPNOW = timestampnow
                 xer.append("%s %s %s %s" % ("\"" + host + "\"", id_name, TIMESTAMPNOW, converted_resource))
@@ -2668,6 +2826,117 @@ class CusSSHClient(object):
                 except Exception as e:
                     logger.error(f"处理linuxMount资源时发生错误: {str(e)}")
                     raise
+            elif ['linuxStat'].count(resource) == 1:
+                try:
+                    # 1. 加载Excel数据
+                    self.cus_excel_op.load_excel('/etc/zabbix/scripts/checkLinuxStat.xlsx', 1)
+
+                    # 2. 定义回调函数
+                    def stat_status_callback(future, ip, stat_path):
+                        """处理stat状态检查的回调函数"""
+                        try:
+                            result = future.result()
+                            status = "正常" if result else "异常"
+                            logger.info(f"成功检查 {ip} 的stat {stat_path} 状态: {status}")
+                            return result
+                        except Exception as e:
+                            logger.error(f"检查 {ip} 的 {stat_path} stat状态时出错: {str(e)}")
+                            return None
+
+                    # 3. 主处理函数
+                    def stat_ps_status():
+                        # 获取各列数据(跳过表头)
+                        row_count = len(self.cus_excel_op.get_column_values(1)) - 1
+                        columns = {
+                            'ip': [self.cus_excel_op.get_cell_value(i + 2, 7) for i in range(row_count)],
+                            'user': [self.cus_excel_op.get_cell_value(i + 2, 9) for i in range(row_count)],
+                            'pwd': [self.cus_excel_op.get_cell_value(i + 2, 10) for i in range(row_count)],
+                            'port': [self.cus_excel_op.get_cell_value(i + 2, 11) for i in range(row_count)],
+                            'stat_path': [self.cus_excel_op.get_cell_value(i + 2, 13) for i in range(row_count)]
+                        }
+
+                        # 初始化设备字典
+                        self.lv_dic01 = {}
+                        for ip, user, pwd, port, path in zip(
+                                columns['ip'], columns['user'], columns['pwd'],
+                                columns['port'], columns['stat_path']):
+
+                            if ip not in self.lv_dic01:
+                                self.lv_dic01[ip] = {
+                                    'attr': [],
+                                    'usr': user,
+                                    'pwd': pwd,
+                                    'port': port
+                                }
+
+                            self.lv_dic01[ip]['attr'].append([
+                                {'statPath': path},
+                                {'statStatus': '异常'}  # 初始值
+                            ])
+
+                        # 多线程处理stat状态检查
+                        with ThreadPoolExecutor(max_workers=GV_CPU_COUNT) as executor:
+                            futures = []
+                            total_tasks = sum(len(data['attr']) for data in self.lv_dic01.values())
+                            completed = 0
+
+                            # 提交任务
+                            for ip, ip_data in self.lv_dic01.items():
+                                for idx, attr in enumerate(ip_data['attr']):
+                                    stat_path = attr[0]['statPath']
+                                    future = executor.submit(
+                                        self.def_connect_linux_stat, ip, attr, idx)
+                                    future.add_done_callback(
+                                        lambda f, lip=ip, pp=stat_path: stat_status_callback(f, lip, pp))
+                                    futures.append(future)
+
+                            # 显示进度并处理结果
+                            for future in as_completed(futures):
+                                completed += 1
+                                progress = f"处理进度: {completed}/{total_tasks} ({completed / total_tasks:.1%})"
+                                logger.info(progress)
+                                print(f"\r{progress}", end="", flush=True)
+
+                                try:
+                                    result = future.result()
+                                    if result is not None:
+                                        ip, idx = result['ip'], result['idx']
+                                        self.lv_dic01[ip]['attr'][idx][1]['statStatus'] = "正常" if result else "异常"
+                                except Exception as e:
+                                    logger.error(f"处理结果时出错: {str(e)}")
+                            print()  # 换行
+
+                        # 准备Zabbix数据
+                        state_resources = []
+                        dic_replace = {".": "__", "/": "__", "%": "", "$": "", "\"": "",
+                                       "+": "", "(": "", ")": "", " ": ""}
+
+                        for ip, ip_data in self.lv_dic01.items():
+                            for attr in ip_data['attr']:
+                                ip_clean = self.cus_localMethord.def_batch_replace(ip, dic_replace)
+                                path_clean = self.cus_localMethord.def_batch_replace(
+                                    attr[0]['statPath'], dic_replace)
+                                IPLIST = [ip_clean, path_clean]
+                                STR_IPLIST = "__".join(IPLIST)
+                                key = f"statStatus.[{STR_IPLIST}]"
+                                state_resources.append(
+                                    f"\"{host}\" \"{key}\" {int(time.time())} {attr[1]['statStatus']}")
+
+                        # 发送数据到Zabbix
+                        if state_resources:
+                            self.cus_zabbixSender.def_send_data_to_zabbix(
+                                'linuxStat', state_resources, host)
+                            logger.info(f"成功发送 {len(state_resources)} 条stat状态数据到Zabbix")
+                        else:
+                            logger.warning("没有收集到有效的stat状态数据")
+
+                    # 执行主处理逻辑
+                    stat_ps_status()
+
+                except Exception as e:
+                    logger.error(f"处理linuxStat资源时发生错误: {str(e)}")
+                    raise
+
             elif ['linuxPs'].count(resource) == 1:
                 try:
                     # 1. 加载Excel数据
@@ -3700,7 +3969,7 @@ class CusZabbixSender(object):
                                         env=os.environ)
         print("STDOUT:", self.send_code.stdout)
         print("STDERR:", self.send_code.stderr)
-        print("Return Code:", self.send_code.stdout)
+        print("Return Code:", self.send_code.returncode)
         time.sleep(0.1)
         if os.path.isfile(temp_file):
             os.remove(temp_file)
@@ -3840,12 +4109,14 @@ def main():
         list_resources = ['linuxMount']
     elif ['linuxDf'].count(arguments.type) == 1:
         list_resources = ['linuxDf']
+    elif ['linuxStat'].count(arguments.type) == 1:
+        list_resources = ['linuxStat']
     elif ['linuxPs'].count(arguments.type) == 1:
         list_resources = ['linuxPs']
     elif ['sftp'].count(arguments.type) == 1:
         list_resources = ['queueDepth']
     elif ['linux'].count(arguments.type) == 1:
-        # linux_checkping /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type='linux' --host='172.16.51.250' --status
+        # linux_checkping /etc/zabbix/venv_centos8/bin/python3 /etc/zabbix/scripts/zabbix_sender.py --type='linuxStat' --host='172.16.51.250' --discovery --status
         # list_resources = ['linux_df', 'linux_netstat', 'linux_checkping']
         list_resources = ['linux_checkping']
     elif ['web'].count(arguments.type) == 1:
@@ -3870,6 +4141,8 @@ def main():
         elif ['linuxMount'].count(arguments.type) == 1:
             cus_ssh_client.def_discovering_resources(arguments.host, list_resources)
         elif ['linuxDf'].count(arguments.type) == 1:
+            cus_ssh_client.def_discovering_resources(arguments.host, list_resources)
+        elif ['linuxStat'].count(arguments.type) == 1:
             cus_ssh_client.def_discovering_resources(arguments.host, list_resources)
         elif ['linuxPs'].count(arguments.type) == 1:
             cus_ssh_client.def_discovering_resources(arguments.host, list_resources)
@@ -3897,6 +4170,8 @@ def main():
         elif ['linuxMount'].count(arguments.type) == 1:
             cus_ssh_client.def_get_status_resources(arguments.host, list_resources)
         elif ['linuxDf'].count(arguments.type) == 1:
+            cus_ssh_client.def_get_status_resources(arguments.host, list_resources)
+        elif ['linuxStat'].count(arguments.type) == 1:
             cus_ssh_client.def_get_status_resources(arguments.host, list_resources)
         elif ['linuxPs'].count(arguments.type) == 1:
             cus_ssh_client.def_get_status_resources(arguments.host, list_resources)

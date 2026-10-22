@@ -3365,7 +3365,17 @@ class CusZabbixApi:
             "jsonrpc": "2.0",
             "method": "host.get",
             "params": {
-                "output": ["host", "name", "proxyid", "proxy_groupid"],
+                "output": [
+                    "host", 
+                    "name", 
+                    "proxyid", 
+                    "proxy_groupid",
+                    # 添加 IPMI 相关字段
+                    "ipmi_authtype",
+                    "ipmi_privilege", 
+                    "ipmi_username",
+                    "ipmi_password"
+                ],
                 "groupids": hostgroup_id_list,
                 "selectParentTemplates": ["host"],
                 "selectHostGroups": ["name"],
