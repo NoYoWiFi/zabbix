@@ -1,0 +1,4 @@
+#![Windows版本]
+https://cdn.zabbix.com/zabbix/binaries/stable/
+#![Linux版本]
+https://repo.zabbix.com/
